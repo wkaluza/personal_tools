@@ -152,6 +152,29 @@ function install_yubico_utilities() {
     yubikey-personalization-gui >/dev/null
 }
 
+function install_golang() {
+  print_trace
+
+  local go_archive="go.tar.gz"
+  local v="1.16.6"
+  local download_url="https://dl.google.com/go/go${v}.linux-amd64.tar.gz"
+  # Must match PATH update in bashrc_append.sh
+  local target_dir="/usr/local"
+
+  if ! test -d "${target_dir}/go"; then
+    curl -fsSL --output "./${go_archive}" "${download_url}"
+    sudo mv "./${go_archive}" "${target_dir}"
+
+    pushd "${target_dir}" >/dev/null
+    sudo tar -xzf "./${go_archive}"
+    sudo rm "./${go_archive}"
+    popd >/dev/null
+  else
+    echo "golang is already installed"
+    go version >/dev/null
+  fi
+}
+
 function configure_bash() {
   print_trace
 
@@ -235,6 +258,7 @@ function main() {
   install_cmake
   install_jetbrains_toolbox "${jetbrains_toolbox_tar_gz}"
   install_yubico_utilities
+  install_golang
 
   configure_bash
   configure_gpg "${pgp_primary_key_fingerprint}"
