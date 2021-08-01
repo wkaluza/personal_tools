@@ -184,6 +184,13 @@ function install_nodejs() {
   npm config set ignore-scripts true
 }
 
+function install_tex_live() {
+  print_trace
+
+  sudo apt-get install -y \
+    texlive-full >/dev/null
+}
+
 function configure_bash() {
   print_trace
 
@@ -269,6 +276,7 @@ function main() {
   install_yubico_utilities
   install_golang
   install_nodejs
+  install_tex_live
 
   configure_bash
   configure_gpg "${pgp_primary_key_fingerprint}"
