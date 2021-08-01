@@ -28,6 +28,30 @@ function install_basics() {
     wget >/dev/null
 }
 
+function install_git() {
+  print_trace
+
+  sudo add-apt-repository -y ppa:git-core/ppa >/dev/null
+  sudo apt-get update >/dev/null
+
+  sudo apt-get install -y git >/dev/null
+}
+
+function install_github_cli() {
+  print_trace
+
+  local key="/usr/share/keyrings/githubcli-archive-keyring.gpg"
+  local url="https://cli.github.com/packages"
+
+  curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg |
+    sudo gpg --dearmor -o "${key}"
+  echo "deb [arch=amd64 signed-by=${key}] ${url} stable main" |
+    sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+
+  sudo apt-get update >/dev/null
+  sudo apt-get install -y gh >/dev/null
+}
+
 function configure_bash() {
   print_trace
 
@@ -41,6 +65,31 @@ function configure_bash() {
     echo "${config_preamble}" >>"${bashrc_path}"
     cat "${THIS_SCRIPT_DIR}/bashrc_append.sh" >>"${bashrc_path}"
   fi
+}
+
+function configure_git() {
+  print_trace
+
+  local pgp_signing_key_fingerprint="$1"
+
+  git config --global user.email "wkaluza@protonmail.com"
+  git config --global user.name "Wojciech Kaluza"
+
+  git config --global init.defaultBranch main
+
+  git config --global rebase.autosquash true
+  git config --global pull.ff only
+  git config --global merge.ff false
+
+  git config --global log.showSignature true
+
+  git config --global user.signingKey "${pgp_signing_key_fingerprint}"
+  git config --global gpg.program gpg
+
+  git config --global commit.gpgSign true
+  git config --global merge.verifySignatures true
+
+  git config --global rerere.enabled true
 }
 
 function configure_gpg() {
@@ -66,13 +115,17 @@ function configure_gpg() {
 
 function main() {
   local pgp_primary_key_fingerprint="174C9368811039C87F0C806A896572D1E78ED6A7"
+  local pgp_signing_key_fingerprint="143EE89AAC97053810D13E378A7E8CA85A62CF20"
 
   ensure_not_sudo
 
   install_basics
+  install_git
+  install_github_cli
 
   configure_bash
   configure_gpg "${pgp_primary_key_fingerprint}"
+  configure_git "${pgp_signing_key_fingerprint}"
 
   log_info "Success!"
   wait_and_reboot
