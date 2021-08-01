@@ -18,6 +18,7 @@ function install_basics() {
     scdaemon \
     rng-tools \
     vlc \
+    gnupg \
     jq \
     dislocker \
     software-properties-common \
@@ -42,12 +43,36 @@ function configure_bash() {
   fi
 }
 
+function configure_gpg() {
+  print_trace
+
+  local pgp_primary_key_fingerprint="$1"
+
+  local gpg_home="$HOME/.gnupg"
+  local gpg_config_dir="gpg_config"
+
+  mkdir -p "$gpg_home"
+  cp "${THIS_SCRIPT_DIR}/${gpg_config_dir}/gpg.conf" "${gpg_home}"
+  cp "${THIS_SCRIPT_DIR}/${gpg_config_dir}/gpg-agent.conf" "${gpg_home}"
+  chmod u+rwx,go-rwx "${gpg_home}"
+
+  gpg --receive-keys "${pgp_primary_key_fingerprint}"
+  # Set trust to ultimate
+  echo "${pgp_primary_key_fingerprint}:6:" | gpg --import-ownertrust
+
+  # Import GitHub's public key
+  gpg --fetch-keys "https://github.com/web-flow.gpg"
+}
+
 function main() {
+  local pgp_primary_key_fingerprint="174C9368811039C87F0C806A896572D1E78ED6A7"
+
   ensure_not_sudo
 
   install_basics
 
   configure_bash
+  configure_gpg "${pgp_primary_key_fingerprint}"
 
   log_info "Success!"
   wait_and_reboot
