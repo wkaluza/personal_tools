@@ -110,6 +110,37 @@ function install_cmake() {
   sudo apt-get install -y cmake >/dev/null
 }
 
+function install_jetbrains_toolbox() {
+  print_trace
+
+  local tar_gz_path="$1"
+
+  local extract_target_name
+  extract_target_name="$(basename "${tar_gz_path}" ".tar.gz")"
+  local install_destination="/opt/jetbrains/jetbrains-toolbox"
+
+  if ! test -x "${install_destination}"; then
+    sudo mkdir -p "$(dirname "${install_destination}")"
+
+    pushd "$(dirname "${tar_gz_path}")" >/dev/null
+    tar -xzf "${tar_gz_path}"
+    sudo cp \
+      "./${extract_target_name}/$(basename "${install_destination}")" \
+      "${install_destination}"
+
+    sudo rm -rf "${tar_gz_path}"
+    sudo rm -rf "./${extract_target_name}"
+    popd >/dev/null
+  else
+    log_info "jetbrains-toolbox already installed at ${install_destination}"
+  fi
+
+  if ! test -x "${install_destination}"; then
+    log_error "Something went wrong when installing jetbrains-toolbox"
+    exit 1
+  fi
+}
+
 function configure_bash() {
   print_trace
 
@@ -172,6 +203,14 @@ function configure_gpg() {
 }
 
 function main() {
+  local jetbrains_toolbox_tar_gz
+  jetbrains_toolbox_tar_gz="$(realpath "$1")"
+
+  if ! test -f "${jetbrains_toolbox_tar_gz}"; then
+    log_error "Invalid path to jetbrains-toolbox archive"
+    exit 1
+  fi
+
   local pgp_primary_key_fingerprint="174C9368811039C87F0C806A896572D1E78ED6A7"
   local pgp_signing_key_fingerprint="143EE89AAC97053810D13E378A7E8CA85A62CF20"
 
@@ -183,6 +222,7 @@ function main() {
   install_python
   install_cpp_toolchains
   install_cmake
+  install_jetbrains_toolbox "${jetbrains_toolbox_tar_gz}"
 
   configure_bash
   configure_gpg "${pgp_primary_key_fingerprint}"
@@ -193,4 +233,4 @@ function main() {
 }
 
 # Entry point
-main
+main "$1"
