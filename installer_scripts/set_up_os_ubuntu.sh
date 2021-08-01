@@ -52,6 +52,20 @@ function install_github_cli() {
   sudo apt-get install -y gh >/dev/null
 }
 
+function install_python() {
+  print_trace
+
+  sudo apt-get install -y \
+    python3-dev \
+    python3-pip \
+    python3-venv >/dev/null
+
+  python3 -u -m pip install --upgrade pip >/dev/null
+  python3 -u -m pip install --upgrade certifi setuptools wheel >/dev/null
+  python3 -u -m pip install --upgrade \
+    pipenv >/dev/null
+}
+
 function configure_bash() {
   print_trace
 
@@ -122,6 +136,7 @@ function main() {
   install_basics
   install_git
   install_github_cli
+  install_python
 
   configure_bash
   configure_gpg "${pgp_primary_key_fingerprint}"
