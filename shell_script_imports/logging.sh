@@ -19,3 +19,13 @@ function log_error() {
 
   echo "ERROR: $message"
 }
+
+function print_trace() {
+  local func="${FUNCNAME[1]}"
+  local line="${BASH_LINENO[1]}"
+  local file="${BASH_SOURCE[2]}"
+
+  local trace="Entered ${func} on line ${line} of ${file}"
+
+  echo "[***TRACE***]: $trace"
+}
