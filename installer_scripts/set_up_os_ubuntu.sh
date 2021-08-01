@@ -79,6 +79,34 @@ function install_cpp_toolchains() {
     clang-tidy-12 >/dev/null
 }
 
+function install_cmake() {
+  print_trace
+
+  sudo apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    gnupg \
+    software-properties-common \
+    wget >/dev/null
+
+  local url="https://apt.kitware.com/keys/kitware-archive-latest.asc"
+
+  curl -fsSL "${url}" 2>/dev/null |
+    sudo APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE="DontWarn" \
+      apt-key add - >/dev/null
+
+  # Get Kitware Apt Archive Automatic Signing Key (2021) <debian@kitware.com>"
+  sudo apt-key adv \
+    --keyserver keyserver.ubuntu.com \
+    --recv-keys 2EEA802239DDF0E52942A7B4FCEE74BB7F3C88C8
+
+  sudo add-apt-repository \
+    "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" >/dev/null
+  sudo apt-get update >/dev/null
+
+  sudo apt-get install -y cmake >/dev/null
+}
+
 function configure_bash() {
   print_trace
 
@@ -151,6 +179,7 @@ function main() {
   install_github_cli
   install_python
   install_cpp_toolchains
+  install_cmake
 
   configure_bash
   configure_gpg "${pgp_primary_key_fingerprint}"
