@@ -141,6 +141,17 @@ function install_jetbrains_toolbox() {
   fi
 }
 
+function install_yubico_utilities() {
+  print_trace
+
+  sudo add-apt-repository -y ppa:yubico/stable >/dev/null
+  sudo apt-get update >/dev/null
+  sudo apt-get install -y \
+    yubikey-manager \
+    yubioath-desktop \
+    yubikey-personalization-gui >/dev/null
+}
+
 function configure_bash() {
   print_trace
 
@@ -223,6 +234,7 @@ function main() {
   install_cpp_toolchains
   install_cmake
   install_jetbrains_toolbox "${jetbrains_toolbox_tar_gz}"
+  install_yubico_utilities
 
   configure_bash
   configure_gpg "${pgp_primary_key_fingerprint}"
