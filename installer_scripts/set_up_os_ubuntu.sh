@@ -22,7 +22,6 @@ function install_basics() {
     jq \
     dislocker \
     software-properties-common \
-    make \
     vim \
     curl \
     wget >/dev/null
@@ -64,6 +63,20 @@ function install_python() {
   python3 -u -m pip install --upgrade certifi setuptools wheel >/dev/null
   python3 -u -m pip install --upgrade \
     pipenv >/dev/null
+}
+
+function install_cpp_toolchains() {
+  print_trace
+
+  sudo apt-get install -y \
+    make \
+    ninja-build \
+    gcc-10 \
+    g++-10 \
+    clang-12 \
+    clang-tools-12 \
+    clang-format-12 \
+    clang-tidy-12 >/dev/null
 }
 
 function configure_bash() {
@@ -137,6 +150,7 @@ function main() {
   install_git
   install_github_cli
   install_python
+  install_cpp_toolchains
 
   configure_bash
   configure_gpg "${pgp_primary_key_fingerprint}"
