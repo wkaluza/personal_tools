@@ -20,6 +20,9 @@ function install_basics() {
     vlc \
     gnupg \
     jq \
+    inkscape \
+    libcanberra-gtk-module \
+    libcanberra-gtk3-module \
     dislocker \
     software-properties-common \
     vim \
