@@ -191,6 +191,41 @@ function install_tex_live() {
     texlive-full >/dev/null
 }
 
+function install_chrome() {
+  print_trace
+
+  local url="https://dl.google.com/linux/direct"
+
+  sudo apt-get install -y \
+    fonts-liberation >/dev/null
+
+  if test -x "/opt/google/chrome/google-chrome"; then
+    log_info "Google Chrome already installed"
+  else
+    wget --output-document ./chrome.deb \
+      "${url}/google-chrome-stable_current_amd64.deb"
+    sudo dpkg --install ./chrome.deb >/dev/null
+    rm ./chrome.deb
+  fi
+
+  google-chrome --version >/dev/null
+}
+
+function install_brave() {
+  local key="/usr/share/keyrings/brave-browser-archive-keyring.gpg"
+  local url="https://brave-browser-apt-release.s3.brave.com"
+
+  sudo apt-get install apt-transport-https curl
+  sudo curl -fsSL -o "${key}" "${url}/brave-browser-archive-keyring.gpg"
+  echo "deb [arch=amd64 signed-by=${key}] ${url} stable main" |
+    sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+
+  sudo apt-get update
+  sudo apt-get install -y brave-browser
+
+  brave-browser --version >/dev/null
+}
+
 function configure_bash() {
   print_trace
 
@@ -277,6 +312,8 @@ function main() {
   install_golang
   install_nodejs
   install_tex_live
+  install_chrome
+  install_brave
 
   configure_bash
   configure_gpg "${pgp_primary_key_fingerprint}"
