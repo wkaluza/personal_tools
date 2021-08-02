@@ -17,6 +17,7 @@ function install_basics() {
     snapd \
     scdaemon \
     rng-tools \
+    gettext-base \
     vlc \
     gnupg \
     jq \
