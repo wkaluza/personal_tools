@@ -1,0 +1,9 @@
+Key-Type: RSA
+Key-Length: 4096
+Key-Usage: cert
+
+Name-Real: ${name}
+Name-Comment: ${comment}
+Name-Email: ${email}
+
+Expire-Date: 2y

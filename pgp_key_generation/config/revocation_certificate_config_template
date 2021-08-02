@@ -1,0 +1,5 @@
+y
+${reason}
+Revokes key labelled "${comment}"
+
+y
