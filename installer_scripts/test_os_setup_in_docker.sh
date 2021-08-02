@@ -7,9 +7,9 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 function main() {
   local jetbrains_toolbox_tar_gz="$1"
 
-  local today_yymmdd
-  today_yymmdd="$(date --utc +'%Y%m%d%H%M%S')"
-  local image_name="set_up_ubuntu_${today_yymmdd}"
+  local now
+  now="$(date --utc +'%Y%m%d%H%M%S')"
+  local image_name="set_up_ubuntu_${now}"
 
   docker build \
     -t "${image_name}" \
