@@ -1,0 +1,11 @@
+key ${signing_key_fingerprint}
+keytocard
+1
+key ${signing_key_fingerprint}
+key ${encryption_key_fingerprint}
+keytocard
+2
+key ${encryption_key_fingerprint}
+key ${authentication_key_fingerprint}
+keytocard
+3

@@ -1,0 +1,7 @@
+admin
+${kdf_setup_command}
+url
+${public_key_url}
+name
+${last_name}
+${first_name}
