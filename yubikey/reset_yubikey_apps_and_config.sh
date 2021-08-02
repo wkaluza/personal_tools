@@ -9,9 +9,9 @@ source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.sh"
 function reset_yubikey_apps() {
   print_trace
 
-  log_info "Reset FIDO"
-  ykman fido reset
-  sleep 2
+#  log_info "Reset FIDO"
+#  ykman fido reset
+#  sleep 2
 
   log_info "Reset OATH"
   ykman oath reset --force
