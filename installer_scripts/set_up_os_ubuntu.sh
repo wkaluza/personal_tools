@@ -116,8 +116,6 @@ function install_jetbrains_toolbox() {
 
   local tar_gz_path="$1"
 
-  local extract_target_name
-  extract_target_name="$(basename "${tar_gz_path}" ".tar.gz")"
   local install_destination="/opt/jetbrains/jetbrains-toolbox"
 
   if ! test -x "${install_destination}"; then
@@ -125,12 +123,16 @@ function install_jetbrains_toolbox() {
 
     pushd "$(dirname "${tar_gz_path}")" >/dev/null
     tar -xzf "${tar_gz_path}"
+
+    local extracted_dir
+    extracted_dir="$(find . -type d -name jetbrains-toolbox-*)"
+
     sudo cp \
-      "./${extract_target_name}/$(basename "${install_destination}")" \
+      "${extracted_dir}/$(basename "${install_destination}")" \
       "${install_destination}"
 
     sudo rm -rf "${tar_gz_path}"
-    sudo rm -rf "./${extract_target_name}"
+    sudo rm -rf "${extracted_dir}"
     popd >/dev/null
   else
     log_info "jetbrains-toolbox already installed at ${install_destination}"
@@ -293,7 +295,7 @@ function main() {
   jetbrains_toolbox_tar_gz="$(realpath "$1")"
 
   if ! test -f "${jetbrains_toolbox_tar_gz}"; then
-    log_error "Invalid path to jetbrains-toolbox archive"
+    log_error "Invalid path to jetbrains-toolbox archive: ${jetbrains_toolbox_tar_gz}"
     exit 1
   fi
 
