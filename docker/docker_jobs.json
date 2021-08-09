@@ -8,5 +8,14 @@
       "Hello",
       "World"
     ]
+  },
+  "test_os_setup": {
+    "dockerfile": "./installer_scripts/docker_test_ubuntu_setup/test.dockerfile",
+    "build_context": "./installer_scripts/docker_test_ubuntu_setup/",
+    "host_workspace": "./",
+    "command": [
+      "./installer_scripts/set_up_os_ubuntu.sh",
+      "./jetbrains-toolbox___.tar.gz"
+    ]
   }
 }

@@ -5,26 +5,15 @@ set -euo pipefail
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 function main() {
-  local jetbrains_toolbox_tar_gz="$1"
+  local repo_root
+  repo_root="$(realpath "${THIS_SCRIPT_DIR}/../")"
+  local docker_dir="${repo_root}/docker"
 
-  local now
-  now="$(date --utc +'%Y%m%d%H%M%S')"
-  local image_name="set_up_ubuntu_${now}"
-
-  docker build \
-    -t "${image_name}" \
-    -f "${THIS_SCRIPT_DIR}/test_ubuntu_setup.dockerfile" \
-    "${THIS_SCRIPT_DIR}"
-
-  docker run \
-    --rm \
-    --interactive \
-    --tty \
-    --volume "${THIS_SCRIPT_DIR}/..:/home/someuser/workspace" \
-    "${image_name}" \
-    "./installer_scripts/set_up_os_ubuntu.sh" \
-    "${jetbrains_toolbox_tar_gz}"
+  "${docker_dir}"/run_in_docker.sh \
+    "${repo_root}" \
+    "${docker_dir}/docker_jobs.json" \
+    "test_os_setup"
 }
 
 # Entry point
-main "$1"
+main
