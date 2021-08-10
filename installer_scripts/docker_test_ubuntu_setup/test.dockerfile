@@ -9,16 +9,14 @@ SHELL ["/bin/bash", "-c"]
 
 ENV TEMP_CONTAINER_SETUP_DIR="/docker_setup_temp"
 
-COPY user_workspace_setup.sh \
-$TEMP_CONTAINER_SETUP_DIR/
-
+COPY user_workspace_setup.sh $TEMP_CONTAINER_SETUP_DIR/
 RUN $TEMP_CONTAINER_SETUP_DIR/user_workspace_setup.sh \
 $UID \
 $GID \
 $USERNAME \
 $WORKSPACE
-RUN rm -rf $TEMP_CONTAINER_SETUP_DIR
 
+RUN rm -rf $TEMP_CONTAINER_SETUP_DIR
 ENV TEMP_CONTAINER_SETUP_DIR=""
 
 USER $USERNAME
