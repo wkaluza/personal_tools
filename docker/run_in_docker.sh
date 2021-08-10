@@ -14,6 +14,7 @@ function docker_run() {
   docker run \
     --interactive \
     --tty \
+    --rm \
     --name "${container_name}" \
     --user "${uid}:${gid}" \
     --volume "${host_workspace}:${docker_workspace}" \
