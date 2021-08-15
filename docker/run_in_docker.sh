@@ -8,8 +8,20 @@ function docker_run() {
   local uid="$3"
   local gid="$4"
   local host_workspace="$5"
-  local docker_workspace="$6"
-  local command="$7"
+  local command="$6"
+
+  local docker_workspace
+  docker_workspace="$(docker run \
+    --interactive \
+    --tty \
+    --rm \
+    --name "${container_name}_workspace_probe" \
+    --user "${uid}:${gid}" \
+    "${docker_tag}" \
+    "/bin/bash" \
+    "-c" \
+    'stty -onlcr && echo "$WORKSPACE"' # prevent trailing CR in output
+    )"
 
   docker run \
     --interactive \
@@ -31,8 +43,7 @@ function docker_build() {
   local uid="$3"
   local gid="$4"
   local username="$5"
-  local docker_workspace="$6"
-  local build_context="$7"
+  local build_context="$6"
 
   docker build \
     --tag "${docker_tag}" \
@@ -40,7 +51,6 @@ function docker_build() {
     --build-arg UID="${uid}" \
     --build-arg GID="${gid}" \
     --build-arg USERNAME="${username}" \
-    --build-arg WORKSPACE="${docker_workspace}" \
     "${build_context}"
 }
 
@@ -63,7 +73,6 @@ function main() {
   gid="$(id -g)"
   local username
   username="$(id -un)"
-  local docker_workspace="/home/${username}/workspace"
 
   docker_build \
     "${docker_tag}" \
@@ -71,7 +80,6 @@ function main() {
     "${uid}" \
     "${gid}" \
     "${username}" \
-    "${docker_workspace}" \
     "${build_context}"
 
   docker_run \
@@ -80,7 +88,6 @@ function main() {
     "${uid}" \
     "${gid}" \
     "${host_workspace}" \
-    "${docker_workspace}" \
     "${command}"
 }
 

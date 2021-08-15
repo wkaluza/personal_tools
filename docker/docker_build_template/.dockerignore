@@ -1,3 +1,4 @@
 *
-!user_workspace_setup.sh
-!system_setup.sh
+!create_user_workspace.sh
+!system_setup_root.sh
+!system_setup_user.sh

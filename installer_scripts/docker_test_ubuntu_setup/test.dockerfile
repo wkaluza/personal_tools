@@ -3,22 +3,24 @@ FROM ubuntu:20.04
 ARG UID
 ARG GID
 ARG USERNAME
-ARG WORKSPACE
+
+ARG _HOME="/home/$USERNAME"
+ENV WORKSPACE="$_HOME/workspace"
+
+ARG _DOCKER_BUILD_TEMP_ROOT_DIR="/docker_build_temp"
 
 SHELL ["/bin/bash", "-c"]
 
-ENV TEMP_CONTAINER_SETUP_DIR="/docker_setup_temp"
-
-COPY user_workspace_setup.sh $TEMP_CONTAINER_SETUP_DIR/
-RUN $TEMP_CONTAINER_SETUP_DIR/user_workspace_setup.sh \
+COPY create_user_workspace.sh $_DOCKER_BUILD_TEMP_ROOT_DIR/
+RUN $_DOCKER_BUILD_TEMP_ROOT_DIR/create_user_workspace.sh \
 $UID \
 $GID \
 $USERNAME \
 $WORKSPACE
 
-RUN rm -rf $TEMP_CONTAINER_SETUP_DIR
-ENV TEMP_CONTAINER_SETUP_DIR=""
+RUN rm -rf $_DOCKER_BUILD_TEMP_ROOT_DIR
 
 USER $USERNAME
+WORKDIR $WORKSPACE
 
 CMD ["/bin/bash"]
