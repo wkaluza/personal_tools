@@ -310,13 +310,13 @@ function main() {
   install_python
   install_cpp_toolchains
   install_cmake
-  install_jetbrains_toolbox "${jetbrains_toolbox_tar_gz}"
   install_yubico_utilities
   install_golang
   install_nodejs
   install_tex_live
   install_chrome
   install_brave
+  install_jetbrains_toolbox "${jetbrains_toolbox_tar_gz}"
 
   configure_bash
   configure_gpg "${pgp_primary_key_fingerprint}"
