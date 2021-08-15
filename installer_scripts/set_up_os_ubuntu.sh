@@ -10,8 +10,8 @@ source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.sh"
 function install_basics() {
   print_trace
 
-  sudo apt-get update >/dev/null
-  sudo apt-get upgrade --with-new-pkgs -y >/dev/null
+  sudo apt-get update
+  sudo apt-get upgrade --with-new-pkgs -y
   DEBIAN_FRONTEND=noninteractive sudo \
     --preserve-env=DEBIAN_FRONTEND apt-get install -y \
     snapd \
@@ -28,16 +28,16 @@ function install_basics() {
     software-properties-common \
     vim \
     curl \
-    wget >/dev/null
+    wget
 }
 
 function install_git() {
   print_trace
 
-  sudo add-apt-repository -y ppa:git-core/ppa >/dev/null
-  sudo apt-get update >/dev/null
+  sudo add-apt-repository -y ppa:git-core/ppa
+  sudo apt-get update
 
-  sudo apt-get install -y git >/dev/null
+  sudo apt-get install -y git
 }
 
 function install_github_cli() {
@@ -49,10 +49,10 @@ function install_github_cli() {
   curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg |
     sudo gpg --dearmor -o "${key}"
   echo "deb [arch=amd64 signed-by=${key}] ${url} stable main" |
-    sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+    sudo tee /etc/apt/sources.list.d/github-cli.list
 
-  sudo apt-get update >/dev/null
-  sudo apt-get install -y gh >/dev/null
+  sudo apt-get update
+  sudo apt-get install -y gh
 }
 
 function install_python() {
@@ -61,12 +61,12 @@ function install_python() {
   sudo apt-get install -y \
     python3-dev \
     python3-pip \
-    python3-venv >/dev/null
+    python3-venv
 
-  python3 -u -m pip install --upgrade pip >/dev/null
-  python3 -u -m pip install --upgrade certifi setuptools wheel >/dev/null
+  python3 -u -m pip install --upgrade pip
+  python3 -u -m pip install --upgrade certifi setuptools wheel
   python3 -u -m pip install --upgrade \
-    pipenv >/dev/null
+    pipenv
 }
 
 function install_cpp_toolchains() {
@@ -80,7 +80,7 @@ function install_cpp_toolchains() {
     clang-12 \
     clang-tools-12 \
     clang-format-12 \
-    clang-tidy-12 >/dev/null
+    clang-tidy-12
 }
 
 function install_cmake() {
@@ -91,13 +91,13 @@ function install_cmake() {
     ca-certificates \
     gnupg \
     software-properties-common \
-    wget >/dev/null
+    wget
 
   local url="https://apt.kitware.com/keys/kitware-archive-latest.asc"
 
   curl -fsSL "${url}" 2>/dev/null |
     sudo APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE="DontWarn" \
-      apt-key add - >/dev/null
+      apt-key add -
 
   # Get Kitware Apt Archive Automatic Signing Key (2021) <debian@kitware.com>"
   sudo apt-key adv \
@@ -105,10 +105,10 @@ function install_cmake() {
     --recv-keys 2EEA802239DDF0E52942A7B4FCEE74BB7F3C88C8
 
   sudo add-apt-repository \
-    "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" >/dev/null
-  sudo apt-get update >/dev/null
+    "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+  sudo apt-get update
 
-  sudo apt-get install -y cmake >/dev/null
+  sudo apt-get install -y cmake
 }
 
 function install_jetbrains_toolbox() {
@@ -121,7 +121,7 @@ function install_jetbrains_toolbox() {
   if ! test -x "${install_destination}"; then
     sudo mkdir -p "$(dirname "${install_destination}")"
 
-    pushd "$(dirname "${tar_gz_path}")" >/dev/null
+    pushd "$(dirname "${tar_gz_path}")"
     tar -xzf "${tar_gz_path}"
 
     local extracted_dir
@@ -133,7 +133,7 @@ function install_jetbrains_toolbox() {
 
     sudo rm -rf "${tar_gz_path}"
     sudo rm -rf "${extracted_dir}"
-    popd >/dev/null
+    popd
   else
     log_info "jetbrains-toolbox already installed at ${install_destination}"
   fi
@@ -147,12 +147,12 @@ function install_jetbrains_toolbox() {
 function install_yubico_utilities() {
   print_trace
 
-  sudo add-apt-repository -y ppa:yubico/stable >/dev/null
-  sudo apt-get update >/dev/null
+  sudo add-apt-repository -y ppa:yubico/stable
+  sudo apt-get update
   sudo apt-get install -y \
     yubikey-manager \
     yubioath-desktop \
-    yubikey-personalization-gui >/dev/null
+    yubikey-personalization-gui
 }
 
 function install_golang() {
@@ -168,13 +168,13 @@ function install_golang() {
     curl -fsSL --output "./${go_archive}" "${download_url}"
     sudo mv "./${go_archive}" "${target_dir}"
 
-    pushd "${target_dir}" >/dev/null
+    pushd "${target_dir}"
     sudo tar -xzf "./${go_archive}"
     sudo rm "./${go_archive}"
-    popd >/dev/null
+    popd
   else
     echo "golang is already installed"
-    go version >/dev/null
+    go version
   fi
 }
 
@@ -182,7 +182,7 @@ function install_nodejs() {
   print_trace
 
   curl -sL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-  sudo apt-get install -y nodejs >/dev/null
+  sudo apt-get install -y nodejs
 
   npm config set ignore-scripts true
 }
@@ -191,7 +191,7 @@ function install_tex_live() {
   print_trace
 
   sudo apt-get install -y \
-    texlive-full >/dev/null
+    texlive-full
 }
 
 function install_chrome() {
@@ -200,18 +200,18 @@ function install_chrome() {
   local url="https://dl.google.com/linux/direct"
 
   sudo apt-get install -y \
-    fonts-liberation >/dev/null
+    fonts-liberation
 
   if test -x "/opt/google/chrome/google-chrome"; then
     log_info "Google Chrome already installed"
   else
     wget --output-document ./chrome.deb \
       "${url}/google-chrome-stable_current_amd64.deb"
-    sudo dpkg --install ./chrome.deb >/dev/null
+    sudo dpkg --install ./chrome.deb
     rm ./chrome.deb
   fi
 
-  google-chrome --version >/dev/null
+  google-chrome --version
 }
 
 function install_brave() {
@@ -226,7 +226,7 @@ function install_brave() {
   sudo apt-get update
   sudo apt-get install -y brave-browser
 
-  brave-browser --version >/dev/null
+  brave-browser --version
 }
 
 function configure_bash() {
