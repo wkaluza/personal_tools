@@ -125,7 +125,7 @@ function install_jetbrains_toolbox() {
     tar -xzf "${tar_gz_path}"
 
     local extracted_dir
-    extracted_dir="$(find . -type d -name jetbrains-toolbox-*)"
+    extracted_dir="$(find . -type d -name 'jetbrains-toolbox-*')"
 
     sudo cp \
       "${extracted_dir}/$(basename "${install_destination}")" \
