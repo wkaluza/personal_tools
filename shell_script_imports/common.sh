@@ -9,18 +9,6 @@ function ensure_not_sudo() {
   fi
 }
 
-function press_any_key_to_() {
-  local action="$1"
-
-  echo "Press any key to ${action} or Ctrl-c to quit"
-  read -n 1 -s -r
-}
-
-function wait_and_reboot() {
-  press_any_key_to_ "reboot"
-  sudo reboot
-}
-
 function set_up_new_gpg_homedir() {
   local temp_gpg_homedir="$1"
 

@@ -51,7 +51,7 @@ function install_docker() {
 function main() {
   ensure_not_sudo
   install_docker
-  wait_and_reboot
+  log_info "Success! Reboot required."
 }
 
 # Entry point

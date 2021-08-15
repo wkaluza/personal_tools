@@ -322,8 +322,7 @@ function main() {
   configure_gpg "${pgp_primary_key_fingerprint}"
   configure_git "${pgp_signing_key_fingerprint}"
 
-  log_info "Success!"
-  wait_and_reboot
+  log_info "Success! Reboot required."
 }
 
 # Entry point
