@@ -58,6 +58,9 @@ function install_github_cli() {
 function install_python() {
   print_trace
 
+  local poetry_url="https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py"
+  local poetry_bash_completion="/etc/bash_completion.d/poetry.bash-completion"
+
   sudo apt-get install -y \
     python3-dev \
     python3-pip \
@@ -67,6 +70,10 @@ function install_python() {
   python3 -u -m pip install --upgrade certifi setuptools wheel
   python3 -u -m pip install --upgrade \
     pipenv
+
+  curl -sSL "${poetry_url}" | python3 -
+  "$HOME"/.local/bin/poetry completions bash |
+    sudo tee "${poetry_bash_completion}"
 }
 
 function install_cpp_toolchains() {
@@ -304,6 +311,8 @@ function main() {
 
   ensure_not_sudo
 
+  configure_bash
+
   install_basics
   install_git
   install_github_cli
@@ -318,7 +327,6 @@ function main() {
   install_brave
   install_jetbrains_toolbox "${jetbrains_toolbox_tar_gz}"
 
-  configure_bash
   configure_gpg "${pgp_primary_key_fingerprint}"
   configure_git "${pgp_signing_key_fingerprint}"
 
