@@ -33,12 +33,12 @@ function docker_run_or_exec() {
   list_exited="$(docker container list \
     --quiet \
     --filter="status=exited" \
-    --filter="name=${container_name}")"
+    --filter="name=^${container_name}$")"
   local list_running
   list_running="$(docker container list \
     --quiet \
     --filter="status=running" \
-    --filter="name=${container_name}")"
+    --filter="name=^${container_name}$")"
 
   if ! test -z "${list_exited}"; then
     docker rm "${container_name}"
