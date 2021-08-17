@@ -11,18 +11,8 @@ function docker_run_or_exec() {
   local command="$6"
   local build_context="$7"
 
-  local docker_workspace
-  docker_workspace="$(docker run \
-    --interactive \
-    --tty \
-    --rm \
-    --name "${container_name}_workspace_probe" \
-    --user "${uid}:${gid}" \
-    "${docker_tag}" \
-    "/bin/bash" \
-    "-c" \
-    'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
-    )"
+  # Value will be overwritten below
+  local docker_workspace="/not_a_valid_directory"
 
   local rel_ws_to_build_ctx
   rel_ws_to_build_ctx="$(realpath \
@@ -45,6 +35,18 @@ function docker_run_or_exec() {
   fi
 
   if test -z "${list_running}"; then
+    docker_workspace="$(docker run \
+      --interactive \
+      --tty \
+      --rm \
+      --name "${container_name}_workspace_probe" \
+      --user "${uid}:${gid}" \
+      "${docker_tag}" \
+      "/bin/bash" \
+      "-c" \
+      'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
+      )"
+
     docker run \
       --detach \
       --tty \
@@ -55,6 +57,16 @@ function docker_run_or_exec() {
       --workdir "${docker_workspace}" \
       "${docker_tag}" \
       "/bin/bash"
+  else
+    docker_workspace="$(docker exec \
+      --tty \
+      --env IMPORTS_DIR="${docker_workspace}/${rel_ws_to_build_ctx}" \
+      --user "${uid}:${gid}" \
+      "${container_name}" \
+      "/bin/bash" \
+      "-c" \
+      'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
+      )"
   fi
 
   docker exec \
