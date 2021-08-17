@@ -6,7 +6,9 @@
     "command": [
       "./docker/docker_build_template/say_something.sh",
       "Hello",
-      "World"
+      "World",
+      "inside\\ container",
+      "\"with spaces\""
     ]
   },
   "test_os_setup": {

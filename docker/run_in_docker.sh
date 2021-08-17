@@ -9,6 +9,7 @@ function docker_run() {
   local gid="$4"
   local host_workspace="$5"
   local command="$6"
+  local build_context="$7"
 
   local docker_workspace
   docker_workspace="$(docker run \
@@ -20,13 +21,19 @@ function docker_run() {
     "${docker_tag}" \
     "/bin/bash" \
     "-c" \
-    'stty -onlcr && echo "$WORKSPACE"' # prevent trailing CR in output
+    'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
     )"
+
+  local rel_ws_to_build_ctx
+  rel_ws_to_build_ctx="$(realpath \
+    --relative-to="${host_workspace}" \
+    "${build_context}")"
 
   docker run \
     --interactive \
     --tty \
     --rm \
+    --env IMPORTS_DIR="${docker_workspace}/${rel_ws_to_build_ctx}" \
     --name "${container_name}" \
     --user "${uid}:${gid}" \
     --volume "${host_workspace}:${docker_workspace}" \
@@ -88,7 +95,8 @@ function main() {
     "${uid}" \
     "${gid}" \
     "${host_workspace}" \
-    "${command}"
+    "${command}" \
+    "${build_context}"
 }
 
 function main_json() {

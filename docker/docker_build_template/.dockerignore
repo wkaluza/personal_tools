@@ -2,3 +2,6 @@
 !create_user_workspace.sh
 !system_setup_root.sh
 !system_setup_user.sh
+!files_common/
+!files_root/
+!files_user/
