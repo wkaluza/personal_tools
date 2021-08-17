@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-function docker_run() {
+function docker_run_or_exec() {
   local container_name="$1"
   local docker_tag="$2"
   local uid="$3"
@@ -29,16 +29,38 @@ function docker_run() {
     --relative-to="${host_workspace}" \
     "${build_context}")"
 
-  docker run \
-    --interactive \
+  local list_exited="$(docker container list \
+    --quiet \
+    --filter="status=exited" \
+    --filter="name=${container_name}")"
+  local list_running="$(docker container list \
+    --quiet \
+    --filter="status=running" \
+    --filter="name=${container_name}")"
+
+  if ! test -z "${list_exited}"; then
+    docker rm "${container_name}"
+  fi
+
+  if test -z "${list_running}"; then
+    docker run \
+      --detach \
+      --tty \
+      --env IMPORTS_DIR="${docker_workspace}/${rel_ws_to_build_ctx}" \
+      --name "${container_name}" \
+      --user "${uid}:${gid}" \
+      --volume "${host_workspace}:${docker_workspace}" \
+      --workdir "${docker_workspace}" \
+      "${docker_tag}" \
+      "/bin/bash"
+  fi
+
+  docker exec \
     --tty \
-    --rm \
     --env IMPORTS_DIR="${docker_workspace}/${rel_ws_to_build_ctx}" \
-    --name "${container_name}" \
     --user "${uid}:${gid}" \
-    --volume "${host_workspace}:${docker_workspace}" \
     --workdir "${docker_workspace}" \
-    "${docker_tag}" \
+    "${container_name}" \
     "/bin/bash" \
     "-c" \
     "${command}"
@@ -62,8 +84,6 @@ function docker_build() {
 }
 
 function main() {
-  local now
-  now="$(date --utc +'%Y%m%d%H%M%S')"
   local docker_image="$1"
   local dockerfile
   dockerfile="$(realpath "$2")"
@@ -73,7 +93,9 @@ function main() {
   host_workspace="$(realpath "$4")"
   local command="$5"
 
-  local docker_tag="${docker_image}:${now}"
+  local docker_tag="${docker_image}"
+  local container_name="${docker_image}"
+
   local uid
   uid="$(id -u)"
   local gid
@@ -89,8 +111,8 @@ function main() {
     "${username}" \
     "${build_context}"
 
-  docker_run \
-    "${docker_image}_${now}" \
+  docker_run_or_exec \
+    "${container_name}" \
     "${docker_tag}" \
     "${uid}" \
     "${gid}" \
