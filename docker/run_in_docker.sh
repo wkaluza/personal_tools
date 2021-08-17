@@ -29,11 +29,13 @@ function docker_run_or_exec() {
     --relative-to="${host_workspace}" \
     "${build_context}")"
 
-  local list_exited="$(docker container list \
+  local list_exited
+  list_exited="$(docker container list \
     --quiet \
     --filter="status=exited" \
     --filter="name=${container_name}")"
-  local list_running="$(docker container list \
+  local list_running
+  list_running="$(docker container list \
     --quiet \
     --filter="status=running" \
     --filter="name=${container_name}")"
@@ -93,7 +95,7 @@ function main() {
   host_workspace="$(realpath "$4")"
   local command="$5"
 
-  local docker_tag="${docker_image}"
+  local docker_tag="${docker_image}:auto"
   local container_name="${docker_image}"
 
   local uid
