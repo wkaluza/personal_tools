@@ -19,6 +19,7 @@ function install_basics() {
     rng-tools \
     gettext-base \
     vlc \
+    meld \
     gnupg \
     jq \
     inkscape \
