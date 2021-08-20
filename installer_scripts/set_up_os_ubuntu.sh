@@ -22,6 +22,9 @@ function install_basics() {
     meld \
     gnupg \
     jq \
+    mercurial \
+    darcs \
+    subversion \
     inkscape \
     libcanberra-gtk-module \
     libcanberra-gtk3-module \
