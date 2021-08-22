@@ -59,6 +59,12 @@ function install_github_cli() {
   sudo apt-get install -y gh
 }
 
+function install_rust() {
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  source $HOME/.cargo/env
+  rustup update
+}
+
 function install_python() {
   print_trace
 
@@ -320,6 +326,7 @@ function main() {
   install_basics
   install_git
   install_github_cli
+  install_rust
   install_python
   install_cpp_toolchains
   install_cmake
