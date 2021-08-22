@@ -195,6 +195,23 @@ function install_golang() {
   fi
 }
 
+function install_pijul() {
+  local pijul_version="~1.0.0-alpha"
+
+  sudo apt-get -y install \
+    make \
+    libsodium-dev \
+    libclang-dev \
+    pkg-config \
+    libssl-dev \
+    libxxhash-dev \
+    libzstd-dev \
+    clang
+
+  cargo search pijul
+  cargo install pijul --version "${pijul_version}"
+}
+
 function install_nodejs() {
   print_trace
 
@@ -332,6 +349,7 @@ function main() {
   install_cmake
   install_yubico_utilities
   install_golang
+  install_pijul
   install_nodejs
   install_tex_live
   install_chrome
