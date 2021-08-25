@@ -20,6 +20,7 @@ function install_basics() {
     gettext-base \
     vlc \
     meld \
+    rdfind \
     gnupg \
     jq \
     mercurial \
