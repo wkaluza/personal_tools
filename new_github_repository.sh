@@ -26,7 +26,15 @@ function main() {
   cd "${repo_name}"
   git remote add origin "${repo_url}"
   git fetch --all --recurse-submodules --tags
+
   git commit --allow-empty --message "Repository root"
+
+  local gitignore_name=".gitignore"
+
+  echo "*___*" > "${gitignore_name}"
+  git add "${gitignore_name}"
+  git commit --message "Add Git ignore file"
+
   git push --set-upstream origin main
 }
 
