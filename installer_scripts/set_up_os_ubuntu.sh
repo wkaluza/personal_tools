@@ -302,6 +302,8 @@ function configure_git() {
   git config --global merge.verifySignatures true
 
   git config --global rerere.enabled true
+
+  git config --global url."git@github.com:".insteadOf "https://github.com/"
 }
 
 function configure_gpg() {
