@@ -25,6 +25,7 @@ function install_basics() {
     jq \
     mercurial \
     darcs \
+    fossil \
     subversion \
     inkscape \
     libcanberra-gtk-module \
