@@ -305,6 +305,8 @@ function configure_git() {
   git config --global rerere.enabled true
 
   git config --global url."git@github.com:".insteadOf "https://github.com/"
+
+  git config --global advice.detachedHead false
 }
 
 function configure_gpg() {
