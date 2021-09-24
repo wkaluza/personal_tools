@@ -96,7 +96,9 @@ function install_cpp_toolchains() {
     ninja-build \
     gcc-10 \
     g++-10 \
+    lldb-12 \
     clang-12 \
+    libclang-12-dev \
     clang-tools-12 \
     clang-format-12 \
     clang-tidy-12
@@ -203,12 +205,10 @@ function install_pijul() {
   sudo apt-get -y install \
     make \
     libsodium-dev \
-    libclang-dev \
     pkg-config \
     libssl-dev \
     libxxhash-dev \
-    libzstd-dev \
-    clang
+    libzstd-dev
 
   cargo search pijul
   cargo install pijul --version "${pijul_version}"
@@ -355,7 +355,7 @@ function main() {
   install_cmake
   install_yubico_utilities
   install_golang
-  install_pijul
+  install_pijul # requires install_cpp_toolchains
   install_nodejs
   install_tex_live
   install_chrome
