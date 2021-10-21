@@ -180,7 +180,7 @@ function install_golang() {
   print_trace
 
   local go_archive="go.tar.gz"
-  local v="1.16.6"
+  local v="1.17.2"
   local download_url="https://dl.google.com/go/go${v}.linux-amd64.tar.gz"
   # Must match PATH update in bashrc_append.sh
   local target_dir="/usr/local"
