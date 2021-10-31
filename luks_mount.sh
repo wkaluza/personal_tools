@@ -3,8 +3,10 @@
 set -euo pipefail
 
 function main() {
-  local encrypted_device="/dev/sda"
-  local mapping_name="pcspec_sda_luks"
+  local device="$1"
+
+  local encrypted_device="/dev/${device}"
+  local mapping_name="pcspec_${device}_luks"
 
   local mapped_device="/dev/mapper/${mapping_name}"
   local mount_point="${HOME}/luks/${mapping_name}"
@@ -17,4 +19,4 @@ function main() {
 }
 
 # Entry point
-main
+main "$1"
