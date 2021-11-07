@@ -2,14 +2,14 @@
 
 set -euo pipefail
 
-function ensure_not_sudo() {
+function ensure_not_sudo {
   if test "0" -eq "$(id -u)"; then
     echo "Do not run this as root"
     exit 1
   fi
 }
 
-function set_up_new_gpg_homedir() {
+function set_up_new_gpg_homedir {
   local temp_gpg_homedir="$1"
 
   mkdir "${temp_gpg_homedir}"

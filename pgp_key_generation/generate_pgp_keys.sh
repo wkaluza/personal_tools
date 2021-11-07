@@ -7,7 +7,7 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.sh"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.sh"
 
-function perform_exports() {
+function perform_exports {
   print_trace
 
   local email="$1"
@@ -79,7 +79,7 @@ function perform_exports() {
   sleep 2
 }
 
-function generate_keys() {
+function generate_keys {
   print_trace
 
   local email="$1"
@@ -114,7 +114,7 @@ function generate_keys() {
   sleep 2
 }
 
-function generate_configs() {
+function generate_configs {
   print_trace
 
   local name="$1"
@@ -145,7 +145,7 @@ function generate_configs() {
     envsubst <"${revocation_certificate_config_template}" >"${revocation_certificate_config}_unused"
 }
 
-function main() {
+function main {
   local key_purpose="$1"
 
   local name="Wojciech Kaluza"

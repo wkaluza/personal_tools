@@ -4,7 +4,7 @@ set -euo pipefail
 
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
-function main() {
+function main {
   local repo_root
   repo_root="$(realpath "${THIS_SCRIPT_DIR}/../")"
   local docker_dir="${repo_root}/docker"

@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-function main() {
+function main {
   local primary_key_fingerprint="$1"
 
   gpg --keyserver keys.openpgp.org --send-keys "${primary_key_fingerprint}"

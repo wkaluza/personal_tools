@@ -4,7 +4,7 @@ set -euo pipefail
 
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
-function main() {
+function main {
   local first="$1"
   local second="$2"
   local third="$3"

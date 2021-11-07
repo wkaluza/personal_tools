@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-function main() {
+function main {
   local repo_name="$1"
   local repo_description="$2"
 

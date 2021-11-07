@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-function main() {
+function main {
   local dir_name="$1"
 
   local current_date_time

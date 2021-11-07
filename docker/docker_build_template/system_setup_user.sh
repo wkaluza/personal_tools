@@ -4,7 +4,7 @@ set -euo pipefail
 
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
-function main() {
+function main {
 #  python3 -m pip install --upgrade pip
 #  python3 -m pip install --upgrade \
 #    certifi setuptools wheel

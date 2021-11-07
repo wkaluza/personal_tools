@@ -7,7 +7,7 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.sh"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.sh"
 
-function configure_openpgp_card_metadata() {
+function configure_openpgp_card_metadata {
   print_trace
 
   local first_name="$1"
@@ -44,7 +44,7 @@ function configure_openpgp_card_metadata() {
   sleep 2
 }
 
-function upload_pgp_keys() {
+function upload_pgp_keys {
   print_trace
 
   local primary_key_fingerprint="$1"
@@ -70,7 +70,7 @@ function upload_pgp_keys() {
   sleep 2
 }
 
-function upload_secrets_and_config() {
+function upload_secrets_and_config {
   print_trace
 
   local first_name="$1"
@@ -103,7 +103,7 @@ function upload_secrets_and_config() {
     "${now}"
 }
 
-function main() {
+function main {
   local primary_key_fingerprint="$1"
   local signing_key_fingerprint="$2"
   local encryption_key_fingerprint="$3"

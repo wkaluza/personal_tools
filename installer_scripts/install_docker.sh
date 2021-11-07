@@ -7,7 +7,7 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.sh"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.sh"
 
-function install_docker() {
+function install_docker {
   if ! docker --version >/dev/null; then
     log_info "Installing docker"
 
@@ -48,7 +48,7 @@ function install_docker() {
   fi
 }
 
-function main() {
+function main {
   ensure_not_sudo
   install_docker
   log_info "Success! Reboot required."

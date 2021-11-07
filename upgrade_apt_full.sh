@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-function main() {
+function main {
   sudo apt-get update
   sudo apt-get upgrade --with-new-pkgs -y
   sudo apt-get dist-upgrade -y

@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-function create_user() {
+function create_user {
   local uid="$1"
   local gid="$2"
   local username="$3"
@@ -17,7 +17,7 @@ function create_user() {
     "${username}"
 }
 
-function allow_passwordless_sudo() {
+function allow_passwordless_sudo {
   local username="$1"
 
   apt-get update
@@ -27,7 +27,7 @@ function allow_passwordless_sudo() {
   echo "%sudo ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers
 }
 
-function create_workspace() {
+function create_workspace {
   local workspace="$1"
   local uid="$2"
   local gid="$3"
@@ -36,7 +36,7 @@ function create_workspace() {
   chown --recursive "${uid}:${gid}" "${workspace}"
 }
 
-function main() {
+function main {
   local uid="$1"
   local gid="$2"
   local username="$3"
