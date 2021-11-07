@@ -35,17 +35,18 @@ function docker_run_or_exec {
   fi
 
   if test -z "${list_running}"; then
-    docker_workspace="$(docker run \
-      --interactive \
-      --tty \
-      --rm \
-      --name "${container_name}_workspace_probe" \
-      --user "${uid}:${gid}" \
-      "${docker_tag}" \
-      "/bin/bash" \
-      "-c" \
-      'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
-      )"
+    docker_workspace="$(
+      docker run \
+        --interactive \
+        --tty \
+        --rm \
+        --name "${container_name}_workspace_probe" \
+        --user "${uid}:${gid}" \
+        "${docker_tag}" \
+        "/bin/bash" \
+        "-c" \
+        'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
+    )"
 
     docker run \
       --detach \
@@ -58,15 +59,16 @@ function docker_run_or_exec {
       "${docker_tag}" \
       "/bin/bash"
   else
-    docker_workspace="$(docker exec \
-      --tty \
-      --env IMPORTS_DIR="${docker_workspace}/${rel_ws_to_build_ctx}" \
-      --user "${uid}:${gid}" \
-      "${container_name}" \
-      "/bin/bash" \
-      "-c" \
-      'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
-      )"
+    docker_workspace="$(
+      docker exec \
+        --tty \
+        --env IMPORTS_DIR="${docker_workspace}/${rel_ws_to_build_ctx}" \
+        --user "${uid}:${gid}" \
+        "${container_name}" \
+        "/bin/bash" \
+        "-c" \
+        'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
+    )"
   fi
 
   docker exec \

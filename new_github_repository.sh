@@ -31,7 +31,7 @@ function main {
 
   local gitignore_name=".gitignore"
 
-  echo "*___*" > "${gitignore_name}"
+  echo "*___*" >"${gitignore_name}"
   git add "${gitignore_name}"
   git commit --message "Add Git ignore file"
 

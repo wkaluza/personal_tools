@@ -5,15 +5,14 @@ set -euo pipefail
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 function main {
-#  apt-get update
-#  apt-get upgrade -y
-#  DEBIAN_FRONTEND=noninteractive apt-get install -y \
-#    curl \
-#    git
-#
-#  apt-get autoremove -y
-#  apt-get clean
-
+  # apt-get update
+  # apt-get upgrade -y
+  # DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  #   curl \
+  #   git
+  #
+  # apt-get autoremove -y
+  # apt-get clean
 
   echo "========================================"
 
