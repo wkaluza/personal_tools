@@ -1,7 +1,7 @@
 *
-!create_user_workspace.sh
-!system_setup_root.sh
-!system_setup_user.sh
+!create_user_workspace.bash
+!system_setup_root.bash
+!system_setup_user.bash
 !files_common/
 !files_root/
 !files_user/

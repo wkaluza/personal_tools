@@ -9,7 +9,7 @@ function main {
   repo_root="$(realpath "${THIS_SCRIPT_DIR}/../")"
   local docker_dir="${repo_root}/docker"
 
-  "${docker_dir}"/run_in_docker.sh \
+  "${docker_dir}"/run_in_docker.bash \
     "${repo_root}" \
     "${docker_dir}/docker_jobs.json" \
     "test_os_setup"

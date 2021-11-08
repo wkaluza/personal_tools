@@ -4,7 +4,7 @@
     "build_context": "./docker/docker_build_template/",
     "host_workspace": "./",
     "command": [
-      "./docker/docker_build_template/say_something.sh",
+      "./docker/docker_build_template/say_something.bash",
       "Hello",
       "World",
       "inside\\ container",
@@ -16,7 +16,7 @@
     "build_context": "./installer_scripts/docker_test_ubuntu_setup/",
     "host_workspace": "./",
     "command": [
-      "./installer_scripts/set_up_os_ubuntu.sh",
+      "./installer_scripts/set_up_os_ubuntu.bash",
       "./jetbrains-toolbox___.tar.gz"
     ]
   }

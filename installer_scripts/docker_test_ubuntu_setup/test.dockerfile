@@ -11,8 +11,8 @@ ARG _DOCKER_BUILD_TEMP_ROOT_DIR="/docker_build_temp"
 
 SHELL ["/bin/bash", "-c"]
 
-COPY create_user_workspace.sh $_DOCKER_BUILD_TEMP_ROOT_DIR/
-RUN $_DOCKER_BUILD_TEMP_ROOT_DIR/create_user_workspace.sh \
+COPY create_user_workspace.bash $_DOCKER_BUILD_TEMP_ROOT_DIR/
+RUN $_DOCKER_BUILD_TEMP_ROOT_DIR/create_user_workspace.bash \
 $UID \
 $GID \
 $USERNAME \

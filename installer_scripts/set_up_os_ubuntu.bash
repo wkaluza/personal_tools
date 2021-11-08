@@ -4,8 +4,8 @@ set -euo pipefail
 
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
-source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.sh"
-source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.sh"
+source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
+source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.bash"
 
 function install_basics {
   print_trace
@@ -182,7 +182,7 @@ function install_golang {
   local go_archive="go.tar.gz"
   local v="1.17.2"
   local download_url="https://dl.google.com/go/go${v}.linux-amd64.tar.gz"
-  # Must match PATH update in bashrc_append.sh
+  # Must match PATH update in bashrc_append.bash
   local target_dir="/usr/local"
 
   if ! test -d "${target_dir}/go"; then
@@ -276,7 +276,7 @@ function configure_bash {
     log_info "bash already configured"
   else
     echo "${config_preamble}" >>"${bashrc_path}"
-    cat "${THIS_SCRIPT_DIR}/bashrc_append.sh" >>"${bashrc_path}"
+    cat "${THIS_SCRIPT_DIR}/bashrc_append.bash" >>"${bashrc_path}"
   fi
 }
 

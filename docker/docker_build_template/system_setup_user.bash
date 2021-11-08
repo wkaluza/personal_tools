@@ -24,13 +24,13 @@ function main {
   echo "IMPORTS_DIR is ${IMPORTS_DIR}"
   echo ""
 
-  echo source "${IMPORTS_DIR}/files_common/common_import.sh"
-  source "${IMPORTS_DIR}/files_common/common_import.sh"
+  echo source "${IMPORTS_DIR}/files_common/common_import.bash"
+  source "${IMPORTS_DIR}/files_common/common_import.bash"
   echo "Call common_import_fn..."
   common_import_fn
 
-  echo source "${IMPORTS_DIR}/files_user/user_import.sh"
-  source "${IMPORTS_DIR}/files_user/user_import.sh"
+  echo source "${IMPORTS_DIR}/files_user/user_import.bash"
+  source "${IMPORTS_DIR}/files_user/user_import.bash"
   echo "Call user_import_fn..."
   user_import_fn
 
