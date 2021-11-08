@@ -7,6 +7,22 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.bash"
 
+JETBRAINS_TOOLBOX_TAR_GZ_PATH="does_not_exist"
+CHROME_DEB_PATH="./chrome.deb"
+
+function on_exit {
+  local exit_code=$?
+
+  if [[ $exit_code -eq 0 ]]; then
+    rm -f "${JETBRAINS_TOOLBOX_TAR_GZ_PATH}"
+    rm -f "${CHROME_DEB_PATH}"
+  fi
+
+  exit $exit_code
+}
+
+trap on_exit EXIT
+
 function install_basics {
   print_trace
 
@@ -135,15 +151,13 @@ function install_cmake {
 function install_jetbrains_toolbox {
   print_trace
 
-  local tar_gz_path="$1"
-
   local install_destination="/opt/jetbrains/jetbrains-toolbox"
 
   if ! test -x "${install_destination}"; then
     sudo mkdir -p "$(dirname "${install_destination}")"
 
-    pushd "$(dirname "${tar_gz_path}")"
-    tar -xzf "${tar_gz_path}"
+    pushd "$(dirname "${JETBRAINS_TOOLBOX_TAR_GZ_PATH}")"
+    tar -xzf "${JETBRAINS_TOOLBOX_TAR_GZ_PATH}"
 
     local extracted_dir
     extracted_dir="$(find . -type d -name 'jetbrains-toolbox-*')"
@@ -152,8 +166,7 @@ function install_jetbrains_toolbox {
       "${extracted_dir}/$(basename "${install_destination}")" \
       "${install_destination}"
 
-    sudo rm -rf "${tar_gz_path}"
-    sudo rm -rf "${extracted_dir}"
+    rm -rf "${extracted_dir}"
     popd
   else
     log_info "jetbrains-toolbox already installed at ${install_destination}"
@@ -241,10 +254,9 @@ function install_chrome {
   if test -x "/opt/google/chrome/google-chrome"; then
     log_info "Google Chrome already installed"
   else
-    wget --output-document ./chrome.deb \
+    wget --output-document "${CHROME_DEB_PATH}" \
       "${url}/google-chrome-stable_current_amd64.deb"
-    sudo dpkg --install ./chrome.deb
-    rm ./chrome.deb
+    sudo dpkg --install "${CHROME_DEB_PATH}"
   fi
 
   google-chrome --version
@@ -331,11 +343,10 @@ function configure_gpg {
 }
 
 function main {
-  local jetbrains_toolbox_tar_gz
-  jetbrains_toolbox_tar_gz="$(realpath "$1")"
+  JETBRAINS_TOOLBOX_TAR_GZ_PATH="$(realpath "$1")"
 
-  if ! test -f "${jetbrains_toolbox_tar_gz}"; then
-    log_error "Invalid path to jetbrains-toolbox archive: ${jetbrains_toolbox_tar_gz}"
+  if ! test -f "${JETBRAINS_TOOLBOX_TAR_GZ_PATH}"; then
+    log_error "Invalid path to jetbrains-toolbox archive: ${JETBRAINS_TOOLBOX_TAR_GZ_PATH}"
     exit 1
   fi
 
@@ -360,7 +371,7 @@ function main {
   install_tex_live
   install_chrome
   install_brave
-  install_jetbrains_toolbox "${jetbrains_toolbox_tar_gz}"
+  install_jetbrains_toolbox
 
   configure_gpg "${pgp_primary_key_fingerprint}"
   configure_git "${pgp_signing_key_fingerprint}"
