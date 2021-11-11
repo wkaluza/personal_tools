@@ -14,9 +14,6 @@ function main {
     docker rm --volumes $exited_containers
   fi
 
-  log_info "Pruning unused images"
-  docker image prune --all --force
-
   local running_containers
   running_containers=$(docker container list --all --quiet --filter="status=running")
   if test -z "$running_containers"; then
@@ -27,6 +24,9 @@ function main {
     log_info "Deleting..."
     docker rm --volumes $running_containers
   fi
+
+  # log_info "Pruning unused images"
+  # docker image prune --all --force
 }
 
 # Entry point
