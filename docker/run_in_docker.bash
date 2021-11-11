@@ -4,15 +4,12 @@ set -euo pipefail
 
 function docker_run_or_exec {
   local container_name="$1"
-  local docker_tag="$2"
+  local image_name_with_tag="$2"
   local uid="$3"
   local gid="$4"
   local host_workspace="$5"
   local command="$6"
   local build_context="$7"
-
-  # Value will be overwritten below
-  local docker_workspace="/not_a_valid_directory"
 
   local rel_ws_to_build_ctx
   rel_ws_to_build_ctx="$(realpath \
@@ -24,66 +21,41 @@ function docker_run_or_exec {
     --quiet \
     --filter="status=exited" \
     --filter="name=^${container_name}$")"
-  local list_running
-  list_running="$(docker container list \
-    --quiet \
-    --filter="status=running" \
-    --filter="name=^${container_name}$")"
 
   if ! test -z "${list_exited}"; then
     docker rm "${container_name}"
   fi
 
-  if test -z "${list_running}"; then
-    docker_workspace="$(
-      docker run \
-        --interactive \
-        --tty \
-        --rm \
-        --name "${container_name}_workspace_probe" \
-        --user "${uid}:${gid}" \
-        "${docker_tag}" \
-        "/bin/bash" \
-        "-c" \
-        'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
-    )"
-
+  local docker_workspace
+  docker_workspace="$(
     docker run \
-      --detach \
       --tty \
-      --env IMPORTS_DIR="${docker_workspace}/${rel_ws_to_build_ctx}" \
-      --name "${container_name}" \
+      --rm \
+      --name "${container_name}_workspace_probe" \
       --user "${uid}:${gid}" \
-      --volume "${host_workspace}:${docker_workspace}" \
-      --workdir "${docker_workspace}" \
-      "${docker_tag}" \
-      "/bin/bash"
-  else
-    docker_workspace="$(
-      docker exec \
-        --tty \
-        --env IMPORTS_DIR="${docker_workspace}/${rel_ws_to_build_ctx}" \
-        --user "${uid}:${gid}" \
-        "${container_name}" \
-        "/bin/bash" \
-        "-c" \
-        'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
-    )"
-  fi
+      "${image_name_with_tag}" \
+      "/bin/bash" \
+      "-c" \
+      'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
+  )"
 
-  docker exec \
+  docker run \
+    --rm \
     --tty \
+    --interactive \
     --env IMPORTS_DIR="${docker_workspace}/${rel_ws_to_build_ctx}" \
+    --name "${container_name}" \
     --user "${uid}:${gid}" \
+    --volume "${host_workspace}:${docker_workspace}" \
     --workdir "${docker_workspace}" \
-    "${container_name}" \
+    "${image_name_with_tag}" \
     "/bin/bash" \
     "-c" \
     "${command}"
 }
 
 function docker_build {
-  local docker_tag="$1"
+  local image_name_with_tag="$1"
   local dockerfile="$2"
   local uid="$3"
   local gid="$4"
@@ -91,7 +63,7 @@ function docker_build {
   local build_context="$6"
 
   docker build \
-    --tag "${docker_tag}" \
+    --tag "${image_name_with_tag}" \
     --file "${dockerfile}" \
     --build-arg UID="${uid}" \
     --build-arg GID="${gid}" \
@@ -109,7 +81,7 @@ function main {
   host_workspace="$(realpath "$4")"
   local command="$5"
 
-  local docker_tag="${docker_image}:auto"
+  local image_name_with_tag="${docker_image}:auto"
   local container_name="${docker_image}"
 
   local uid
@@ -120,7 +92,7 @@ function main {
   username="$(id -un)"
 
   docker_build \
-    "${docker_tag}" \
+    "${image_name_with_tag}" \
     "${dockerfile}" \
     "${uid}" \
     "${gid}" \
@@ -129,7 +101,7 @@ function main {
 
   docker_run_or_exec \
     "${container_name}" \
-    "${docker_tag}" \
+    "${image_name_with_tag}" \
     "${uid}" \
     "${gid}" \
     "${host_workspace}" \
