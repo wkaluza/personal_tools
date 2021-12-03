@@ -14,3 +14,14 @@ PATH="$PATH:${HOME}/.local/bin"
 SSH_AUTH_SOCK="$(gpgconf --list-dirs | grep ssh | sed -n 's/.*:\(\/.*$\)/\1/p')"
 eval "$(gh completion --shell bash)"
 eval "$(rustup completions bash)"
+
+export HISTFILESIZE \
+HISTSIZE \
+HISTIGNORE \
+HISTCONTROL \
+PROMPT_COMMAND \
+GOROOT \
+GOPATH \
+GOPRIVATE \
+PATH \
+SSH_AUTH_SOCK
