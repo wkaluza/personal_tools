@@ -2,9 +2,9 @@ shopt -s histappend
 shopt -s cmdhist
 HISTFILESIZE=1000000
 HISTSIZE=1000000
-# HISTIGNORE='pwd:top:ps'
+HISTIGNORE="pwd:top:ps"
 HISTCONTROL=ignorespace:erasedups
-PROMPT_COMMAND='history -n ; history -a'
+PROMPT_COMMAND="history -n ; history -a"
 GOROOT="/usr/local/go"
 GOPATH="${HOME}/go"
 GOPRIVATE="github.com/wkaluza/*"
