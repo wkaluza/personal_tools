@@ -8,6 +8,7 @@ PROMPT_COMMAND="history -n ; history -a"
 GOROOT="/usr/local/go"
 GOPATH="${HOME}/go"
 GOPRIVATE="github.com/wkaluza/*"
+CGO_ENABLED=0
 PATH="$PATH:${GOROOT}/bin"
 PATH="$PATH:${GOPATH}/bin"
 PATH="$PATH:${HOME}/.local/bin"
@@ -23,5 +24,6 @@ PROMPT_COMMAND \
 GOROOT \
 GOPATH \
 GOPRIVATE \
+CGO_ENABLED \
 PATH \
 SSH_AUTH_SOCK
