@@ -263,6 +263,8 @@ function install_chrome {
 }
 
 function install_brave {
+  print_trace
+
   local key="/usr/share/keyrings/brave-browser-archive-keyring.gpg"
   local url="https://brave-browser-apt-release.s3.brave.com"
 
