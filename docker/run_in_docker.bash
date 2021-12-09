@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-function docker_run_or_exec {
+function docker_run {
   local container_name="$1"
   local image_name_with_tag="$2"
   local uid="$3"
@@ -99,7 +99,7 @@ function main {
     "${username}" \
     "${build_context}"
 
-  docker_run_or_exec \
+  docker_run \
     "${container_name}" \
     "${image_name_with_tag}" \
     "${uid}" \
