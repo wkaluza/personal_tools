@@ -47,3 +47,16 @@ function set_up_new_gpg_homedir {
   gpg --homedir "${temp_gpg_homedir}" --list-secret-keys >/dev/null
   sleep 2
 }
+
+function up_to_128_random_hex_chars {
+  local num_chars="${1:-128}"
+
+  local long
+  long="$(
+    dd if=/dev/urandom bs=4096 count=1 2>/dev/null |
+      sha512sum |
+      awk '{ print $1 }'
+  )"
+
+  echo -n "${long:0:$num_chars}"
+}
