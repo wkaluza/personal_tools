@@ -7,8 +7,8 @@ function main {
   local dislocker_dir="$2"
   local mount_point="$3"
 
-  sudo mkdir -p "${dislocker_dir}"
-  sudo mkdir -p "${mount_point}"
+  sudo mkdir --parents "${dislocker_dir}"
+  sudo mkdir --parents "${mount_point}"
 
   sudo dislocker "${encrypted_partition}" -u -- "${dislocker_dir}"
   sleep 5
