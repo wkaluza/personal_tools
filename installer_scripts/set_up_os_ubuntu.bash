@@ -283,6 +283,29 @@ function install_brave {
   brave-browser --version
 }
 
+function install_heroku_cli {
+  print_trace
+
+  local apt_url="https://cli-assets.heroku.com/apt"
+
+  echo "deb ${apt_url} ./" |
+    sudo tee /etc/apt/sources.list.d/heroku.list
+
+  curl "https://cli-assets.heroku.com/apt/release.key" |
+    sudo APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE="DontWarn" \
+      apt-key add -
+
+  sudo apt-get update
+  sudo apt-get install -y \
+    heroku
+
+  echo "heroku installed to $(which heroku)"
+  heroku version
+
+  printf "$(heroku autocomplete:script bash)" >>"$HOME/.bashrc"
+  source "$HOME/.bashrc"
+}
+
 function configure_bash {
   print_trace
 
@@ -377,6 +400,7 @@ function main {
   install_tex_live
   install_chrome
   install_brave
+  install_heroku_cli
   install_jetbrains_toolbox
 
   configure_gpg "${pgp_primary_key_fingerprint}"
