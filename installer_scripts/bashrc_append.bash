@@ -17,13 +17,13 @@ eval "$(gh completion --shell bash)"
 eval "$(rustup completions bash)"
 
 export HISTFILESIZE \
-HISTSIZE \
-HISTIGNORE \
-HISTCONTROL \
-PROMPT_COMMAND \
-GOROOT \
-GOPATH \
-GOPRIVATE \
-CGO_ENABLED \
-PATH \
-SSH_AUTH_SOCK
+  HISTSIZE \
+  HISTIGNORE \
+  HISTCONTROL \
+  PROMPT_COMMAND \
+  GOROOT \
+  GOPATH \
+  GOPRIVATE \
+  CGO_ENABLED \
+  PATH \
+  SSH_AUTH_SOCK
