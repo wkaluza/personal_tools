@@ -78,6 +78,8 @@ function install_github_cli {
 }
 
 function install_rust {
+  print_trace
+
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   source $HOME/.cargo/env
   rustup update
@@ -154,7 +156,7 @@ function install_jetbrains_toolbox {
   local install_destination="/opt/jetbrains/jetbrains-toolbox"
 
   if ! test -x "${install_destination}"; then
-    sudo mkdir -p "$(dirname "${install_destination}")"
+    sudo mkdir --parents "$(dirname "${install_destination}")"
 
     pushd "$(dirname "${JETBRAINS_TOOLBOX_TAR_GZ_PATH}")"
     tar -xzf "${JETBRAINS_TOOLBOX_TAR_GZ_PATH}"
@@ -213,6 +215,8 @@ function install_golang {
 }
 
 function install_pijul {
+  print_trace
+
   local pijul_version="~1.0.0-alpha"
 
   sudo apt-get -y install \
@@ -331,7 +335,7 @@ function configure_gpg {
   local gpg_home="$HOME/.gnupg"
   local gpg_config_dir="gpg_config"
 
-  mkdir -p "$gpg_home"
+  mkdir --parents "$gpg_home"
   cp "${THIS_SCRIPT_DIR}/${gpg_config_dir}/gpg.conf" "${gpg_home}"
   cp "${THIS_SCRIPT_DIR}/${gpg_config_dir}/gpg-agent.conf" "${gpg_home}"
   chmod u+rwx,go-rwx "${gpg_home}"
