@@ -7,6 +7,20 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.bash"
 
+CREDENTIAL_HELPERS_DIR="${THIS_SCRIPT_DIR}/docker_credential_helpers___deleteme"
+
+function on_exit {
+  local exit_code=$?
+
+  if [[ $exit_code -eq 0 ]]; then
+    rm -rf "${CREDENTIAL_HELPERS_DIR}"
+  fi
+
+  exit $exit_code
+}
+
+trap on_exit EXIT
+
 function install_basics {
   print_trace
 
@@ -116,19 +130,15 @@ EOF
 function configure_docker {
   print_trace
 
-  local credential_helpers_dir="${HOME}/docker_credential_helpers_deleteme"
   local dest_dir="${HOME}/.local/bin"
-  local docker_config
-  docker_config="${HOME}/.docker/config.json"
+  local docker_config="${HOME}/.docker/config.json"
 
   mkdir --parents "${dest_dir}"
 
   run_in_context \
-    "${credential_helpers_dir}" \
+    "${CREDENTIAL_HELPERS_DIR}" \
     build_docker_pass_credential_helper \
     "${dest_dir}"
-
-  rm -rf "${credential_helpers_dir}"
 
   echo "export PATH=\"\$PATH:${dest_dir}\"" >>"${HOME}/.bashrc"
   source "${HOME}/.bashrc"
