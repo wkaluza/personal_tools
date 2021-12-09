@@ -368,7 +368,7 @@ function main {
   install_cmake
   install_yubico_utilities
   install_golang
-  install_pijul # requires install_cpp_toolchains
+  # install_pijul # requires cpp_toolchains and rust
   install_nodejs
   install_tex_live
   install_chrome
