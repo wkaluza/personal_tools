@@ -42,75 +42,63 @@ function build_docker_pass_credential_helper {
   local random_tag
   random_tag="$(up_to_128_random_hex_chars 16)"
 
-  local temp_docker_ctx
-  temp_docker_ctx="docker_ctx_${random_tag}_deleteme___"
-  mkdir --parents "${temp_docker_ctx}"
-
-  cat <<EOF >>"${temp_docker_ctx}/build.bash"
-  set -euo pipefail
-
-  function install_basics_inner {
-    apt-get update
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      curl \
-      make \
-      git
-  }
-
-  function install_golang {
-    local go_archive="go.tar.gz"
-    local v="1.17.2"
-    local download_url="https://dl.google.com/go/go\${v}.linux-amd64.tar.gz"
-
-    local target_dir="/usr/local"
-    export PATH="\${PATH}:\${target_dir}/go/bin"
-
-    if test -d "\${target_dir}/go"; then
-      echo "golang is already installed"
-      go version
-    else
-      curl -fsSL --output "./\${go_archive}" "\${download_url}"
-      mv "./\${go_archive}" "\${target_dir}"
-
-      pushd "\${target_dir}"
-      tar -xzf "./\${go_archive}"
-      rm "./\${go_archive}"
-      popd
-    fi
-  }
-
-  function main {
-    local temp_dir="temp"
-
-    install_basics_inner
-    install_golang
-
-    git clone \
-      "https://github.com/docker/docker-credential-helpers.git" \
-      "\${temp_dir}"
-
-    pushd "\${temp_dir}"
-    make pass
-    popd
-  }
-
-  # Entry point
-  main
-EOF
-
-  cat <<EOF >>"${temp_docker_ctx}/temp.dockerfile"
+  cat <<EOF | docker build \
+    -t "${random_tag}" \
+    -
 FROM ubuntu:focal
 WORKDIR /workspace
-COPY build.bash /workspace/
-RUN bash /workspace/build.bash
+RUN echo "set -euo pipefail \n \
+\n \
+function install_basics_inner { \n \
+  apt-get update \n \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    curl \
+    make \
+    git \n \
+} \n \
+\n \
+function install_golang { \n \
+  local go_archive=\"go.tar.gz\" \n \
+  local v=\"1.17.5\" \n \
+  local download_url=\"https://dl.google.com/go/go\\\${v}.linux-amd64.tar.gz\" \n \
+\n \
+  local target_dir=\"/usr/local\" \n \
+  export PATH=\"\\\${PATH}:\\\${target_dir}/go/bin\" \n \
+\n \
+  if test -d \"\\\${target_dir}/go\"; then \n \
+    echo \"golang is already installed\" \n \
+    go version \n \
+  else \n \
+    curl -fsSL --output \"./\\\${go_archive}\" \"\\\${download_url}\" \n \
+    mv \"./\\\${go_archive}\" \"\\\${target_dir}\" \n \
+\n \
+    pushd \"\\\${target_dir}\" \n \
+    tar -xzf \"./\\\${go_archive}\" \n \
+    rm \"./\\\${go_archive}\" \n \
+    popd \n \
+  fi \n \
+} \n \
+\n \
+function main { \n \
+  local temp_dir=\"temp\" \n \
+\n \
+  install_basics_inner \n \
+  install_golang \n \
+\n \
+  git clone \
+    \"https://github.com/docker/docker-credential-helpers.git\" \
+    \"\\\${temp_dir}\" \n \
+\n \
+  pushd \"\\\${temp_dir}\" \n \
+  make pass \n \
+  popd \n \
+} \n \
+\n \
+main \n \
+" | bash -
 EOF
 
-  docker build \
-    -t "${random_tag}" \
-    -f "${temp_docker_ctx}/temp.dockerfile" \
-    "${temp_docker_ctx}"
-
-  local host_mount_dir="${temp_docker_ctx}/shared_dir"
+  local host_mount_dir="shared_dir"
   mkdir --parents "${host_mount_dir}"
 
   docker run \
@@ -119,7 +107,7 @@ EOF
     "${random_tag}" \
     mv "/workspace/temp/bin/docker-credential-pass" "${docker_mount_dir}"
   log_info "Need to change file ownership of docker-credential-pass"
-  sudo chown "$(id -u)" "${host_mount_dir}/docker-credential-pass"
+  sudo chown "$(id -u):$(id -g)" "${host_mount_dir}/docker-credential-pass"
   chmod 700 "${host_mount_dir}/docker-credential-pass"
 
   mv \
