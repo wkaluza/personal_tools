@@ -3,8 +3,17 @@
 set -euo pipefail
 
 function main {
-  find . -type f -iname '*.bash' |
-    xargs --no-run-if-empty --max-lines=1 shfmt -i 2 -w
+  for f in $(find . -type f -iname '*.bash'); do
+    shfmt -i 2 -w "${f}"
+  done
+
+  for f in $(find . -type f -iname '*.json'); do
+    cp "${f}" "${f}.temp"
+    jq --sort-keys \
+      '.' \
+      "${f}" >"${f}.temp"
+    mv "${f}.temp" "${f}"
+  done
 }
 
 # Entry point

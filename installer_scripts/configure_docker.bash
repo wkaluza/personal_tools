@@ -27,9 +27,9 @@ function install_basics {
   sudo apt-get update >/dev/null
   DEBIAN_FRONTEND=noninteractive sudo \
     --preserve-env=DEBIAN_FRONTEND apt-get install -y \
-    make \
     git \
     jq \
+    make \
     pass >/dev/null
 }
 
@@ -151,12 +151,15 @@ function configure_docker {
   fi
 
   cp "${docker_config}" "${docker_config}.temp"
-  jq '. | { "credsStore": "pass" }' "${docker_config}" >"${docker_config}.temp"
+  jq --sort-keys \
+    '. | { "credsStore": "pass" }' \
+    "${docker_config}" >"${docker_config}.temp"
   mv "${docker_config}.temp" "${docker_config}"
 }
 
 function main {
   ensure_not_sudo
+
   install_basics
   configure_docker
 

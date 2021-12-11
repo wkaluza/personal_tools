@@ -1,23 +1,23 @@
 {
   "example": {
-    "dockerfile": "./docker/docker_build_template/example.dockerfile",
     "build_context": "./docker/docker_build_template/",
-    "host_workspace": "./",
     "command": [
       "./docker/docker_build_template/say_something.bash",
       "Hello",
       "World",
       "inside\\ container",
       "\"with spaces\""
-    ]
+    ],
+    "dockerfile": "./docker/docker_build_template/example.dockerfile",
+    "host_workspace": "./"
   },
   "test_os_setup": {
-    "dockerfile": "./installer_scripts/docker_test_ubuntu_setup/test.dockerfile",
     "build_context": "./installer_scripts/docker_test_ubuntu_setup/",
-    "host_workspace": "./",
     "command": [
       "./installer_scripts/set_up_os_ubuntu.bash",
       "./jetbrains-toolbox___.tar.gz"
-    ]
+    ],
+    "dockerfile": "./installer_scripts/docker_test_ubuntu_setup/test.dockerfile",
+    "host_workspace": "./"
   }
 }
