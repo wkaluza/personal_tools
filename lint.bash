@@ -11,8 +11,8 @@ function main {
     cp "${f}" "${f}.temp"
     jq --sort-keys \
       '.' \
-      "${f}" >"${f}.temp"
-    mv "${f}.temp" "${f}"
+      "${f}.temp" >"${f}"
+    rm "${f}.temp"
   done
 }
 
