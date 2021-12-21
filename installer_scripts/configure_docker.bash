@@ -143,8 +143,8 @@ function install_docker_pass_credential_helper {
   cp "${docker_config}" "${docker_config}.temp"
   jq --sort-keys \
     '. | { "credsStore": "pass" }' \
-    "${docker_config}" >"${docker_config}.temp"
-  mv "${docker_config}.temp" "${docker_config}"
+    "${docker_config}.temp" >"${docker_config}"
+  rm "${docker_config}.temp"
 }
 
 function install_docker_compose_if_absent {
