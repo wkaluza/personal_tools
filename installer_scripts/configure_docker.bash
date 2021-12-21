@@ -147,11 +147,28 @@ function install_docker_pass_credential_helper {
   mv "${docker_config}.temp" "${docker_config}"
 }
 
+function install_docker_compose_if_absent {
+  local docker_plugins_dir="${HOME}/.docker/cli-plugins"
+  local plugin_version="v2.2.2"
+  local download_url="https://github.com/docker/compose/releases/download"
+
+  if docker compose ls >/dev/null 2>&1; then
+    log_info "docker compose already installed"
+  else
+    mkdir --parents "${docker_plugins_dir}"
+    curl -sSL \
+      "${download_url}/${plugin_version}/docker-compose-linux-x86_64" \
+      -o "${docker_plugins_dir}/docker-compose"
+    chmod u+x "${docker_plugins_dir}/docker-compose"
+  fi
+}
+
 function main {
   ensure_not_sudo
 
   install_basics
   install_docker_pass_credential_helper
+  install_docker_compose_if_absent
 
   echo Success
 }
