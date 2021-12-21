@@ -110,12 +110,14 @@ EOF
   sudo chown "$(id -u):$(id -g)" "${host_mount_dir}/docker-credential-pass"
   chmod 700 "${host_mount_dir}/docker-credential-pass"
 
+  docker rm "${random_tag}"
+
   mv \
     "${host_mount_dir}/docker-credential-pass" \
     "${host_installation_dir}/"
 }
 
-function configure_docker {
+function install_docker_pass_credential_helper {
   print_trace
 
   local dest_dir="${HOME}/.local/bin"
@@ -149,7 +151,7 @@ function main {
   ensure_not_sudo
 
   install_basics
-  configure_docker
+  install_docker_pass_credential_helper
 
   echo Success
 }
