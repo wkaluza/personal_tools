@@ -7,7 +7,8 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.bash"
 
-function set_app_security {
+function set_app_security
+{
   print_trace
 
   local pin="$1"
@@ -76,7 +77,8 @@ function set_app_security {
   sleep 2
 }
 
-function main {
+function main
+{
   local pin="$1"
   local admin_pin="$2"
   local piv_puk_openpgp_reset_code="$3"

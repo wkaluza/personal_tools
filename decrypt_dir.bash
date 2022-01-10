@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-function main {
+function main
+{
   local encrypted_file
   encrypted_file="$(realpath "$1")"
 

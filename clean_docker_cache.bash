@@ -4,7 +4,8 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"
 
-function main {
+function main
+{
   local running_containers
   running_containers=$(docker container list --all --quiet --filter="status=running")
   if test -z "$running_containers"; then

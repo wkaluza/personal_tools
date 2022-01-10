@@ -2,9 +2,10 @@
 
 set -euo pipefail
 
-function main {
+function main
+{
   for f in $(find . -type f -iname '*.bash'); do
-    shfmt -i 2 -w "${f}"
+    shfmt -i 2 -fn -w "${f}"
   done
 
   for f in $(find . -type f -iname '*.json'); do

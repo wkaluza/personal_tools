@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-function main {
+function main
+{
   local secret_dir
   secret_dir="$(realpath "$1")"
 

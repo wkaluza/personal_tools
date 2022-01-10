@@ -6,7 +6,8 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
 
-function reset_yubikey_apps {
+function reset_yubikey_apps
+{
   print_trace
 
   # log_info "Reset FIDO"
@@ -38,7 +39,8 @@ function reset_yubikey_apps {
   sleep 2
 }
 
-function adjust_config {
+function adjust_config
+{
   print_trace
 
   log_info "Enable NFC for all apps"
@@ -62,7 +64,8 @@ function adjust_config {
   sleep 2
 }
 
-function ensure_unlocked_config {
+function ensure_unlocked_config
+{
   print_trace
 
   local config_lock_code="$1"
@@ -76,7 +79,8 @@ function ensure_unlocked_config {
   sleep 2
 }
 
-function lock_config {
+function lock_config
+{
   print_trace
 
   local config_lock_code="$1"
@@ -85,7 +89,8 @@ function lock_config {
   sleep 2
 }
 
-function main {
+function main
+{
   local config_lock_code="$1"
 
   reset_yubikey_apps

@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-function main {
+function main
+{
   local device="$1"
 
   local encrypted_device="/dev/${device}"

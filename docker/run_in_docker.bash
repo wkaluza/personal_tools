@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-function docker_run {
+function docker_run
+{
   local container_name="$1"
   local image_name_with_tag="$2"
   local uid="$3"
@@ -54,7 +55,8 @@ function docker_run {
     "${command}"
 }
 
-function docker_build {
+function docker_build
+{
   local image_name_with_tag="$1"
   local dockerfile="$2"
   local uid="$3"
@@ -71,7 +73,8 @@ function docker_build {
     "${build_context}"
 }
 
-function main {
+function main
+{
   local docker_image="$1"
   local dockerfile
   dockerfile="$(realpath "$2")"
@@ -109,7 +112,8 @@ function main {
     "${build_context}"
 }
 
-function main_json {
+function main_json
+{
   local root_dir
   root_dir="$(realpath "$1")"
   local json_config

@@ -7,7 +7,8 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.bash"
 
-function install_docker {
+function install_docker
+{
   print_trace
 
   local url="https://download.docker.com/linux/ubuntu"
@@ -48,7 +49,8 @@ function install_docker {
   fi
 }
 
-function install_docker_unless_already_installed {
+function install_docker_unless_already_installed
+{
   print_trace
 
   if docker --version >/dev/null 2>&1; then
@@ -63,7 +65,8 @@ function install_docker_unless_already_installed {
   fi
 }
 
-function main {
+function main
+{
   ensure_not_sudo
   install_docker_unless_already_installed
 

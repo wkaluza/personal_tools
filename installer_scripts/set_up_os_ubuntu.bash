@@ -10,7 +10,8 @@ source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.bash"
 JETBRAINS_TOOLBOX_TAR_GZ_PATH="does_not_exist"
 CHROME_DEB_PATH="./chrome.deb"
 
-function on_exit {
+function on_exit
+{
   local exit_code=$?
 
   if [[ $exit_code -eq 0 ]]; then
@@ -23,7 +24,8 @@ function on_exit {
 
 trap on_exit EXIT
 
-function install_basics {
+function install_basics
+{
   print_trace
 
   sudo apt-get update
@@ -53,7 +55,8 @@ function install_basics {
     wget
 }
 
-function install_git {
+function install_git
+{
   print_trace
 
   sudo add-apt-repository -y ppa:git-core/ppa
@@ -62,7 +65,8 @@ function install_git {
   sudo apt-get install -y git
 }
 
-function install_github_cli {
+function install_github_cli
+{
   print_trace
 
   local key="/usr/share/keyrings/githubcli-archive-keyring.gpg"
@@ -77,7 +81,8 @@ function install_github_cli {
   sudo apt-get install -y gh
 }
 
-function install_rust {
+function install_rust
+{
   print_trace
 
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -85,7 +90,8 @@ function install_rust {
   rustup update
 }
 
-function install_python {
+function install_python
+{
   print_trace
 
   local poetry_url="https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py"
@@ -106,7 +112,8 @@ function install_python {
     sudo tee "${poetry_bash_completion}"
 }
 
-function install_cpp_toolchains {
+function install_cpp_toolchains
+{
   print_trace
 
   sudo apt-get install -y \
@@ -122,7 +129,8 @@ function install_cpp_toolchains {
     clang-tidy-12
 }
 
-function install_cmake {
+function install_cmake
+{
   print_trace
 
   sudo apt-get install -y \
@@ -150,7 +158,8 @@ function install_cmake {
   sudo apt-get install -y cmake
 }
 
-function install_jetbrains_toolbox {
+function install_jetbrains_toolbox
+{
   print_trace
 
   local install_destination="/opt/jetbrains/jetbrains-toolbox"
@@ -180,7 +189,8 @@ function install_jetbrains_toolbox {
   fi
 }
 
-function install_yubico_utilities {
+function install_yubico_utilities
+{
   print_trace
 
   sudo add-apt-repository -y ppa:yubico/stable
@@ -191,7 +201,8 @@ function install_yubico_utilities {
     yubikey-personalization-gui
 }
 
-function install_golang {
+function install_golang
+{
   print_trace
 
   local go_archive="go.tar.gz"
@@ -214,7 +225,8 @@ function install_golang {
   fi
 }
 
-function install_pijul {
+function install_pijul
+{
   print_trace
 
   local pijul_version="~1.0.0-alpha"
@@ -231,7 +243,8 @@ function install_pijul {
   cargo install pijul --version "${pijul_version}"
 }
 
-function install_nodejs {
+function install_nodejs
+{
   print_trace
 
   curl -sL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
@@ -240,14 +253,16 @@ function install_nodejs {
   npm config set ignore-scripts true
 }
 
-function install_tex_live {
+function install_tex_live
+{
   print_trace
 
   sudo apt-get install -y \
     texlive-full
 }
 
-function install_chrome {
+function install_chrome
+{
   print_trace
 
   local url="https://dl.google.com/linux/direct"
@@ -266,7 +281,8 @@ function install_chrome {
   google-chrome --version
 }
 
-function install_brave {
+function install_brave
+{
   print_trace
 
   local key="/usr/share/keyrings/brave-browser-archive-keyring.gpg"
@@ -283,7 +299,8 @@ function install_brave {
   brave-browser --version
 }
 
-function install_heroku_cli {
+function install_heroku_cli
+{
   print_trace
 
   local apt_url="https://cli-assets.heroku.com/apt"
@@ -306,7 +323,8 @@ function install_heroku_cli {
   source "$HOME/.bashrc"
 }
 
-function configure_bash {
+function configure_bash
+{
   print_trace
 
   local config_preamble="# WK workstation setup"
@@ -321,7 +339,8 @@ function configure_bash {
   fi
 }
 
-function configure_git {
+function configure_git
+{
   print_trace
 
   local pgp_signing_key_fingerprint="$1"
@@ -350,7 +369,8 @@ function configure_git {
   git config --global advice.detachedHead false
 }
 
-function configure_gpg {
+function configure_gpg
+{
   print_trace
 
   local pgp_primary_key_fingerprint="$1"
@@ -371,7 +391,8 @@ function configure_gpg {
   gpg --fetch-keys "https://github.com/web-flow.gpg"
 }
 
-function main {
+function main
+{
   JETBRAINS_TOOLBOX_TAR_GZ_PATH="$(realpath "$1")"
 
   if ! test -f "${JETBRAINS_TOOLBOX_TAR_GZ_PATH}"; then

@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-function clean_repo {
+function clean_repo
+{
   git clean -dffx
   git checkout .
 
@@ -10,7 +11,8 @@ function clean_repo {
   git submodule foreach --recursive git checkout .
 }
 
-function check_out {
+function check_out
+{
   local commit="$1"
 
   local current_sha
@@ -25,7 +27,8 @@ function check_out {
   fi
 }
 
-function clone_or_fetch {
+function clone_or_fetch
+{
   local url="$1"
   local dir_path="$2"
 

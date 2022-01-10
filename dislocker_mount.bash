@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-function main {
+function main
+{
   local encrypted_partition="$1"
   local dislocker_dir="$2"
   local mount_point="$3"

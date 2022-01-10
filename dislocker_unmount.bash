@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-function main {
+function main
+{
   local dislocker_dir="$1"
   local mount_point="$2"
 

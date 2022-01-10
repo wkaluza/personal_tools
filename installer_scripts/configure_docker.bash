@@ -9,7 +9,8 @@ source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.bash"
 
 CREDENTIAL_HELPERS_DIR="${THIS_SCRIPT_DIR}/docker_credential_helpers___deleteme"
 
-function on_exit {
+function on_exit
+{
   local exit_code=$?
 
   if [[ $exit_code -eq 0 ]]; then
@@ -21,7 +22,8 @@ function on_exit {
 
 trap on_exit EXIT
 
-function install_basics {
+function install_basics
+{
   print_trace
 
   sudo apt-get update >/dev/null
@@ -33,7 +35,8 @@ function install_basics {
     pass >/dev/null
 }
 
-function build_docker_pass_credential_helper {
+function build_docker_pass_credential_helper
+{
   print_trace
 
   local host_installation_dir="$1"
@@ -117,7 +120,8 @@ EOF
     "${host_installation_dir}/"
 }
 
-function install_docker_pass_credential_helper {
+function install_docker_pass_credential_helper
+{
   print_trace
 
   local dest_dir="${HOME}/.local/bin"
@@ -147,7 +151,8 @@ function install_docker_pass_credential_helper {
   rm "${docker_config}.temp"
 }
 
-function install_docker_compose_if_absent {
+function install_docker_compose_if_absent
+{
   local docker_plugins_dir="${HOME}/.docker/cli-plugins"
   local plugin_version="v2.2.2"
   local download_url="https://github.com/docker/compose/releases/download"
@@ -163,7 +168,8 @@ function install_docker_compose_if_absent {
   fi
 }
 
-function main {
+function main
+{
   ensure_not_sudo
 
   install_basics
