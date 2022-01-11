@@ -391,6 +391,12 @@ function configure_gpg
   gpg --fetch-keys "https://github.com/web-flow.gpg"
 }
 
+function disable_swap
+{
+  sudo swapoff --all
+  cat /etc/fstab | grep -v ' swap ' | sudo tee /etc/fstab
+}
+
 function main
 {
   JETBRAINS_TOOLBOX_TAR_GZ_PATH="$(realpath "$1")"
@@ -426,6 +432,8 @@ function main
 
   configure_gpg "${pgp_primary_key_fingerprint}"
   configure_git "${pgp_signing_key_fingerprint}"
+
+  disable_swap
 
   log_info "Success! Reboot required."
 }
