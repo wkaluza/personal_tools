@@ -11,11 +11,13 @@ function main
   done
 
   for f in $(find "${THIS_SCRIPT_DIR}" -type f -iname '*.json'); do
-    cp "${f}" "${f}.temp"
-    jq --sort-keys \
-      '.' \
-      "${f}.temp" >"${f}"
-    rm "${f}.temp"
+    local json_text
+    json_text="$(cat "${f}")"
+
+    echo "${json_text}" |
+      jq --sort-keys \
+        '.' \
+        - >"${f}"
   done
 }
 
