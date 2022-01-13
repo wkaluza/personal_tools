@@ -3,12 +3,10 @@
 set -euo pipefail
 
 TEMP_UNPACK_DIR="$HOME/not_a_real_directory"
-TEMP_SNAPSHOT_FILE="$HOME/not_a_real_file"
 
 function on_exit
 {
   rm -rf "${TEMP_UNPACK_DIR}"
-  rm -f "${TEMP_SNAPSHOT_FILE}"
 }
 
 trap on_exit EXIT
@@ -30,16 +28,16 @@ function main
   local now
   now="$(date --utc +'%Y%m%d%H%M%S%N')"
 
-  local snapshot_file
-  snapshot_file="$(find "${backup_dir}" -type f -name 'tar_snapshot_*')"
+  local last_snapshot_file
+  last_snapshot_file="$(find "${backup_dir}" -type f -name 'tar_snapshot_*' | sort | tail -n1)"
 
-  if test -f "${snapshot_file}"; then
-    snapshot_file="$(realpath "${snapshot_file}")"
-    TEMP_SNAPSHOT_FILE="$(dirname "${snapshot_file}")/temp_snapshot"
-    cp "${snapshot_file}" "${TEMP_SNAPSHOT_FILE}"
+  local snapshot_file
+  snapshot_file="$(realpath "${backup_dir}/tar_snapshot_${now}")"
+
+  if test -f "${last_snapshot_file}"; then
+    cp "${last_snapshot_file}" "${snapshot_file}"
   else
     echo No snapshot file: perfoming initial full backup...
-    snapshot_file="${backup_dir}/tar_snapshot_${now}"
   fi
 
   tar \
@@ -78,10 +76,7 @@ function main
     echo "Test recovery failed: diff did not match with original"
 
     rm "${backup_dir}/backup_${now}.tar.gz"
-
-    if test -f "${TEMP_SNAPSHOT_FILE}"; then
-      mv -f "${TEMP_SNAPSHOT_FILE}" "${snapshot_file}"
-    fi
+    rm "${snapshot_file}"
 
     exit 1
   fi
