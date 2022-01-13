@@ -32,6 +32,7 @@ function main
 
   local snapshot_file
   snapshot_file="$(find "${backup_dir}" -type f -name 'tar_snapshot_*')"
+
   if test -f "${snapshot_file}"; then
     snapshot_file="$(realpath "${snapshot_file}")"
     TEMP_SNAPSHOT_FILE="$(dirname "${snapshot_file}")/temp_snapshot"
@@ -69,9 +70,15 @@ function main
   echo "Test restoration done"
   echo "Performing comparison..."
 
-  if ! diff --recursive "${TEMP_UNPACK_DIR}/$(basename "${dir_to_back_up}")" "${dir_to_back_up}"; then
+  if ! diff \
+    --recursive \
+    --no-dereference \
+    "${TEMP_UNPACK_DIR}/$(basename "${dir_to_back_up}")" \
+    "${dir_to_back_up}"; then
     echo "Test recovery failed: diff did not match with original"
+
     rm "${backup_dir}/backup_${now}.tar.gz"
+
     if test -f "${TEMP_SNAPSHOT_FILE}"; then
       mv -f "${TEMP_SNAPSHOT_FILE}" "${snapshot_file}"
     fi
