@@ -3,10 +3,12 @@
 set -euo pipefail
 
 TEMP_UNPACK_DIR="$HOME/not_a_real_directory"
+TEMP_SNAPSHOT_FILE="$HOME/not_a_real_file"
 
 function on_exit
 {
   rm -rf "${TEMP_UNPACK_DIR}"
+  rm -f "${TEMP_SNAPSHOT_FILE}"
 }
 
 trap on_exit EXIT
@@ -32,7 +34,10 @@ function main
   snapshot_file="$(find "${backup_dir}" -type f -name 'tar_snapshot_*')"
   if test -f "${snapshot_file}"; then
     snapshot_file="$(realpath "${snapshot_file}")"
+    TEMP_SNAPSHOT_FILE="$(dirname "${snapshot_file}")/temp_snapshot"
+    cp "${snapshot_file}" "${TEMP_SNAPSHOT_FILE}"
   else
+    echo No snapshot file: perfoming initial full backup...
     snapshot_file="${backup_dir}/tar_snapshot_${now}"
   fi
 
@@ -66,6 +71,9 @@ function main
   if ! diff --recursive "${TEMP_UNPACK_DIR}/$(basename "${dir_to_back_up}")" "${dir_to_back_up}"; then
     echo "Test recovery failed: diff did not match with original"
     rm "${backup_dir}/backup_${now}.tar.gz"
+    if test -f "${TEMP_SNAPSHOT_FILE}"; then
+      mv -f "${TEMP_SNAPSHOT_FILE}" "${snapshot_file}"
+    fi
 
     exit 1
   fi
