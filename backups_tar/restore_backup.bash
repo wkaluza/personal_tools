@@ -21,7 +21,7 @@ function main
   echo "Performing restoration..."
 
   for f in $(find "${backup_dir}" -type f -name 'backup_*.tar.gz' | sort); do
-    echo "  Extracting $(realpath "${f}")"
+    echo "- - Extracting $(realpath "${f}")"
 
     tar \
       --directory "${restore_destination}" \
