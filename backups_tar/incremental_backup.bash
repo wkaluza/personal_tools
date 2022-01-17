@@ -29,10 +29,10 @@ function main
   now="$(date --utc +'%Y%m%d%H%M%S%N')"
 
   local last_snapshot_file
-  last_snapshot_file="$(find "${backup_dir}" -type f -name 'tar_snapshot_*' | sort | tail -n1)"
+  last_snapshot_file="$(find "${backup_dir}" -type f -name '*_tar_snapshot' | sort | tail -n1)"
 
   local snapshot_file
-  snapshot_file="$(realpath "${backup_dir}/tar_snapshot_${now}")"
+  snapshot_file="$(realpath "${backup_dir}/${now}_tar_snapshot")"
 
   if test -f "${last_snapshot_file}"; then
     cp "${last_snapshot_file}" "${snapshot_file}"
@@ -46,7 +46,7 @@ function main
     --create \
     --gzip \
     --verbose \
-    --file "${backup_dir}/backup_${now}.tar.gz" \
+    --file "${backup_dir}/${now}_backup.tar.gz" \
     "./$(basename "${dir_to_back_up}")"
 
   TEMP_UNPACK_DIR="$(dirname "${backup_dir}")/temp_unpack_$(basename "${backup_dir}")"
@@ -54,7 +54,7 @@ function main
 
   echo "Performing test restoration..."
 
-  for f in $(find "${backup_dir}" -type f -name 'backup_*.tar.gz' | sort); do
+  for f in $(find "${backup_dir}" -type f -name '*_backup.tar.gz' | sort); do
     echo "- - Extracting $(realpath "${f}")"
 
     tar \
@@ -75,7 +75,7 @@ function main
     "${dir_to_back_up}"; then
     echo "Test recovery failed: diff did not match with original"
 
-    rm "${backup_dir}/backup_${now}.tar.gz"
+    rm "${backup_dir}/${now}_backup.tar.gz"
     rm "${snapshot_file}"
 
     exit 1
