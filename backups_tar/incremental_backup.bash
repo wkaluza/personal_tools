@@ -54,7 +54,6 @@ function main
     "./$(basename "${dir_to_back_up}")" |
     gpg \
       --verbose \
-      --armor \
       --encrypt \
       --recipient "${primary_key}" \
       --output "${backup_dir}/${now}_gpg_${encryption_subkey}_backup.secret"
@@ -62,7 +61,6 @@ function main
   cat "${snapshot_file}.decrypted" |
     gpg \
       --verbose \
-      --armor \
       --encrypt \
       --recipient "${primary_key}" \
       --output "${snapshot_file}"
