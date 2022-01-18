@@ -45,7 +45,6 @@ function main
     --listed-incremental="${snapshot_file}" \
     --create \
     --gzip \
-    --verbose \
     --file "${backup_dir}/${now}_backup.tar.gz" \
     "./$(basename "${dir_to_back_up}")"
 
@@ -55,7 +54,7 @@ function main
   echo "Performing test restoration..."
 
   for f in $(find "${backup_dir}" -type f -name '*_backup.tar.gz' | sort); do
-    echo "- - Extracting $(realpath "${f}")"
+    echo "- Extracting $(realpath "${f}")"
 
     tar \
       --directory "${TEMP_UNPACK_DIR}" \
