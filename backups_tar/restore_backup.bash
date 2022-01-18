@@ -20,15 +20,18 @@ function main
 
   echo "Performing restoration..."
 
-  for f in $(find "${backup_dir}" -type f -name '*_backup.tar.gz' | sort); do
+  for f in $(find "${backup_dir}" -type f -name '*_backup.secret' | sort); do
     echo "- Extracting $(realpath "${f}")"
 
-    tar \
-      --directory "${restore_destination}" \
-      --listed-incremental=/dev/null \
-      --extract \
-      --gzip \
-      --file "$(realpath "${f}")"
+    cat "$(realpath "${f}")" |
+      gpg \
+        --verbose \
+        --decrypt |
+      tar \
+        --directory "${restore_destination}" \
+        --listed-incremental=/dev/null \
+        --extract \
+        --gzip
   done
 
   echo Success

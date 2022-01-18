@@ -13,6 +13,9 @@ trap on_exit EXIT
 
 function main
 {
+  local primary_key="174C9368811039C87F0C806A896572D1E78ED6A7"
+  local encryption_subkey="217BB178444E212F714DBAC90FBB9BD0E486C169"
+
   local dir_to_back_up
   dir_to_back_up="$(realpath "$1")"
   local backup_dir
@@ -45,23 +48,31 @@ function main
     --listed-incremental="${snapshot_file}" \
     --create \
     --gzip \
-    --file "${backup_dir}/${now}_backup.tar.gz" \
-    "./$(basename "${dir_to_back_up}")"
+    "./$(basename "${dir_to_back_up}")" |
+    gpg \
+      --verbose \
+      --armor \
+      --encrypt \
+      --recipient "${primary_key}" \
+      --output "${backup_dir}/${now}_gpg_${encryption_subkey}_backup.secret"
 
   TEMP_UNPACK_DIR="$(dirname "${backup_dir}")/temp_unpack_$(basename "${backup_dir}")"
   mkdir --parents "${TEMP_UNPACK_DIR}"
 
   echo "Performing test restoration..."
 
-  for f in $(find "${backup_dir}" -type f -name '*_backup.tar.gz' | sort); do
+  for f in $(find "${backup_dir}" -type f -name '*_backup.secret' | sort); do
     echo "- Extracting $(realpath "${f}")"
 
-    tar \
-      --directory "${TEMP_UNPACK_DIR}" \
-      --listed-incremental=/dev/null \
-      --extract \
-      --gzip \
-      --file "$(realpath "${f}")"
+    cat "$(realpath "${f}")" |
+      gpg \
+        --verbose \
+        --decrypt |
+      tar \
+        --directory "${TEMP_UNPACK_DIR}" \
+        --listed-incremental=/dev/null \
+        --extract \
+        --gzip
   done
 
   echo "Test restoration done"
@@ -74,7 +85,7 @@ function main
     "${dir_to_back_up}"; then
     echo "Test recovery failed: diff did not match with original"
 
-    rm "${backup_dir}/${now}_backup.tar.gz"
+    rm "${backup_dir}/${now}_gpg_${encryption_subkey}_backup.secret"
     rm "${snapshot_file}"
 
     exit 1
