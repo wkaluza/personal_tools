@@ -32,20 +32,23 @@ function main
   now="$(date --utc +'%Y%m%d%H%M%S%N')"
 
   local last_snapshot_file
-  last_snapshot_file="$(find "${backup_dir}" -type f -name '*_tar_snapshot' | sort | tail -n1)"
+  last_snapshot_file="$(find "${backup_dir}" -type f -name '*_snapshot.secret' | sort | tail -n1)"
 
   local snapshot_file
-  snapshot_file="$(realpath "${backup_dir}/${now}_tar_snapshot")"
+  snapshot_file="$(realpath "${backup_dir}/${now}_gpg_${encryption_subkey}_snapshot.secret")"
 
   if test -f "${last_snapshot_file}"; then
-    cp "${last_snapshot_file}" "${snapshot_file}"
+    cat "${last_snapshot_file}" |
+      gpg \
+        --verbose \
+        --decrypt >"${snapshot_file}.decrypted"
   else
     echo No snapshot file: perfoming initial full backup...
   fi
 
   tar \
     --directory "$(dirname "${dir_to_back_up}")" \
-    --listed-incremental="${snapshot_file}" \
+    --listed-incremental="${snapshot_file}.decrypted" \
     --create \
     --gzip \
     "./$(basename "${dir_to_back_up}")" |
@@ -55,6 +58,16 @@ function main
       --encrypt \
       --recipient "${primary_key}" \
       --output "${backup_dir}/${now}_gpg_${encryption_subkey}_backup.secret"
+
+  cat "${snapshot_file}.decrypted" |
+    gpg \
+      --verbose \
+      --armor \
+      --encrypt \
+      --recipient "${primary_key}" \
+      --output "${snapshot_file}"
+
+  rm "${snapshot_file}.decrypted"
 
   TEMP_UNPACK_DIR="$(dirname "${backup_dir}")/temp_unpack_$(basename "${backup_dir}")"
   mkdir --parents "${TEMP_UNPACK_DIR}"
