@@ -25,7 +25,6 @@ function main
 
     cat "$(realpath "${f}")" |
       gpg \
-        --verbose \
         --decrypt |
       tar \
         --directory "${restore_destination}" \

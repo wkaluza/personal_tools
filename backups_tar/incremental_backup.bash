@@ -40,7 +40,6 @@ function main
   if test -f "${last_snapshot_file}"; then
     cat "${last_snapshot_file}" |
       gpg \
-        --verbose \
         --decrypt >"${snapshot_file}.decrypted"
   else
     echo No snapshot file: perfoming initial full backup...
@@ -53,14 +52,12 @@ function main
     --gzip \
     "./$(basename "${dir_to_back_up}")" |
     gpg \
-      --verbose \
       --encrypt \
       --recipient "${primary_key}" \
       --output "${backup_dir}/${now}_gpg_${encryption_subkey}_backup.secret"
 
   cat "${snapshot_file}.decrypted" |
     gpg \
-      --verbose \
       --encrypt \
       --recipient "${primary_key}" \
       --output "${snapshot_file}"
@@ -77,7 +74,6 @@ function main
 
     cat "$(realpath "${f}")" |
       gpg \
-        --verbose \
         --decrypt |
       tar \
         --directory "${TEMP_UNPACK_DIR}" \
