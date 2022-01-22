@@ -38,6 +38,7 @@ function install_basics
     gettext-base \
     vlc \
     meld \
+    inotify-tools \
     rdfind \
     gnupg \
     jq \
