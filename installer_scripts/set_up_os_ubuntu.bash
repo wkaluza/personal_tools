@@ -142,19 +142,21 @@ function install_cmake
     wget
 
   local url="https://apt.kitware.com/keys/kitware-archive-latest.asc"
+  local temp_keyring="/usr/share/keyrings/kitware-archive-keyring.gpg"
 
   curl -fsSL "${url}" 2>/dev/null |
-    sudo APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE="DontWarn" \
-      apt-key add -
+    gpg --dearmor - |
+    sudo tee "${temp_keyring}" >/dev/null
 
-  # Get Kitware Apt Archive Automatic Signing Key (2021) <debian@kitware.com>"
-  sudo apt-key adv \
-    --keyserver keyserver.ubuntu.com \
-    --recv-keys 2EEA802239DDF0E52942A7B4FCEE74BB7F3C88C8
+  echo "deb [signed-by=${temp_keyring}] https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" |
+    sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
 
-  sudo add-apt-repository \
-    "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
   sudo apt-get update
+
+  sudo rm -rf "${temp_keyring}"
+
+  # Automate key rotation
+  sudo apt-get install -y kitware-archive-keyring
 
   sudo apt-get install -y cmake
 }
