@@ -50,6 +50,8 @@ function main
     --listed-incremental="${snapshot_file}.decrypted" \
     --create \
     --gzip \
+    --exclude '*/.idea*' \
+    --exclude '*/node_modules*' \
     "./$(basename "${dir_to_back_up}")" |
     gpg \
       --encrypt \
@@ -88,6 +90,8 @@ function main
   if ! diff \
     --recursive \
     --no-dereference \
+    --exclude '.idea' \
+    --exclude 'node_modules' \
     "${TEMP_UNPACK_DIR}/$(basename "${dir_to_back_up}")" \
     "${dir_to_back_up}"; then
     echo "Test recovery failed: diff did not match with original"
