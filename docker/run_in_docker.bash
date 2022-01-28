@@ -2,15 +2,22 @@
 
 set -euo pipefail
 
+IMAGE_NAME=""
+
+function on_exit {
+  docker rmi --no-prune "${IMAGE_NAME}"
+}
+
+trap on_exit EXIT
+
 function docker_run
 {
   local container_name="$1"
-  local image_name_with_tag="$2"
-  local uid="$3"
-  local gid="$4"
-  local host_workspace="$5"
-  local command="$6"
-  local build_context="$7"
+  local uid="$2"
+  local gid="$3"
+  local host_workspace="$4"
+  local command="$5"
+  local build_context="$6"
 
   local rel_ws_to_build_ctx
   rel_ws_to_build_ctx="$(realpath \
@@ -30,11 +37,11 @@ function docker_run
   local docker_workspace
   docker_workspace="$(
     docker run \
-      --tty \
       --rm \
+      --tty \
       --name "${container_name}_workspace_probe" \
       --user "${uid}:${gid}" \
-      "${image_name_with_tag}" \
+      "${IMAGE_NAME}" \
       "/bin/bash" \
       "-c" \
       'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
@@ -49,7 +56,7 @@ function docker_run
     --user "${uid}:${gid}" \
     --volume "${host_workspace}:${docker_workspace}" \
     --workdir "${docker_workspace}" \
-    "${image_name_with_tag}" \
+    "${IMAGE_NAME}" \
     "/bin/bash" \
     "-c" \
     "${command}"
@@ -57,15 +64,14 @@ function docker_run
 
 function docker_build
 {
-  local image_name_with_tag="$1"
-  local dockerfile="$2"
-  local uid="$3"
-  local gid="$4"
-  local username="$5"
-  local build_context="$6"
+  local dockerfile="$1"
+  local uid="$2"
+  local gid="$3"
+  local username="$4"
+  local build_context="$5"
 
   docker build \
-    --tag "${image_name_with_tag}" \
+    --tag "${IMAGE_NAME}" \
     --file "${dockerfile}" \
     --build-arg UID="${uid}" \
     --build-arg GID="${gid}" \
@@ -75,7 +81,7 @@ function docker_build
 
 function main
 {
-  local docker_image="$1"
+  local job_name="$1"
   local dockerfile
   dockerfile="$(realpath "$2")"
   local build_context
@@ -84,9 +90,8 @@ function main
   host_workspace="$(realpath "$4")"
   local command="$5"
 
-  local image_name_with_tag="${docker_image}:auto"
-  local container_name="${docker_image}"
-
+  IMAGE_NAME="${job_name}"
+  local container_name="${job_name}"
   local uid
   uid="$(id -u)"
   local gid
@@ -95,7 +100,6 @@ function main
   username="$(id -un)"
 
   docker_build \
-    "${image_name_with_tag}" \
     "${dockerfile}" \
     "${uid}" \
     "${gid}" \
@@ -104,7 +108,6 @@ function main
 
   docker_run \
     "${container_name}" \
-    "${image_name_with_tag}" \
     "${uid}" \
     "${gid}" \
     "${host_workspace}" \
@@ -122,7 +125,6 @@ function main_json
 
   cd "${root_dir}"
 
-  local docker_image="${job_name}"
   local dockerfile
   dockerfile="$(realpath \
     "$(jq -r ".${job_name}.dockerfile" "${json_config}")")"
@@ -136,7 +138,7 @@ function main_json
   command="$(jq -r ".${job_name}.command | join(\" \")" "${json_config}")"
 
   main \
-    "${docker_image}" \
+    "${job_name}" \
     "${dockerfile}" \
     "${build_context}" \
     "${host_workspace}" \
