@@ -1,10 +1,9 @@
-#!/usr/bin/env bash
-
 set -euo pipefail
 
 IMAGE_NAME=""
 
-function on_exit {
+function on_exit
+{
   docker rmi --no-prune "${IMAGE_NAME}"
 }
 
@@ -59,7 +58,7 @@ function docker_run
     "${IMAGE_NAME}" \
     "/bin/bash" \
     "-c" \
-    "${command}"
+    "source /etc/profile && ${command}"
 }
 
 function docker_build

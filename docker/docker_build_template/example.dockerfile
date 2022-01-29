@@ -13,7 +13,8 @@ ARG _DOCKER_BUILD_TEMP_USER_DIR="$_HOME/docker_user_build_temp"
 SHELL ["/bin/bash", "-c"]
 
 COPY create_user_workspace.bash $_DOCKER_BUILD_TEMP_ROOT_DIR/
-RUN $_DOCKER_BUILD_TEMP_ROOT_DIR/create_user_workspace.bash \
+RUN bash \
+$_DOCKER_BUILD_TEMP_ROOT_DIR/create_user_workspace.bash \
 $UID \
 $GID \
 $USERNAME \
@@ -26,9 +27,13 @@ $_DOCKER_BUILD_TEMP_ROOT_DIR/files_common/
 COPY files_root/ \
 $_DOCKER_BUILD_TEMP_ROOT_DIR/files_root/
 
-RUN IMPORTS_DIR="$_DOCKER_BUILD_TEMP_ROOT_DIR" \
-$_DOCKER_BUILD_TEMP_ROOT_DIR/system_setup_root.bash
-RUN rm -rf $_DOCKER_BUILD_TEMP_ROOT_DIR
+RUN source /etc/profile \
+&& \
+IMPORTS_DIR="$_DOCKER_BUILD_TEMP_ROOT_DIR" \
+bash \
+$_DOCKER_BUILD_TEMP_ROOT_DIR/system_setup_root.bash \
+&& \
+rm -rf $_DOCKER_BUILD_TEMP_ROOT_DIR
 
 USER $USERNAME
 
@@ -39,9 +44,13 @@ $_DOCKER_BUILD_TEMP_USER_DIR/files_common/
 COPY --chown=$UID:$GID files_user/ \
 $_DOCKER_BUILD_TEMP_USER_DIR/files_user/
 
-RUN IMPORTS_DIR="$_DOCKER_BUILD_TEMP_USER_DIR" \
-$_DOCKER_BUILD_TEMP_USER_DIR/system_setup_user.bash
-RUN rm -rf $_DOCKER_BUILD_TEMP_USER_DIR
+RUN source /etc/profile \
+&& \
+IMPORTS_DIR="$_DOCKER_BUILD_TEMP_USER_DIR" \
+bash \
+$_DOCKER_BUILD_TEMP_USER_DIR/system_setup_user.bash \
+&& \
+rm -rf $_DOCKER_BUILD_TEMP_USER_DIR
 
 WORKDIR $WORKSPACE
 
