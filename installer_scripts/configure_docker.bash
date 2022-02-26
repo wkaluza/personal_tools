@@ -109,11 +109,12 @@ EOF
     -v "$(realpath "${host_mount_dir}"):${docker_mount_dir}" \
     "${random_tag}" \
     mv "/workspace/temp/bin/docker-credential-pass" "${docker_mount_dir}"
+
   log_info "Need to change file ownership of docker-credential-pass"
   sudo chown "$(id -u):$(id -g)" "${host_mount_dir}/docker-credential-pass"
   chmod 700 "${host_mount_dir}/docker-credential-pass"
 
-  docker rm "${random_tag}"
+  docker rmi "${random_tag}"
 
   mv \
     "${host_mount_dir}/docker-credential-pass" \
