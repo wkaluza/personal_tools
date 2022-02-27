@@ -4,14 +4,14 @@ SET_UP_ENV="/etc/profile.d/wk_env.sh"
 
 function install_basics
 {
-  DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  apt-get install -y \
     curl \
     git
 }
 
 function install_jq
 {
-  DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  apt-get install -y \
     jq
 }
 

@@ -27,8 +27,7 @@ function install_basics
   print_trace
 
   sudo apt-get update >/dev/null
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     git \
     jq \
     make \
@@ -54,7 +53,7 @@ RUN echo "set -euo pipefail \n \
 \n \
 function install_basics_inner { \n \
   apt-get update \n \
-  DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  apt-get install -y \
     curl \
     make \
     git \n \

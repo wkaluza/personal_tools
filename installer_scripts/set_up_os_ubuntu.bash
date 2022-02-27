@@ -30,36 +30,43 @@ function install_basics
 
   sudo apt-get update
   sudo apt-get upgrade --with-new-pkgs -y
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
-    snapd \
-    scdaemon \
-    rng-tools \
-    gettext-base \
-    vlc \
-    meld \
-    inotify-tools \
-    rdfind \
-    jq \
-    mercurial \
-    darcs \
-    fossil \
-    subversion \
-    dislocker \
-    software-properties-common \
+  sudo apt-get install -y \
     apt-transport-https \
     ca-certificates \
-    vim \
     curl \
+    darcs \
+    dislocker \
+    gettext-base \
+    git \
+    inotify-tools \
+    jq \
+    lsb-release \
+    make \
+    mercurial \
+    pass \
+    rdfind \
+    rng-tools \
+    rsync \
+    scdaemon \
+    subversion \
+    tar \
+    vim \
     wget
+
+  DEBIAN_FRONTEND=noninteractive sudo \
+    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+    fossil \
+    meld \
+    snapd \
+    software-properties-common \
+    vlc
 }
 
 function install_gnupg
 {
   print_trace
 
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     gnupg
 
   echo $'SSH_AUTH_SOCK="$(gpgconf --list-dirs | grep ssh | sed -n \'s/.*:\(\/.*$\)/\\1/p\')"' >>"${HOME}/.bashrc"
@@ -72,8 +79,7 @@ function install_git
   sudo add-apt-repository -y ppa:git-core/ppa
   sudo apt-get update
 
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     git
 }
 
@@ -90,8 +96,7 @@ function install_github_cli
     sudo tee /etc/apt/sources.list.d/github-cli.list
 
   sudo apt-get update
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     gh
 
   echo 'eval "$(gh completion --shell bash)"'
@@ -115,8 +120,7 @@ function install_python
   local poetry_url="https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py"
   local poetry_bash_completion="/etc/bash_completion.d/poetry.bash-completion"
 
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     python3-dev \
     python3-pip \
     python3-venv
@@ -135,8 +139,7 @@ function install_cpp_toolchains
 {
   print_trace
 
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     make \
     ninja-build \
     gcc-10 \
@@ -153,8 +156,7 @@ function install_cmake
 {
   print_trace
 
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     apt-transport-https \
     ca-certificates \
     gnupg \
@@ -176,12 +178,10 @@ function install_cmake
   sudo rm -rf "${temp_keyring}"
 
   # Automate key rotation
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     kitware-archive-keyring
 
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     cmake
 }
 
@@ -222,8 +222,7 @@ function install_yubico_utilities
 
   sudo add-apt-repository -y ppa:yubico/stable
   sudo apt-get update
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     yubikey-manager \
     yubioath-desktop \
     yubikey-personalization-gui
@@ -281,8 +280,7 @@ function install_nodejs
   print_trace
 
   curl -sL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     nodejs
 
   npm config set ignore-scripts true
@@ -292,8 +290,7 @@ function install_tex_live
 {
   print_trace
 
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     texlive-full
 }
 
@@ -303,8 +300,7 @@ function install_chrome
 
   local url="https://dl.google.com/linux/direct"
 
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     fonts-liberation
 
   if test -x "/opt/google/chrome/google-chrome"; then
@@ -327,8 +323,7 @@ function install_brave
   local key="/usr/share/keyrings/brave-browser-archive-keyring.gpg"
   local url="https://brave-browser-apt-release.s3.brave.com"
 
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     apt-transport-https \
     curl
 
@@ -337,8 +332,7 @@ function install_brave
     sudo tee /etc/apt/sources.list.d/brave-browser-release.list
 
   sudo apt-get update
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     brave-browser
 
   brave-browser --version
@@ -358,8 +352,7 @@ function install_heroku_cli
       apt-key add -
 
   sudo apt-get update
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     heroku
 
   echo "heroku installed to $(which heroku)"
@@ -373,8 +366,7 @@ function install_inkscape
 {
   print_trace
 
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     inkscape \
     libcanberra-gtk-module \
     libcanberra-gtk3-module

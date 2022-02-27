@@ -15,8 +15,7 @@ function install_docker
   local key="/usr/share/keyrings/docker-archive-keyring.gpg"
 
   sudo apt-get update >/dev/null
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     apt-transport-https \
     ca-certificates \
     gnupg \
@@ -31,8 +30,7 @@ function install_docker
     sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 
   sudo apt-get update >/dev/null
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+  sudo apt-get install -y \
     docker-ce \
     docker-ce-cli \
     containerd.io >/dev/null
