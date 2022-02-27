@@ -8,7 +8,7 @@ source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.bash"
 
 JETBRAINS_TOOLBOX_TAR_GZ_PATH="does_not_exist"
-CHROME_DEB_PATH="./chrome.deb"
+CHROME_DEB_PATH="does_not_exist"
 
 function on_exit
 {
@@ -310,6 +310,8 @@ function install_chrome
   if test -x "/opt/google/chrome/google-chrome"; then
     log_info "Google Chrome already installed"
   else
+    CHROME_DEB_PATH="${THIS_SCRIPT_DIR}/../chrome_$(date --utc +'%Y%m%d%H%M%S%N').deb"
+
     wget --output-document "${CHROME_DEB_PATH}" \
       "${url}/google-chrome-stable_current_amd64.deb"
     sudo dpkg --install "${CHROME_DEB_PATH}"
