@@ -40,20 +40,27 @@ function install_basics
     meld \
     inotify-tools \
     rdfind \
-    gnupg \
     jq \
     mercurial \
     darcs \
     fossil \
     subversion \
-    inkscape \
-    libcanberra-gtk-module \
-    libcanberra-gtk3-module \
     dislocker \
     software-properties-common \
     vim \
     curl \
     wget
+}
+
+function install_gnupg
+{
+  print_trace
+
+  DEBIAN_FRONTEND=noninteractive sudo \
+    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+    gnupg
+
+  echo $'SSH_AUTH_SOCK="$(gpgconf --list-dirs | grep ssh | sed -n \'s/.*:\(\/.*$\)/\\1/p\')"' >>"${HOME}/.bashrc"
 }
 
 function install_git
@@ -80,15 +87,19 @@ function install_github_cli
 
   sudo apt-get update
   sudo apt-get install -y gh
+
+  echo 'eval "$(gh completion --shell bash)"'
 }
 
 function install_rust
 {
   print_trace
 
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-  source $HOME/.cargo/env
+  curl --proto '=https' --tlsv1.2 -sSf "https://sh.rustup.rs" | sh -s -- -y
+  source "${HOME}/.cargo/env"
   rustup update
+
+  echo 'eval "$(rustup completions bash)"' >>"${HOME}/.bashrc"
 }
 
 function install_python
@@ -211,7 +222,6 @@ function install_golang
   local go_archive="go.tar.gz"
   local v="1.17.2"
   local download_url="https://dl.google.com/go/go${v}.linux-amd64.tar.gz"
-  # Must match PATH update in bashrc_append.bash
   local target_dir="/usr/local"
 
   if ! test -d "${target_dir}/go"; then
@@ -222,6 +232,12 @@ function install_golang
     sudo tar -xzf "./${go_archive}"
     sudo rm "./${go_archive}"
     popd
+
+    echo 'export GOROOT="/usr/local/go"' >>"${HOME}/.bashrc"
+    echo 'export GOPATH="${HOME}/go"' >>"${HOME}/.bashrc"
+    echo 'export GOPRIVATE="github.com/wkaluza/*"' >>"${HOME}/.bashrc"
+    echo 'export CGO_ENABLED=0' >>"${HOME}/.bashrc"
+    echo 'export PATH="$PATH:${GOROOT}/bin:${GOPATH}/bin"' >>"${HOME}/.bashrc"
   else
     echo "golang is already installed"
     go version
@@ -326,6 +342,17 @@ function install_heroku_cli
   source "$HOME/.bashrc"
 }
 
+function install_inkscape
+{
+  print_trace
+
+  DEBIAN_FRONTEND=noninteractive sudo \
+    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+    inkscape \
+    libcanberra-gtk-module \
+    libcanberra-gtk3-module
+}
+
 function configure_bash
 {
   print_trace
@@ -417,6 +444,7 @@ function main
   configure_bash
 
   install_basics
+  install_gnupg
   install_git
   install_github_cli
   install_rust
@@ -431,6 +459,7 @@ function main
   install_chrome
   install_brave
   install_heroku_cli
+  install_inkscape
   install_jetbrains_toolbox
 
   configure_gpg "${pgp_primary_key_fingerprint}"
