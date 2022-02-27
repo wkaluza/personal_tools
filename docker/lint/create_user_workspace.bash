@@ -21,8 +21,8 @@ function allow_passwordless_sudo
   local username="$1"
 
   apt-get update
-  apt-get upgrade -y
-  apt-get install -y sudo
+  apt-get upgrade --yes
+  apt-get install --yes sudo
   adduser "${username}" sudo
   echo "%sudo ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers
 }

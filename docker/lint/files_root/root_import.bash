@@ -4,14 +4,14 @@ SET_UP_ENV="/etc/profile.d/wk_env.sh"
 
 function install_basics
 {
-  apt-get install -y \
+  apt-get install --yes \
     curl \
     git
 }
 
 function install_jq
 {
-  apt-get install -y \
+  apt-get install --yes \
     jq
 }
 

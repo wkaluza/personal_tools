@@ -29,8 +29,8 @@ function install_basics
   print_trace
 
   sudo apt-get update
-  sudo apt-get upgrade --with-new-pkgs -y
-  sudo apt-get install -y \
+  sudo apt-get upgrade --with-new-pkgs --yes
+  sudo apt-get install --yes \
     apt-transport-https \
     ca-certificates \
     curl \
@@ -49,7 +49,7 @@ function install_basics
     wget
 
   DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+    --preserve-env=DEBIAN_FRONTEND apt-get install --yes \
     meld \
     snapd \
     software-properties-common \
@@ -60,7 +60,7 @@ function install_gnupg
 {
   print_trace
 
-  sudo apt-get install -y \
+  sudo apt-get install --yes \
     gnupg
 
   echo $'SSH_AUTH_SOCK="$(gpgconf --list-dirs | grep ssh | sed -n \'s/.*:\(\/.*$\)/\\1/p\')"' >>"${HOME}/.bashrc"
@@ -73,7 +73,7 @@ function install_git
   sudo add-apt-repository -y ppa:git-core/ppa
   sudo apt-get update
 
-  sudo apt-get install -y \
+  sudo apt-get install --yes \
     git
 }
 
@@ -90,7 +90,7 @@ function install_github_cli
     sudo tee /etc/apt/sources.list.d/github-cli.list
 
   sudo apt-get update
-  sudo apt-get install -y \
+  sudo apt-get install --yes \
     gh
 
   echo 'eval "$(gh completion --shell bash)"'
@@ -133,7 +133,7 @@ function install_yubico_utilities
 
   sudo add-apt-repository -y ppa:yubico/stable
   sudo apt-get update
-  sudo apt-get install -y \
+  sudo apt-get install --yes \
     yubikey-manager \
     yubioath-desktop \
     yubikey-personalization-gui
@@ -145,7 +145,7 @@ function install_chrome
 
   local url="https://dl.google.com/linux/direct"
 
-  sudo apt-get install -y \
+  sudo apt-get install --yes \
     fonts-liberation
 
   if test -x "/opt/google/chrome/google-chrome"; then
@@ -168,7 +168,7 @@ function install_brave
   local key="/usr/share/keyrings/brave-browser-archive-keyring.gpg"
   local url="https://brave-browser-apt-release.s3.brave.com"
 
-  sudo apt-get install -y \
+  sudo apt-get install --yes \
     apt-transport-https \
     curl
 
@@ -177,7 +177,7 @@ function install_brave
     sudo tee /etc/apt/sources.list.d/brave-browser-release.list
 
   sudo apt-get update
-  sudo apt-get install -y \
+  sudo apt-get install --yes \
     brave-browser
 
   brave-browser --version
@@ -197,7 +197,7 @@ function install_heroku_cli
       apt-key add -
 
   sudo apt-get update
-  sudo apt-get install -y \
+  sudo apt-get install --yes \
     heroku
 
   echo "heroku installed to $(which heroku)"
@@ -211,7 +211,7 @@ function install_inkscape
 {
   print_trace
 
-  sudo apt-get install -y \
+  sudo apt-get install --yes \
     inkscape \
     libcanberra-gtk-module \
     libcanberra-gtk3-module

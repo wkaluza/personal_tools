@@ -27,7 +27,7 @@ function install_basics
   print_trace
 
   sudo apt-get update >/dev/null
-  sudo apt-get install -y \
+  sudo apt-get install --yes \
     git \
     jq \
     make \
@@ -53,7 +53,7 @@ RUN echo "set -euo pipefail \n \
 \n \
 function install_basics_inner { \n \
   apt-get update \n \
-  apt-get install -y \
+  apt-get install --yes \
     curl \
     make \
     git \n \
