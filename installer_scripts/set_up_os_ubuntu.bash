@@ -310,7 +310,7 @@ function install_chrome
   if test -x "/opt/google/chrome/google-chrome"; then
     log_info "Google Chrome already installed"
   else
-    CHROME_DEB_PATH="${THIS_SCRIPT_DIR}/../chrome_$(date --utc +'%Y%m%d%H%M%S%N').deb"
+    CHROME_DEB_PATH="${THIS_SCRIPT_DIR}/../chrome_$(date --utc +'%Y%m%d%H%M%S%N')___.deb"
 
     wget --output-document "${CHROME_DEB_PATH}" \
       "${url}/google-chrome-stable_current_amd64.deb"
