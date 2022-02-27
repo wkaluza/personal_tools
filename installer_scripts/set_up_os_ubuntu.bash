@@ -191,7 +191,9 @@ function install_jetbrains_toolbox
 
   local install_destination="/opt/jetbrains/jetbrains-toolbox"
 
-  if ! test -x "${install_destination}"; then
+  if test -x "${install_destination}"; then
+    log_info "jetbrains-toolbox already installed at ${install_destination}"
+  else
     sudo mkdir --parents "$(dirname "${install_destination}")"
 
     pushd "$(dirname "${JETBRAINS_TOOLBOX_TAR_GZ_PATH}")" >/dev/null
@@ -206,8 +208,6 @@ function install_jetbrains_toolbox
 
     rm -rf "${extracted_dir}"
     popd >/dev/null
-  else
-    log_info "jetbrains-toolbox already installed at ${install_destination}"
   fi
 
   if ! test -x "${install_destination}"; then
@@ -238,7 +238,10 @@ function install_golang
   local download_url="https://dl.google.com/go/go${v}.linux-amd64.tar.gz"
   local target_dir="/usr/local"
 
-  if ! test -d "${target_dir}/go"; then
+  if test -d "${target_dir}/go"; then
+    echo "golang is already installed"
+    go version
+  else
     curl -fsSL --output "./${go_archive}" "${download_url}"
     sudo mv "./${go_archive}" "${target_dir}"
 
@@ -252,9 +255,6 @@ function install_golang
     echo 'export GOPRIVATE="github.com/wkaluza/*"' >>"${HOME}/.bashrc"
     echo 'export CGO_ENABLED=0' >>"${HOME}/.bashrc"
     echo 'export PATH="$PATH:${GOROOT}/bin:${GOPATH}/bin"' >>"${HOME}/.bashrc"
-  else
-    echo "golang is already installed"
-    go version
   fi
 }
 
