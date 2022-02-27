@@ -101,7 +101,7 @@ function install_jetbrains_toolbox
   if ! test -x "${install_destination}"; then
     sudo mkdir --parents "$(dirname "${install_destination}")"
 
-    pushd "$(dirname "${JETBRAINS_TOOLBOX_TAR_GZ_PATH}")"
+    pushd "$(dirname "${JETBRAINS_TOOLBOX_TAR_GZ_PATH}")" >/dev/null
     tar -xzf "${JETBRAINS_TOOLBOX_TAR_GZ_PATH}"
 
     local extracted_dir
@@ -112,7 +112,7 @@ function install_jetbrains_toolbox
       "${install_destination}"
 
     rm -rf "${extracted_dir}"
-    popd
+    popd >/dev/null
   else
     log_info "jetbrains-toolbox already installed at ${install_destination}"
   fi
