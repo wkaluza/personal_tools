@@ -42,6 +42,8 @@ function install_basics
     jq \
     dislocker \
     software-properties-common \
+    apt-transport-https \
+    ca-certificates \
     vim \
     curl \
     wget
