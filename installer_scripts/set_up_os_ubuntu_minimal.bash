@@ -65,7 +65,9 @@ function install_git
   sudo add-apt-repository -y ppa:git-core/ppa
   sudo apt-get update
 
-  sudo apt-get install -y git
+  DEBIAN_FRONTEND=noninteractive sudo \
+    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+    git
 }
 
 function install_github_cli
@@ -81,7 +83,9 @@ function install_github_cli
     sudo tee /etc/apt/sources.list.d/github-cli.list
 
   sudo apt-get update
-  sudo apt-get install -y gh
+  DEBIAN_FRONTEND=noninteractive sudo \
+    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+    gh
 
   echo 'eval "$(gh completion --shell bash)"'
 }
@@ -123,7 +127,8 @@ function install_yubico_utilities
 
   sudo add-apt-repository -y ppa:yubico/stable
   sudo apt-get update
-  sudo apt-get install -y \
+  DEBIAN_FRONTEND=noninteractive sudo \
+    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
     yubikey-manager \
     yubioath-desktop \
     yubikey-personalization-gui
@@ -135,7 +140,8 @@ function install_chrome
 
   local url="https://dl.google.com/linux/direct"
 
-  sudo apt-get install -y \
+  DEBIAN_FRONTEND=noninteractive sudo \
+    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
     fonts-liberation
 
   if test -x "/opt/google/chrome/google-chrome"; then
@@ -156,13 +162,19 @@ function install_brave
   local key="/usr/share/keyrings/brave-browser-archive-keyring.gpg"
   local url="https://brave-browser-apt-release.s3.brave.com"
 
-  sudo apt-get install apt-transport-https curl
+  DEBIAN_FRONTEND=noninteractive sudo \
+    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+    apt-transport-https \
+    curl
+
   sudo curl -fsSL -o "${key}" "${url}/brave-browser-archive-keyring.gpg"
   echo "deb [arch=amd64 signed-by=${key}] ${url} stable main" |
     sudo tee /etc/apt/sources.list.d/brave-browser-release.list
 
   sudo apt-get update
-  sudo apt-get install -y brave-browser
+  DEBIAN_FRONTEND=noninteractive sudo \
+    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
+    brave-browser
 
   brave-browser --version
 }
@@ -181,7 +193,8 @@ function install_heroku_cli
       apt-key add -
 
   sudo apt-get update
-  sudo apt-get install -y \
+  DEBIAN_FRONTEND=noninteractive sudo \
+    --preserve-env=DEBIAN_FRONTEND apt-get install -y \
     heroku
 
   echo "heroku installed to $(which heroku)"
