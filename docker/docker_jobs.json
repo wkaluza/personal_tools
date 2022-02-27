@@ -11,6 +11,15 @@
     "dockerfile": "./docker/docker_build_template/example.dockerfile",
     "host_workspace": "./"
   },
+  "lint": {
+    "build_context": "./docker/lint/",
+    "command": [
+      "bash",
+      "./scripts/lint.bash"
+    ],
+    "dockerfile": "./docker/lint/lint.dockerfile",
+    "host_workspace": "./"
+  },
   "test_os_setup": {
     "build_context": "./installer_scripts/docker_test_ubuntu_setup/",
     "command": [
