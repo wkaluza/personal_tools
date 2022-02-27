@@ -28,5 +28,14 @@
     ],
     "dockerfile": "./installer_scripts/docker_test_ubuntu_setup/test.dockerfile",
     "host_workspace": "./"
+  },
+  "test_os_setup_minimal": {
+    "build_context": "./installer_scripts/docker_test_ubuntu_setup/",
+    "command": [
+      "./installer_scripts/set_up_os_ubuntu_minimal.bash",
+      "./jetbrains-toolbox___.tar.gz"
+    ],
+    "dockerfile": "./installer_scripts/docker_test_ubuntu_setup/test.dockerfile",
+    "host_workspace": "./"
   }
 }
