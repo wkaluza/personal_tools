@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 set -euo pipefail
 
 function root_import_fn

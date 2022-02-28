@@ -2,6 +2,7 @@
   "example": {
     "build_context": "./docker/docker_build_template/",
     "command": [
+      "bash",
       "./docker/docker_build_template/say_something.bash",
       "Hello",
       "World",
@@ -23,6 +24,7 @@
   "test_os_setup": {
     "build_context": "./installer_scripts/docker_test_ubuntu_setup/",
     "command": [
+      "bash",
       "./installer_scripts/set_up_os_ubuntu.bash",
       "./jetbrains-toolbox___.tar.gz"
     ],
@@ -32,6 +34,7 @@
   "test_os_setup_minimal": {
     "build_context": "./installer_scripts/docker_test_ubuntu_setup/",
     "command": [
+      "bash",
       "./installer_scripts/set_up_os_ubuntu_minimal.bash",
       "./jetbrains-toolbox___.tar.gz"
     ],

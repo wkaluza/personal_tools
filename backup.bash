@@ -12,7 +12,7 @@ function perform_backup
 
     echo "Backing up ${dir_source} to ${dir_destination}"
 
-    bash "${THIS_SCRIPT_DIR}"/backups_tar/incremental_backup.bash \
+    bash "${THIS_SCRIPT_DIR}/backups_tar/incremental_backup.bash" \
       "$dir_source" \
       "$dir_destination"
   fi

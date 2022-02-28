@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"

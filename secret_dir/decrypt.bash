@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 function main
 {
   local encrypted_file

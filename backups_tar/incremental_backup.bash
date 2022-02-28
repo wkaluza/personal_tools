@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 set -euo pipefail
 
 TEMP_UNPACK_DIR="$HOME/not_a_real_directory"
