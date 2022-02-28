@@ -1,3 +1,5 @@
+set -euo pipefail
+
 function main
 {
   local secret_dir
