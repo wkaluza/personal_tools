@@ -1,13 +1,20 @@
 set -euo pipefail
 
-IMAGE_NAME=""
+DIGESTS=""
 
-function on_exit
+function compute_digest
 {
-  docker rmi --no-prune "${IMAGE_NAME}"
+  local input_string="$1"
+
+  echo -n "${input_string}" | md5sum - | awk '{ print $1 }'
 }
 
-trap on_exit EXIT
+function append_digest
+{
+  local input_string="$1"
+
+  DIGESTS="${DIGESTS}$(compute_digest "${input_string}")"
+}
 
 function docker_run
 {
@@ -17,6 +24,7 @@ function docker_run
   local host_workspace="$4"
   local command="$5"
   local build_context="$6"
+  local image_name="$7"
 
   local rel_ws_to_build_ctx
   rel_ws_to_build_ctx="$(realpath \
@@ -40,7 +48,7 @@ function docker_run
       --tty \
       --name "${container_name}_workspace_probe" \
       --user "${uid}:${gid}" \
-      "${IMAGE_NAME}" \
+      "${image_name}" \
       "/bin/bash" \
       "-c" \
       'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
@@ -55,7 +63,7 @@ function docker_run
     --user "${uid}:${gid}" \
     --volume "${host_workspace}:${docker_workspace}" \
     --workdir "${docker_workspace}" \
-    "${IMAGE_NAME}" \
+    "${image_name}" \
     "/bin/bash" \
     "-c" \
     "source /etc/profile && ${command}"
@@ -68,9 +76,10 @@ function docker_build
   local gid="$3"
   local username="$4"
   local build_context="$5"
+  local image_name="$6"
 
   docker build \
-    --tag "${IMAGE_NAME}" \
+    --tag "${image_name}" \
     --file "${dockerfile}" \
     --build-arg UID="${uid}" \
     --build-arg GID="${gid}" \
@@ -89,7 +98,9 @@ function main
   host_workspace="$(realpath "$4")"
   local command="$5"
 
-  IMAGE_NAME="${job_name}"
+  local aggregate_digest="$(compute_digest "$DIGESTS" | cut -c1-8)"
+
+  local image_name="${job_name}_${aggregate_digest}"
   local container_name="${job_name}"
   local uid
   uid="$(id -u)"
@@ -103,7 +114,8 @@ function main
     "${uid}" \
     "${gid}" \
     "${username}" \
-    "${build_context}"
+    "${build_context}" \
+    "${image_name}"
 
   docker_run \
     "${container_name}" \
@@ -111,7 +123,8 @@ function main
     "${gid}" \
     "${host_workspace}" \
     "${command}" \
-    "${build_context}"
+    "${build_context}" \
+    "${image_name}"
 }
 
 function main_json
@@ -135,6 +148,16 @@ function main_json
     "$(jq -r ".${job_name}.host_workspace" "${json_config}")")"
   local command
   command="$(jq -r ".${job_name}.command | join(\" \")" "${json_config}")"
+
+  append_digest "$(realpath "${build_context}")"
+  append_digest "$(realpath "${host_workspace}")"
+  append_digest "$(realpath "${dockerfile}")"
+  append_digest "$(cat "$(realpath "${dockerfile}")")"
+  append_digest "$(realpath "${json_config}")"
+  append_digest "$(cat "$(realpath "${json_config}")")"
+  append_digest "$(realpath "${BASH_SOURCE[0]}")"
+  append_digest "$(cat "$(realpath "${BASH_SOURCE[0]}")")"
+  append_digest "${command}"
 
   main \
     "${job_name}" \
