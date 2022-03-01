@@ -58,6 +58,7 @@ function docker_run
     --rm \
     --tty \
     --interactive \
+    --publish-all \
     --env IMPORTS_DIR="${docker_workspace}/${rel_ws_to_build_ctx}" \
     --name "${container_name}" \
     --user "${uid}:${gid}" \
