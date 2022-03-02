@@ -4,11 +4,21 @@ function main
 {
   local secret_dir
   secret_dir="$(realpath "$1")"
+  local target_dir
+  target_dir="$(realpath "$2")"
+
+  local now
+  now="$(date --utc +'%Y%m%d%H%M%S%N')"
 
   local primary_key="174C9368811039C87F0C806A896572D1E78ED6A7"
   local encryption_subkey="217BB178444E212F714DBAC90FBB9BD0E486C169"
   local encrypted_file
-  encrypted_file="$(basename "${secret_dir}")_gpg_${encryption_subkey}_$(date --utc +'%Y%m%d%H%M%S').secret"
+  encrypted_file="${target_dir}/$(basename "${secret_dir}")_gpg_${encryption_subkey}_${now}.secret"
+
+  if test -f "${encrypted_file}"; then
+    echo "Output file already exists, aborting..."
+    exit 1
+  fi
 
   tar \
     -C "$(dirname "${secret_dir}")" \
@@ -25,4 +35,4 @@ function main
 }
 
 # Entry point
-main "$1"
+main "$1" "$2"
