@@ -259,6 +259,7 @@ function configure_git
   git config --global url."git@github.com:".insteadOf "https://github.com/"
 
   git config --global advice.detachedHead false
+  git config --global advice.fetchShowForcedUpdates false
 
   git config --global fetch.showForcedUpdates false
 }
