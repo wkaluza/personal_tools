@@ -152,17 +152,22 @@ function install_docker_pass_credential_helper
 function install_docker_compose_if_absent
 {
   local docker_plugins_dir="${HOME}/.docker/cli-plugins"
-  local plugin_version="v2.2.2"
+  local plugin_version="2.2.3"
   local download_url="https://github.com/docker/compose/releases/download"
 
-  if docker compose ls >/dev/null 2>&1; then
+  if docker compose version >/dev/null 2>&1; then
     log_info "docker compose already installed"
   else
     mkdir --parents "${docker_plugins_dir}"
     curl -sSL \
-      "${download_url}/${plugin_version}/docker-compose-linux-x86_64" \
+      "${download_url}/v${plugin_version}/docker-compose-linux-x86_64" \
       -o "${docker_plugins_dir}/docker-compose"
     chmod u+x "${docker_plugins_dir}/docker-compose"
+
+    if ! docker compose version | grep "${plugin_version}" >/dev/null 2>&1; then
+      log_error "Unexpected docker compose version number"
+      exit 1
+    fi
   fi
 }
 
