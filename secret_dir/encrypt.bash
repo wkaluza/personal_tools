@@ -20,6 +20,13 @@ function main
     exit 1
   fi
 
+  if ! test -d "${secret_dir}"; then
+    echo "Directory does not exist, aborting..."
+    exit 1
+  fi
+
+  mkdir --parents "$(dirname "${encrypted_file}")"
+
   tar \
     -C "$(dirname "${secret_dir}")" \
     -cz \
