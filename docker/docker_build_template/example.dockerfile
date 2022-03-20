@@ -12,6 +12,8 @@ ARG _DOCKER_BUILD_TEMP_USER_DIR="$_HOME/docker_user_build_temp"
 
 SHELL ["/bin/bash", "-c"]
 
+RUN apt-get update && apt-get upgrade --yes
+
 COPY create_user_workspace.bash $_DOCKER_BUILD_TEMP_ROOT_DIR/
 RUN bash \
 $_DOCKER_BUILD_TEMP_ROOT_DIR/create_user_workspace.bash \
