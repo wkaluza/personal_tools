@@ -171,6 +171,11 @@ function install_docker_compose_if_absent
   fi
 }
 
+function configure_pass
+{
+  pass init "wkaluza@protonmail.com"
+}
+
 function main
 {
   ensure_not_sudo
@@ -178,6 +183,8 @@ function main
   install_basics
   install_docker_pass_credential_helper
   install_docker_compose_if_absent
+
+  configure_pass
 
   echo Success
 }
