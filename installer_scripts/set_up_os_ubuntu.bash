@@ -90,7 +90,7 @@ function install_github_cli
 
   curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg |
     sudo gpg --dearmor -o "${key}"
-  echo "deb [arch=amd64 signed-by=${key}] ${url} stable main" |
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=${key}] ${url} stable main" |
     sudo tee /etc/apt/sources.list.d/github-cli.list
 
   sudo apt-get update
@@ -326,7 +326,7 @@ function install_brave
     curl
 
   sudo curl -fsSL -o "${key}" "${url}/brave-browser-archive-keyring.gpg"
-  echo "deb [arch=amd64 signed-by=${key}] ${url} stable main" |
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=${key}] ${url} stable main" |
     sudo tee /etc/apt/sources.list.d/brave-browser-release.list
 
   sudo apt-get update

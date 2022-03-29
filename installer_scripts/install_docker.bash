@@ -24,7 +24,7 @@ function install_docker
     sudo gpg --dearmor -o "${key}"
 
   echo \
-    "deb [arch=amd64 signed-by=${key}] ${url} $(lsb_release -cs) stable" |
+    "deb [arch=$(dpkg --print-architecture) signed-by=${key}] ${url} $(lsb_release -cs) stable" |
     sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 
   sudo apt-get update >/dev/null
