@@ -2,6 +2,7 @@ set -euo pipefail
 
 BASHRC_PATH="${HOME}/.bashrc"
 STARTUP_SCRIPT="___not_a_real_path___"
+THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 function ensure_not_sudo
 {
@@ -96,6 +97,9 @@ function main
   clone_personal_tools
 
   set_up_pass
+
+  bash "${THIS_SCRIPT_DIR}/install_docker.bash"
+  bash "${THIS_SCRIPT_DIR}/configure_docker.bash"
 
   bash "${STARTUP_SCRIPT}"
 }
