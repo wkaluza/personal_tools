@@ -20,18 +20,6 @@ function on_exit
 
 trap on_exit EXIT
 
-function install_basics
-{
-  print_trace
-
-  sudo apt-get update >/dev/null
-  sudo apt-get install --yes \
-    git \
-    jq \
-    make \
-    pass >/dev/null
-}
-
 function build_docker_pass_credential_helper
 {
   print_trace
@@ -122,6 +110,9 @@ function install_docker_pass_credential_helper
 {
   print_trace
 
+  sudo apt-get install --yes \
+    jq
+
   local dest_dir="${HOME}/.local/bin"
   local docker_config="${HOME}/.docker/config.json"
 
@@ -151,6 +142,9 @@ function install_docker_pass_credential_helper
 
 function install_docker_compose_if_absent
 {
+  sudo apt-get install --yes \
+    curl
+
   local docker_plugins_dir="${HOME}/.docker/cli-plugins"
   local plugin_version="2.2.3"
   local download_url="https://github.com/docker/compose/releases/download"
@@ -171,20 +165,12 @@ function install_docker_compose_if_absent
   fi
 }
 
-function configure_pass
-{
-  pass init "wkaluza@protonmail.com"
-}
-
 function main
 {
   ensure_not_sudo
 
-  install_basics
   install_docker_pass_credential_helper
   install_docker_compose_if_absent
-
-  configure_pass
 
   echo Success
 }
