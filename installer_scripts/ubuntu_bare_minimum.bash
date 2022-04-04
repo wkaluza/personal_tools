@@ -3,6 +3,14 @@ set -euo pipefail
 BASHRC_PATH="${HOME}/.bashrc"
 STARTUP_SCRIPT="___not_a_real_path___"
 
+function ensure_not_sudo
+{
+  if test "0" -eq "$(id -u)"; then
+    echo "Do not run this as root"
+    exit 1
+  fi
+}
+
 function prepare_apt
 {
   sudo apt-get update
@@ -79,6 +87,8 @@ function set_up_pass
 
 function main
 {
+  ensure_not_sudo
+
   prepare_apt
   prepare_gnupg
   prepare_umask_and_home_permissions
