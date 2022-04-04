@@ -3,6 +3,7 @@ set -euo pipefail
 BASHRC_PATH="${HOME}/.bashrc"
 STARTUP_SCRIPT="___not_a_real_path___"
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+TEMP_DIR="___not_a_real_path___"
 
 function ensure_not_sudo
 {
@@ -64,17 +65,17 @@ function clone_personal_tools
   sudo apt-get install --yes \
     git
 
-  temp_dir="$(realpath "${HOME}/wk_personal_tools_temp")"
+  TEMP_DIR="$(realpath "${HOME}/wk_personal_tools_temp")"
   local url="git@github.com:wkaluza/personal_tools.git"
 
-  STARTUP_SCRIPT="${temp_dir}/startup.bash"
+  STARTUP_SCRIPT="${TEMP_DIR}/startup.bash"
 
   if ! test -f "${STARTUP_SCRIPT}"; then
     git clone \
       --recurse-submodules \
       --tags \
       "${url}" \
-      "${temp_dir}"
+      "${TEMP_DIR}"
   fi
 }
 
@@ -102,6 +103,9 @@ function main
   bash "${THIS_SCRIPT_DIR}/configure_docker.bash"
 
   bash "${STARTUP_SCRIPT}"
+  rm -rf "${TEMP_DIR}"
+
+  echo "Success"
 }
 
 main
