@@ -32,12 +32,13 @@ function clone_or_fetch
 
   if ! test -d "${dir_path}"; then
     git clone \
+      --tags \
       --recurse-submodules \
       "${url}" \
       "${dir_path}"
   fi
 
   pushd "${dir_path}"
-  git fetch --all --recurse-submodules --tags
+  git fetch --all --recurse-submodules --tags --force
   popd
 }
