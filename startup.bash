@@ -9,6 +9,8 @@ function main
 
   if docker --version >/dev/null; then
     bash "${THIS_SCRIPT_DIR}/prepare_docker_swarm.bash"
+  else
+    echo "docker is not available"
   fi
 }
 
