@@ -69,6 +69,14 @@ function clone_personal_tools
   fi
 }
 
+function set_up_pass
+{
+  sudo apt-get install --yes \
+    pass
+
+  pass init "wkaluza@protonmail.com"
+}
+
 function main
 {
   prepare_apt
@@ -77,9 +85,7 @@ function main
 
   clone_personal_tools
 
-  sudo apt-get install --yes \
-    jq \
-    vim
+  set_up_pass
 
   bash "${STARTUP_SCRIPT}"
 }
