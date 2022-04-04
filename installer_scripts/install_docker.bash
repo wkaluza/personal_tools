@@ -16,9 +16,9 @@ function install_docker
   sudo apt-get install --yes \
     apt-transport-https \
     ca-certificates \
+    curl \
     gnupg \
-    lsb-release \
-    curl >/dev/null
+    lsb-release >/dev/null
 
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg |
     sudo gpg --dearmor -o "${key}"
