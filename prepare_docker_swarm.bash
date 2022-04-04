@@ -16,14 +16,14 @@ function ensure_docker_swarm_init
   local primary_key="174C9368811039C87F0C806A896572D1E78ED6A7"
   local encryption_subkey="217BB178444E212F714DBAC90FBB9BD0E486C169"
 
-  local encrypted_file="${HOME}/.wk_swarm_key___.secret"
+  local swarm_key_pass_id="wk_local_swarm_key"
   local swarm_key_magic_prefix="SWMKEY"
 
   if [[ "${swarm_state}" == "locked" ]]; then
     echo "Swarm is locked, unlocking..."
-    if test -f "${encrypted_file}" && cat "${encrypted_file}" |
-      gpg --decrypt --quiet |
-      docker swarm unlock; then
+    if pass show "${swarm_key_pass_id}" >/dev/null &&
+      pass show "${swarm_key_pass_id}" |
+      docker swarm unlock >/dev/null 2>&1; then
       echo "Swarm unlocked successfully"
     else
       echo "Cannot unlock swarm, need to leave and re-init..."
@@ -38,12 +38,7 @@ function ensure_docker_swarm_init
     docker swarm init --autolock |
       grep "${swarm_key_magic_prefix}" |
       sed -E "s/^.*(${swarm_key_magic_prefix}.*)$/\1/" |
-      gpg \
-        --armor \
-        --encrypt \
-        --output "${encrypted_file}" \
-        --recipient "${primary_key}" \
-        --yes
+      pass insert --multiline "${swarm_key_pass_id}" >/dev/null
 
     echo "Swarm is now active"
   elif [[ "${swarm_state}" == "active" ]]; then
