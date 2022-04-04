@@ -74,7 +74,7 @@ function install_git
 {
   print_trace
 
-  sudo add-apt-repository -y ppa:git-core/ppa
+  sudo add-apt-repository --yes ppa:git-core/ppa
   sudo apt-get update
 
   sudo apt-get install --yes \
@@ -218,7 +218,7 @@ function install_yubico_utilities
 {
   print_trace
 
-  sudo add-apt-repository -y ppa:yubico/stable
+  sudo add-apt-repository --yes ppa:yubico/stable
   sudo apt-get update
   sudo apt-get install --yes \
     yubikey-manager \
