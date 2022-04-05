@@ -5,16 +5,52 @@ BASHRC_PATH="${HOME}/.bashrc"
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 TEMP_DIR="___not_a_real_path___"
 
+function log_info
+{
+  local message="$1"
+
+  echo "INFO: $message"
+}
+
+function log_warning
+{
+  local message="$1"
+
+  echo "WARNING: $message"
+}
+
+function log_error
+{
+  local message="$1"
+
+  echo "ERROR: $message"
+}
+
+function print_trace
+{
+  local func="${FUNCNAME[1]}"
+  local line="${BASH_LINENO[1]}"
+  local file="${BASH_SOURCE[2]}"
+
+  local trace="Entered ${func} on line ${line} of ${file}"
+
+  echo "[***TRACE***]: $trace"
+}
+
 function ensure_not_sudo
 {
+  print_trace
+
   if test "0" -eq "$(id -u)"; then
-    echo "Do not run this as root"
+    log_error "Do not run this as root"
     exit 1
   fi
 }
 
 function prepare_apt
 {
+  print_trace
+
   sudo apt-get update
 
   sudo apt-get install --yes --no-install-recommends \
@@ -30,6 +66,8 @@ function prepare_apt
 
 function prepare_gnupg
 {
+  print_trace
+
   sudo apt-get install --yes \
     gnupg \
     scdaemon
@@ -62,6 +100,8 @@ function prepare_gnupg
 
 function prepare_umask_and_home_permissions
 {
+  print_trace
+
   chmod --recursive "g-rwx,o-rwx" "${HOME}"
 
   echo 'umask 0077' >>"${BASHRC_PATH}"
@@ -71,6 +111,8 @@ function prepare_umask_and_home_permissions
 
 function clone_personal_tools
 {
+  print_trace
+
   sudo apt-get install --yes \
     git
 
@@ -88,6 +130,8 @@ function clone_personal_tools
 
 function set_up_pass
 {
+  print_trace
+
   sudo apt-get install --yes \
     pass
 
@@ -112,7 +156,7 @@ function main
   bash "${TEMP_DIR}/startup.bash"
   rm -rf "${TEMP_DIR}"
 
-  echo "Success"
+  log_info "Success: $(basename $0)"
 }
 
 main
