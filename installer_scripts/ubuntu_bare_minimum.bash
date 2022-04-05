@@ -1,5 +1,6 @@
 set -euo pipefail
 
+PRIMARY_KEY_FINGERPRINT="174C9368811039C87F0C806A896572D1E78ED6A7"
 BASHRC_PATH="${HOME}/.bashrc"
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 TEMP_DIR="___not_a_real_path___"
@@ -81,7 +82,7 @@ function set_up_pass
   sudo apt-get install --yes \
     pass
 
-  pass init "wkaluza@protonmail.com"
+  pass init "${PRIMARY_KEY_FINGERPRINT}"
 }
 
 function main
