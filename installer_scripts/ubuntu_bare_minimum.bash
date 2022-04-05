@@ -144,19 +144,15 @@ EOF
   gpg --list-keys >/dev/null
   gpg --list-secret-keys >/dev/null
 
-  until gpg --card-status |
-    grep "${PRIMARY_KEY_FINGERPRINT}" >/dev/null; do
-    log_error "Insert smartcard..."
-    sleep 5
-  done
-
   gpg --receive-keys "${PRIMARY_KEY_FINGERPRINT}"
-
   # Set trust to ultimate
   echo "${PRIMARY_KEY_FINGERPRINT}:6:" | gpg --import-ownertrust
 
   # Import GitHub's public key
   gpg --fetch-keys "https://github.com/web-flow.gpg"
+
+  gpg --list-keys
+  gpg --list-secret-keys
 
   gpgconf --kill gpg-agent scdaemon
 
@@ -213,6 +209,7 @@ function main
   prime_sudo_password_cache
 
   prepare_apt
+
   prepare_gnupg
   prepare_umask_and_home_permissions
 
@@ -224,9 +221,6 @@ function main
 
   bash "${TEMP_DIR}/installer_scripts/install_docker.bash"
   bash "${TEMP_DIR}/installer_scripts/configure_docker.bash"
-
-  bash "${TEMP_DIR}/startup.bash"
-  rm -rf "${TEMP_DIR}"
 
   log_info "Success: $(basename $0)"
 }
