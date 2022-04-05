@@ -37,6 +37,11 @@ function print_trace
   echo "[***TRACE***]: $trace"
 }
 
+function prime_sudo_password_cache
+{
+  sudo ls "${HOME}" >/dev/null
+}
+
 function ensure_not_sudo
 {
   print_trace
@@ -192,6 +197,7 @@ function set_up_pass
 function main
 {
   ensure_not_sudo
+  prime_sudo_password_cache
 
   prepare_apt
   prepare_gnupg
