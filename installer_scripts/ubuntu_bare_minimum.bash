@@ -52,6 +52,12 @@ function ensure_not_sudo
   fi
 }
 
+function disable_swap
+{
+  sudo swapoff --all
+  cat /etc/fstab | grep -v ' swap ' | sudo tee /etc/fstab >/dev/null
+}
+
 function prepare_apt
 {
   print_trace
@@ -206,6 +212,8 @@ function main
   clone_personal_tools
 
   set_up_pass
+
+  disable_swap
 
   bash "${TEMP_DIR}/installer_scripts/install_docker.bash"
   bash "${TEMP_DIR}/installer_scripts/configure_docker.bash"
