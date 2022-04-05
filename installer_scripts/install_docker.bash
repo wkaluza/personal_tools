@@ -19,7 +19,7 @@ function install_docker
     curl \
     gnupg >/dev/null
 
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg |
+  curl -fsSL "https://download.docker.com/linux/ubuntu/gpg" |
     sudo gpg --dearmor -o "${key}"
 
   echo \
@@ -58,6 +58,7 @@ function install_docker_unless_already_installed
     docker info
   else
     log_info "Installing docker"
+
     install_docker
     log_info "Success! Reboot required."
     log_info "Next: configure credential provider"
