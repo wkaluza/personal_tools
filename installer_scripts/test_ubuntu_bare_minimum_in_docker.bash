@@ -36,7 +36,7 @@ function main
     --tty \
     --volume "${docker_socket}:${docker_socket}" \
     "${DOCKER_IMAGE_TAG}" \
-    bash "${THIS_SCRIPT_DIR}/ubuntu_bare_minimum.bash"
+    bash "/home/$(id -un)/workspace/ubuntu_bare_minimum.bash"
 
   log_info "Success: $(basename $0)"
 }
