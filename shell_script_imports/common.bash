@@ -62,3 +62,10 @@ function up_to_128_random_hex_chars
 
   echo -n "${long:0:$num_chars}"
 }
+
+function os_version_codename
+{
+  local output
+  output="$(source /etc/os-release | echo $VERSION_CODENAME)"
+  echo "${output}"
+}

@@ -38,7 +38,6 @@ function install_basics
     git \
     inotify-tools \
     jq \
-    lsb-release \
     make \
     mercurial \
     pass \
@@ -169,7 +168,11 @@ function install_cmake
     gpg --dearmor - |
     sudo tee "${temp_keyring}" >/dev/null
 
-  echo "deb [signed-by=${temp_keyring}] https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" |
+  echo \
+    "deb [signed-by=${temp_keyring}]" \
+    "https://apt.kitware.com/ubuntu/" \
+    "$(os_version_codename)" \
+    "main" |
     sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
 
   sudo apt-get update
