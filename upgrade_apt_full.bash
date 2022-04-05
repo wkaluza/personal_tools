@@ -4,9 +4,9 @@ function main
 {
   sudo apt-get update
   sudo apt-get upgrade --with-new-pkgs --yes
-  sudo apt-get dist-upgrade --yes
-  sudo apt-get autoremove --yes
-  sudo apt-get clean
+  # sudo apt-get dist-upgrade --yes
+  # sudo apt-get autoremove --yes
+  # sudo apt-get clean
 
   test -f /var/run/reboot-required &&
     echo reboot required ||
