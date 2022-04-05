@@ -33,40 +33,23 @@ function install_basics
     ca-certificates \
     curl \
     gettext-base \
-    git \
-    jq \
-    lsb-release \
-    make \
-    pass \
     rdfind \
     rng-tools \
     rsync \
-    scdaemon \
-    tar \
     vim \
     wget
 
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install --yes \
+  sudo apt-get install --yes \
     meld \
-    snapd \
-    software-properties-common \
     vlc
 }
 
-function install_gnupg
+function install_latest_git
 {
   print_trace
 
   sudo apt-get install --yes \
-    gnupg
-
-  echo $'SSH_AUTH_SOCK="$(gpgconf --list-dirs | grep ssh | sed -n \'s/.*:\(\/.*$\)/\\1/p\')"' >>"${HOME}/.bashrc"
-}
-
-function install_git
-{
-  print_trace
+    software-properties-common
 
   sudo add-apt-repository --yes ppa:git-core/ppa
   sudo apt-get update
@@ -79,24 +62,29 @@ function install_github_cli
 {
   print_trace
 
-  local key="/usr/share/keyrings/githubcli-archive-keyring.gpg"
-  local url="https://cli.github.com/packages"
+  if gh --version >/dev/null; then
+    log_info "GitHub CLI is already installed"
+  else
+    local key="/usr/share/keyrings/githubcli-archive-keyring.gpg"
+    local url="https://cli.github.com/packages"
 
-  curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg |
-    sudo gpg --dearmor -o "${key}"
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=${key}] ${url} stable main" |
-    sudo tee /etc/apt/sources.list.d/github-cli.list
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg |
+      sudo gpg --dearmor -o "${key}"
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=${key}] ${url} stable main" |
+      sudo tee /etc/apt/sources.list.d/github-cli.list
 
-  sudo apt-get update
-  sudo apt-get install --yes \
-    gh
-
-  echo 'eval "$(gh completion --shell bash)"'
+    sudo apt-get update
+    sudo apt-get install --yes \
+      gh
+  fi
 }
 
 function install_jetbrains_toolbox
 {
   print_trace
+
+  sudo apt-get install --yes \
+    libfuse2
 
   local install_destination="/opt/jetbrains/jetbrains-toolbox"
 
@@ -117,11 +105,11 @@ function install_jetbrains_toolbox
 
     rm -rf "${extracted_dir}"
     popd >/dev/null
-  fi
 
-  if ! test -x "${install_destination}"; then
-    log_error "Something went wrong when installing jetbrains-toolbox"
-    exit 1
+    local uid="$(id -u)"
+    local gid="$(id -g)"
+
+    sudo chown "${uid}:${gid}" "${install_destination}"
   fi
 }
 
@@ -129,80 +117,114 @@ function install_yubico_utilities
 {
   print_trace
 
-  sudo add-apt-repository --yes ppa:yubico/stable
-  sudo apt-get update
   sudo apt-get install --yes \
-    yubikey-manager \
-    yubioath-desktop \
-    yubikey-personalization-gui
+    curl \
+    libfuse2 \
+    pcscd
+
+  local installation_dir="/opt/yubico"
+
+  local auth_name="yubioath-desktop"
+  local mgr_name="yubikey-manager-qt"
+
+  local url_prefix="https://developers.yubico.com"
+
+  local auth_url="${url_prefix}/${auth_name}/Releases/${auth_name}-latest-linux.AppImage"
+  local mgr_url="${url_prefix}/${mgr_name}/Releases/${mgr_name}-latest-linux.AppImage"
+
+  sudo mkdir --parents "${installation_dir}"
+
+  sudo curl \
+    -fsSL \
+    --output "${installation_dir}/${auth_name}" \
+    "${auth_url}"
+
+  sudo curl \
+    -fsSL \
+    --output "${installation_dir}/${mgr_name}" \
+    "${mgr_url}"
+
+  local uid="$(id -u)"
+  local gid="$(id -g)"
+
+  sudo chmod "u+x" \
+    "${installation_dir}/${auth_name}" \
+    "${installation_dir}/${mgr_name}"
+  sudo chown "${uid}:${gid}" \
+    "${installation_dir}/${auth_name}" \
+    "${installation_dir}/${mgr_name}"
+
+  sudo apt-get install --yes \
+    libpcsclite-dev \
+    python3-dev \
+    python3-pip \
+    python3-venv \
+    swig
+
+  python3 -m pip install --upgrade pip
+  python3 -m pip install yubikey-manager
 }
 
 function install_chrome
 {
   print_trace
 
-  local url="https://dl.google.com/linux/direct"
-
-  sudo apt-get install --yes \
-    fonts-liberation
-
-  if test -x "/opt/google/chrome/google-chrome"; then
-    log_info "Google Chrome already installed"
+  if google-chrome --version >/dev/null; then
+    log_info "Chrome is already installed"
   else
-    CHROME_DEB_PATH="${THIS_SCRIPT_DIR}/../chrome_$(date --utc +'%Y%m%d%H%M%S%N')___.deb"
+    local url="https://dl.google.com/linux/direct"
 
-    wget --output-document "${CHROME_DEB_PATH}" \
-      "${url}/google-chrome-stable_current_amd64.deb"
-    sudo dpkg --install "${CHROME_DEB_PATH}"
+    sudo apt-get install --yes \
+      fonts-liberation
+
+    if test -x "/opt/google/chrome/google-chrome"; then
+      log_info "Google Chrome already installed"
+    else
+      CHROME_DEB_PATH="${THIS_SCRIPT_DIR}/../chrome_$(date --utc +'%Y%m%d%H%M%S%N')___.deb"
+
+      wget --output-document "${CHROME_DEB_PATH}" \
+        "${url}/google-chrome-stable_current_amd64.deb"
+      sudo dpkg --install "${CHROME_DEB_PATH}"
+    fi
   fi
-
-  google-chrome --version
 }
 
 function install_brave
 {
   print_trace
 
-  local key="/usr/share/keyrings/brave-browser-archive-keyring.gpg"
-  local url="https://brave-browser-apt-release.s3.brave.com"
+  if brave-browser --version >/dev/null; then
+    log_info "Brave is already installed"
+  else
+    local key="/usr/share/keyrings/brave-browser-archive-keyring.gpg"
+    local url="https://brave-browser-apt-release.s3.brave.com"
 
-  sudo apt-get install --yes \
-    apt-transport-https \
-    curl
+    sudo apt-get install --yes \
+      apt-transport-https \
+      curl
 
-  sudo curl -fsSL -o "${key}" "${url}/brave-browser-archive-keyring.gpg"
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=${key}] ${url} stable main" |
-    sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+    sudo curl -fsSL -o "${key}" "${url}/brave-browser-archive-keyring.gpg"
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=${key}] ${url} stable main" |
+      sudo tee /etc/apt/sources.list.d/brave-browser-release.list
 
-  sudo apt-get update
-  sudo apt-get install --yes \
-    brave-browser
-
-  brave-browser --version
+    sudo apt-get update
+    sudo apt-get install --yes \
+      brave-browser
+  fi
 }
 
 function install_heroku_cli
 {
   print_trace
 
-  local apt_url="https://cli-assets.heroku.com/apt"
-
-  echo "deb ${apt_url} ./" |
-    sudo tee /etc/apt/sources.list.d/heroku.list
-
-  curl "https://cli-assets.heroku.com/apt/release.key" |
-    sudo APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE="DontWarn" \
-      apt-key add -
-
-  sudo apt-get update
   sudo apt-get install --yes \
-    heroku
+    snapd
 
-  echo "heroku installed to $(which heroku)"
-  heroku version
-
-  printf "$(heroku autocomplete:script bash)" >>"$HOME/.bashrc"
-  source "$HOME/.bashrc"
+  if heroku --version >/dev/null; then
+    log_info "Heroku CLI already installed"
+  else
+    sudo snap install --classic heroku
+  fi
 }
 
 function install_inkscape
@@ -309,13 +331,12 @@ function main
   configure_bash
 
   install_basics
-  install_gnupg
-  install_git
-  install_github_cli
-  install_yubico_utilities
+  install_latest_git
+  # install_github_cli
+  # install_yubico_utilities
   install_chrome
   install_brave
-  install_heroku_cli
+  # install_heroku_cli
   install_inkscape
   install_jetbrains_toolbox
 

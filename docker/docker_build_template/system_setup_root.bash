@@ -4,15 +4,6 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 function main
 {
-  # apt-get update
-  # apt-get upgrade --yes
-  # DEBIAN_FRONTEND=noninteractive apt-get install --yes \
-  #   curl \
-  #   git
-  #
-  # apt-get autoremove --yes
-  # apt-get clean
-
   echo "========================================"
 
   echo "Script running as:"

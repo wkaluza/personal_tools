@@ -51,12 +51,10 @@ function install_basics
     vim \
     wget
 
-  DEBIAN_FRONTEND=noninteractive sudo \
-    --preserve-env=DEBIAN_FRONTEND apt-get install --yes \
+  sudo apt-get install --yes \
     fossil \
     meld \
     snapd \
-    software-properties-common \
     vlc
 }
 
@@ -73,6 +71,9 @@ function install_gnupg
 function install_git
 {
   print_trace
+
+  sudo apt-get install --yes \
+    software-properties-common
 
   sudo add-apt-repository --yes ppa:git-core/ppa
   sudo apt-get update
@@ -217,6 +218,9 @@ function install_jetbrains_toolbox
 function install_yubico_utilities
 {
   print_trace
+
+  sudo apt-get install --yes \
+    software-properties-common
 
   sudo add-apt-repository --yes ppa:yubico/stable
   sudo apt-get update
