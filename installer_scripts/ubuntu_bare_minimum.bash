@@ -1,7 +1,6 @@
 set -euo pipefail
 
 BASHRC_PATH="${HOME}/.bashrc"
-STARTUP_SCRIPT="___not_a_real_path___"
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 TEMP_DIR="___not_a_real_path___"
 
@@ -68,9 +67,7 @@ function clone_personal_tools
   TEMP_DIR="$(realpath "${HOME}/wk_personal_tools_temp")"
   local url="git@github.com:wkaluza/personal_tools.git"
 
-  STARTUP_SCRIPT="${TEMP_DIR}/startup.bash"
-
-  if ! test -f "${STARTUP_SCRIPT}"; then
+  if ! test -d "${TEMP_DIR}"; then
     git clone \
       --recurse-submodules \
       --tags \
@@ -99,10 +96,10 @@ function main
 
   set_up_pass
 
-  bash "${THIS_SCRIPT_DIR}/install_docker.bash"
-  bash "${THIS_SCRIPT_DIR}/configure_docker.bash"
+  bash "${TEMP_DIR}/installer_scripts/install_docker.bash"
+  bash "${TEMP_DIR}/installer_scripts/configure_docker.bash"
 
-  bash "${STARTUP_SCRIPT}"
+  bash "${TEMP_DIR}/startup.bash"
   rm -rf "${TEMP_DIR}"
 
   echo "Success"
