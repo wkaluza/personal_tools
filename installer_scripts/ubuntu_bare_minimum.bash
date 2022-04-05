@@ -179,7 +179,7 @@ function clone_personal_tools
     git
 
   TEMP_DIR="$(realpath "${HOME}/wk_personal_tools_temp")"
-  local url="git@github.com:wkaluza/personal_tools.git"
+  local url="https://github.com/wkaluza/personal_tools.git"
 
   if ! test -d "${TEMP_DIR}"; then
     git clone \
