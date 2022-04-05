@@ -2,6 +2,8 @@ set -euo pipefail
 
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
+BASHRC="${HOME}/.bashrc"
+
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.bash"
 
@@ -25,14 +27,20 @@ function build_docker_pass_credential_helper
   print_trace
 
   local host_installation_dir="$1"
-  local docker_mount_dir="/external_mount"
 
-  local random_tag
-  random_tag="$(up_to_128_random_hex_chars 16)"
+  mkdir --parents "${host_installation_dir}"
 
-  cat <<EOF | docker build \
-    -t "${random_tag}" \
-    -
+  if test -x "${host_installation_dir}/docker-credential-pass"; then
+    log_info "docker-credential-pass already installed"
+  else
+    local docker_mount_dir="/external_mount"
+
+    local random_tag
+    random_tag="$(up_to_128_random_hex_chars 16)"
+
+    cat <<EOF | docker build \
+      --tag "${random_tag}" \
+      -
 FROM ubuntu:focal
 WORKDIR /workspace
 RUN echo "set -euo pipefail \n \
@@ -86,24 +94,24 @@ main \n \
 " | bash -
 EOF
 
-  local host_mount_dir="shared_dir"
-  mkdir --parents "${host_mount_dir}"
+    local cmd="mv \
+\"/workspace/temp/bin/docker-credential-pass\" \
+\"${docker_mount_dir}\" \
+&& \
+chown $(id -u):$(id -g) \"${docker_mount_dir}/docker-credential-pass\" \
+&& \
+chmod 700 \"${docker_mount_dir}/docker-credential-pass\""
 
-  docker run \
-    --rm \
-    -v "$(realpath "${host_mount_dir}"):${docker_mount_dir}" \
-    "${random_tag}" \
-    mv "/workspace/temp/bin/docker-credential-pass" "${docker_mount_dir}"
+    docker run \
+      --rm \
+      --volume "${host_installation_dir}:${docker_mount_dir}" \
+      "${random_tag}" \
+      bash -c "${cmd}"
 
-  log_info "Need to change file ownership of docker-credential-pass"
-  sudo chown "$(id -u):$(id -g)" "${host_mount_dir}/docker-credential-pass"
-  chmod 700 "${host_mount_dir}/docker-credential-pass"
-
-  docker rmi "${random_tag}"
-
-  mv \
-    "${host_mount_dir}/docker-credential-pass" \
-    "${host_installation_dir}/"
+    docker rmi \
+      --no-prune \
+      "${random_tag}"
+  fi
 }
 
 function install_docker_pass_credential_helper
@@ -116,15 +124,13 @@ function install_docker_pass_credential_helper
   local dest_dir="${HOME}/.local/bin"
   local docker_config="${HOME}/.docker/config.json"
 
-  mkdir --parents "${dest_dir}"
-
   run_in_context \
     "${CREDENTIAL_HELPERS_DIR}" \
     build_docker_pass_credential_helper \
     "${dest_dir}"
 
-  echo "export PATH=\"\$PATH:${dest_dir}\"" >>"${HOME}/.bashrc"
-  source "${HOME}/.bashrc"
+  echo "export PATH=\"\$PATH:${dest_dir}\"" >>"${BASHRC}"
+  source "${BASHRC}"
 
   if ! test -f "${docker_config}"; then
     mkdir --parents "$(dirname "${docker_config}")"
