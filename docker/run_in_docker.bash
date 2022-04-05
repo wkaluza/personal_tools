@@ -68,6 +68,10 @@ function docker_run
     "/bin/bash" \
     "-c" \
     "source /etc/profile && ${command}"
+
+  docker image rm \
+    --no-prune \
+    "${image_name}"
 }
 
 function docker_build
