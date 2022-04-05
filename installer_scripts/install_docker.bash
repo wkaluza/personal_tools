@@ -38,14 +38,16 @@ function install_docker
 
   sudo systemctl enable docker.service
   sudo systemctl enable containerd.service
+}
+
+function enable_sudoless_docker
+{
+  print_trace
 
   # Create the docker group if it does not exist
-  sudo getent group docker || sudo groupadd docker
-  if [[ "${USER:-_user_not_defined_}" == "_user_not_defined_" ]]; then
-    log_warning "Current user not defined"
-  else
-    sudo usermod -aG docker "$USER" >/dev/null
-  fi
+  getent group docker || sudo addgroup docker
+
+  sudo adduser "${USER}" docker
 }
 
 function install_docker_unless_already_installed
@@ -60,8 +62,7 @@ function install_docker_unless_already_installed
     log_info "Installing docker"
 
     install_docker
-    log_info "Success! Reboot required."
-    log_info "Next: configure credential provider"
+    enable_sudoless_docker
   fi
 }
 
