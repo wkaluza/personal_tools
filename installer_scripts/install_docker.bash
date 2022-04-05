@@ -71,7 +71,7 @@ function main
   ensure_not_sudo
   install_docker_unless_already_installed
 
-  echo Success
+  log_info "Success: $(basename $0)"
 }
 
 # Entry point

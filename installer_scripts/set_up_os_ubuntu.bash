@@ -494,7 +494,8 @@ function main
 
   disable_swap
 
-  log_info "Success! Reboot required."
+  log_info "Success: $(basename $0)"
+  log_info "Reboot required."
 }
 
 # Entry point
