@@ -28,9 +28,9 @@ function prepare_gnupg
   gpgconf --kill gpg-agent scdaemon
 
   local primary_key_fingerprint="174C9368811039C87F0C806A896572D1E78ED6A7"
-  local gpg_url="https://keys.openpgp.org/vks/v1/by-fingerprint/${primary_key_fingerprint}}"
+  local gpg_url="https://keys.openpgp.org/vks/v1/by-fingerprint/${primary_key_fingerprint}"
 
-  if ! gpg --card-status | grep "${gpg_url}" >dev/null; then
+  if ! gpg --card-status | grep "${gpg_url}" >/dev/null; then
     echo "Error: Insert smartcard"
     exit 1
   fi
