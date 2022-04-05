@@ -77,24 +77,70 @@ function prepare_gnupg
     gnupg \
     scdaemon
 
-  gpgconf --kill gpg-agent scdaemon
+  local gpg_home="${HOME}/.gnupg"
 
-  local primary_key_fingerprint="174C9368811039C87F0C806A896572D1E78ED6A7"
-  local gpg_url="https://keys.openpgp.org/vks/v1/by-fingerprint/${primary_key_fingerprint}"
+  mkdir --parents "${gpg_home}"
 
-  if ! gpg --card-status | grep "${gpg_url}" >/dev/null; then
-    echo "Error: Insert smartcard"
-    exit 1
-  fi
+  cat <<EOF >"${gpg_home}/gpg.conf"
+utf8-strings
+no-emit-version
+no-comments
+export-options export-minimal
 
-  gpg --fetch-keys "${gpg_url}"
+keyid-format long
+with-fingerprint
+with-fingerprint
+with-keygrip
 
-  echo "${primary_key_fingerprint}:6:" | gpg --import-ownertrust
+list-options show-uid-validity
+verify-options show-uid-validity
+
+personal-cipher-preferences AES256
+personal-digest-preferences SHA512 SHA256
+personal-compress-preferences ZLIB BZIP2 ZIP
+default-preference-list SHA512 SHA384 SHA256 AES256 AES TWOFISH ZLIB BZIP2 ZIP Uncompressed
+
+cipher-algo AES256
+digest-algo SHA512
+cert-digest-algo SHA512
+compress-algo ZLIB
+
+disable-cipher-algo 3DES
+weak-digest SHA1
+
+s2k-cipher-algo AES256
+s2k-digest-algo SHA512
+s2k-mode 3
+s2k-count 65011712
+EOF
+
+  cat <<EOF >"${gpg_home}/gpg-agent.conf"
+default-cache-ttl 14400
+max-cache-ttl 86400
+EOF
+
+  chmod u+rwx,go-rwx "${gpg_home}"
 
   gpgconf --kill gpg-agent scdaemon
 
   gpg --list-keys >/dev/null
   gpg --list-secret-keys >/dev/null
+
+  until gpg --card-status |
+    grep "${PRIMARY_KEY_FINGERPRINT}" >/dev/null; do
+    log_error "Insert smartcard..."
+    sleep 5
+  done
+
+  gpg --receive-keys "${PRIMARY_KEY_FINGERPRINT}"
+
+  # Set trust to ultimate
+  echo "${PRIMARY_KEY_FINGERPRINT}:6:" | gpg --import-ownertrust
+
+  # Import GitHub's public key
+  gpg --fetch-keys "https://github.com/web-flow.gpg"
+
+  gpgconf --kill gpg-agent scdaemon
 
   echo $'export SSH_AUTH_SOCK="$(gpgconf --list-dirs |' \
     $'grep agent-ssh-socket |' \
