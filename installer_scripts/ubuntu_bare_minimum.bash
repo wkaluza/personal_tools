@@ -72,6 +72,13 @@ function prepare_apt
     keyboard-configuration \
     tzdata
 
+  if [[ "${HOST_TIMEZONE:-"___timezone_not_defined___"}" != "___timezone_not_defined___" ]]; then
+    if test -f "$(readlink -e "${HOST_TIMEZONE}")"; then
+      sudo ln -fs "${HOST_TIMEZONE}" "/etc/localtime"
+      sudo dpkg-reconfigure --frontend noninteractive tzdata
+    fi
+  fi
+
   sudo apt-get upgrade --yes --with-new-pkgs
 
   sudo apt-get install --yes \
