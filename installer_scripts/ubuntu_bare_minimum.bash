@@ -16,6 +16,15 @@ function ensure_not_sudo
 function prepare_apt
 {
   sudo apt-get update
+
+  sudo apt-get install --yes --no-install-recommends \
+    apt-utils
+
+  DEBIAN_FRONTEND=noninteractve sudo --preserve-env=DEBIAN_FRONTEND \
+    apt-get install --yes \
+    keyboard-configuration \
+    tzdata
+
   sudo apt-get upgrade --yes --with-new-pkgs
 }
 
