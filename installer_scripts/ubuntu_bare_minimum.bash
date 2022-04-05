@@ -178,7 +178,7 @@ function clone_personal_tools
   sudo apt-get install --yes \
     git
 
-  TEMP_DIR="$(realpath "${HOME}/wk_personal_tools_temp")"
+  TEMP_DIR="$(realpath "${HOME}/wk_personal_tools___deleteme")"
   local url="https://github.com/wkaluza/personal_tools.git"
 
   if ! test -d "${TEMP_DIR}"; then
