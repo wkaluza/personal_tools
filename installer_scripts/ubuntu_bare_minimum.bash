@@ -62,6 +62,11 @@ function prepare_apt
     tzdata
 
   sudo apt-get upgrade --yes --with-new-pkgs
+
+  sudo apt-get install --yes \
+    apt-transport-https \
+    ca-certificates \
+    software-properties-common
 }
 
 function prepare_gnupg
