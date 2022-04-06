@@ -92,6 +92,14 @@ function prepare_apt
     software-properties-common
 }
 
+function install_rng_tools
+{
+  print_trace
+
+  sudo apt-get install --yes \
+    rng-tools
+}
+
 function prepare_gnupg
 {
   print_trace
@@ -302,6 +310,8 @@ function main
   ensure_user_is_in_docker_group
 
   prepare_apt
+
+  install_rng_tools
 
   prepare_gnupg
   prepare_umask_and_home_permissions
