@@ -40,6 +40,8 @@ function print_trace
 
 function prime_sudo_password_cache
 {
+  print_trace
+
   sudo ls "${HOME}" >/dev/null
 }
 
@@ -55,6 +57,8 @@ function ensure_not_sudo
 
 function disable_swap
 {
+  print_trace
+
   sudo swapoff --all
   cat /etc/fstab | grep -v ' swap ' | sudo tee /etc/fstab >/dev/null
 }
