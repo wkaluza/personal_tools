@@ -295,11 +295,43 @@ function ensure_user_is_in_docker_group
   fi
 }
 
+function configure_bash
+{
+  print_trace
+
+  local config_preamble="# WK workstation setup"
+  local bashrc_path="${HOME}/.bashrc"
+
+  if test -f "${bashrc_path}" &&
+    grep --silent "^${config_preamble}$" "${bashrc_path}"; then
+    log_info "bash already configured"
+  else
+    cat <<EOF >>"${bashrc_path}"
+${config_preamble}
+shopt -s histappend
+shopt -s cmdhist
+HISTFILESIZE=1000000
+HISTSIZE=1000000
+HISTIGNORE="pwd:top:ps"
+HISTCONTROL=ignorespace:erasedups
+PROMPT_COMMAND="history -n ; history -a"
+
+export HISTFILESIZE \
+  HISTSIZE \
+  HISTIGNORE \
+  HISTCONTROL \
+  PROMPT_COMMAND
+EOF
+
+    source "${bashrc_path}"
+  fi
+}
+
 function main
 {
   local jetbrains_toolbox_tar_gz
   jetbrains_toolbox_tar_gz="$(realpath "$1")"
-  
+
   if ! test -f "${jetbrains_toolbox_tar_gz}"; then
     log_error "File not found: ${jetbrains_toolbox_tar_gz}"
     exit 1
@@ -308,6 +340,8 @@ function main
   ensure_not_sudo
   prime_sudo_password_cache
   ensure_user_is_in_docker_group
+
+  configure_bash
 
   prepare_apt
 
