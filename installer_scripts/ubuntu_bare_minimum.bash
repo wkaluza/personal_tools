@@ -180,7 +180,10 @@ function prepare_umask_and_home_permissions
 {
   print_trace
 
-  chmod --recursive "g-rwx,o-rwx" "${HOME}"
+  find "${HOME}" \
+    -user "$(id -un)" \
+    -group "$(id -gn)" \
+    -exec chmod "g-rwx,o-rwx" -- {} \;
 
   echo 'umask 0077' >>"${BASHRC_PATH}"
 
