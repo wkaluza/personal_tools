@@ -38,7 +38,9 @@ function main
     --volume "${docker_socket}:${docker_socket}" \
     --volume "/dev/bus/usb:/dev/bus/usb" \
     "${DOCKER_IMAGE_TAG}" \
-    bash "/home/$(id -un)/workspace/ubuntu_bare_minimum.bash"
+    bash \
+    "/home/$(id -un)/workspace/ubuntu_bare_minimum.bash" \
+    "/home/$(id -un)/workspace/jetbrains-toolbox___.tar.gz"
 
   log_info "Success: $(basename $0)"
 }

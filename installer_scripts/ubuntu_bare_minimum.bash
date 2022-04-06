@@ -267,6 +267,14 @@ function configure_git
 
 function main
 {
+  local jetbrains_toolbox_tar_gz
+  jetbrains_toolbox_tar_gz="$(realpath "$1")"
+  
+  if ! test -f "${jetbrains_toolbox_tar_gz}"; then
+    log_error "File not found: ${jetbrains_toolbox_tar_gz}"
+    exit 1
+  fi
+
   ensure_not_sudo
   prime_sudo_password_cache
 
@@ -287,7 +295,10 @@ function main
 
   configure_git
 
+  bash "${TEMP_DIR}/installer_scripts/install_jetbrains.bash" \
+    "${jetbrains_toolbox_tar_gz}"
+
   log_info "Success: $(basename $0)"
 }
 
-main
+main "$1"
