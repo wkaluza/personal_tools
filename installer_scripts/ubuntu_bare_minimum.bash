@@ -185,10 +185,12 @@ function prepare_umask_and_home_permissions
 {
   print_trace
 
-  find "${HOME}" \
-    -user "$(id -un)" \
-    -group "$(id -gn)" \
-    -exec chmod "g-rwx,o-rwx" -- {} \;
+  if [[ "$(umask)" != "0077" ]]; then
+    find "${HOME}" \
+      -user "$(id -un)" \
+      -group "$(id -gn)" \
+      -exec chmod "g-rwx,o-rwx" -- {} \;
+  fi
 
   echo 'umask 0077' >>"${BASHRC_PATH}"
 
