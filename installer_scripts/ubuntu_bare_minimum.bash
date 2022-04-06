@@ -1,6 +1,7 @@
 set -euo pipefail
 
 PRIMARY_KEY_FINGERPRINT="174C9368811039C87F0C806A896572D1E78ED6A7"
+SIGNING_KEY_FINGERPRINT="143EE89AAC97053810D13E378A7E8CA85A62CF20"
 BASHRC_PATH="${HOME}/.bashrc"
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 TEMP_DIR="___not_a_real_path___"
@@ -219,6 +220,51 @@ function set_up_pass
   pass init "${PRIMARY_KEY_FINGERPRINT}"
 }
 
+function install_latest_git
+{
+  print_trace
+
+  sudo apt-get install --yes \
+    software-properties-common
+
+  sudo add-apt-repository --yes ppa:git-core/ppa
+  sudo apt-get update
+
+  sudo apt-get install --yes \
+    git
+}
+
+function configure_git
+{
+  print_trace
+
+  git config --global user.email "wkaluza@protonmail.com"
+  git config --global user.name "Wojciech Kaluza"
+
+  git config --global init.defaultBranch main
+
+  git config --global rebase.autosquash true
+  git config --global pull.ff only
+  git config --global merge.ff false
+
+  git config --global log.showSignature true
+
+  git config --global user.signingKey "${SIGNING_KEY_FINGERPRINT}"
+  git config --global gpg.program gpg
+
+  git config --global commit.gpgSign true
+  git config --global merge.verifySignatures true
+
+  git config --global rerere.enabled true
+
+  git config --global url."git@github.com:".insteadOf "https://github.com/"
+
+  git config --global advice.detachedHead false
+  git config --global advice.fetchShowForcedUpdates false
+
+  git config --global fetch.showForcedUpdates false
+}
+
 function main
 {
   ensure_not_sudo
@@ -229,6 +275,7 @@ function main
   prepare_gnupg
   prepare_umask_and_home_permissions
 
+  install_latest_git
   clone_personal_tools
 
   set_up_pass
@@ -237,6 +284,8 @@ function main
 
   bash "${TEMP_DIR}/installer_scripts/install_docker.bash"
   bash "${TEMP_DIR}/installer_scripts/configure_docker.bash"
+
+  configure_git
 
   log_info "Success: $(basename $0)"
 }
