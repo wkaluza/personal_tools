@@ -271,6 +271,22 @@ function configure_git
   git config --global fetch.showForcedUpdates false
 }
 
+function ensure_user_is_in_docker_group
+{
+  print_trace
+
+  if ! groups | grep docker >/dev/null; then
+    # Create the docker group if it does not exist
+    getent group docker || sudo addgroup --system docker
+
+    sudo adduser "${USER}" docker
+    log_info "User added to docker group"
+    log_info "Log out and back in for change to take effect"
+
+    exit 1
+  fi
+}
+
 function main
 {
   local jetbrains_toolbox_tar_gz
@@ -283,6 +299,7 @@ function main
 
   ensure_not_sudo
   prime_sudo_password_cache
+  ensure_user_is_in_docker_group
 
   prepare_apt
 
