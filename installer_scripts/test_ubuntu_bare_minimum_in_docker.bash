@@ -19,6 +19,8 @@ function main
 {
   local docker_socket="/var/run/docker.sock"
 
+  gpgconf --kill gpg-agent scdaemon
+
   docker build \
     --build-arg "USER_ID=$(id -u)" \
     --build-arg "GROUP_ID=$(id -g)" \
