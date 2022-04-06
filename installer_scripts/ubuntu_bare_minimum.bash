@@ -303,6 +303,7 @@ function main
 
   bash "${TEMP_DIR}/installer_scripts/install_jetbrains.bash" \
     "${jetbrains_toolbox_tar_gz}"
+  bash "${TEMP_DIR}/installer_scripts/install_applications.bash"
 
   log_info "Success: $(basename $0)"
 }
