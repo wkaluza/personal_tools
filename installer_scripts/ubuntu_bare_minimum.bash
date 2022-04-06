@@ -161,6 +161,19 @@ EOF
     $'sed \'s/^agent-ssh-socket:\(.*\)$/\\1/\')"' >>"${BASHRC_PATH}"
 
   source "${BASHRC_PATH}"
+
+  local primary_key_length
+  primary_key_length="$(echo -n "${PRIMARY_KEY_FINGERPRINT}" |
+    wc -c)"
+  local primary_key_short
+  primary_key_short="$(echo -n "${PRIMARY_KEY_FINGERPRINT}" |
+    cut -c "$((primary_key_length - 15))-${primary_key_length}")"
+
+  if gpg --card-status | grep "${primary_key_short}" >/dev/null; then
+    log_info "Smart card detected"
+  else
+    log_info "Smart card not detected"
+  fi
 }
 
 function prepare_umask_and_home_permissions

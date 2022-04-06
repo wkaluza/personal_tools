@@ -32,9 +32,11 @@ function main
 
   docker run \
     --interactive \
+    --privileged \
     --rm \
     --tty \
     --volume "${docker_socket}:${docker_socket}" \
+    --volume "/dev/bus/usb:/dev/bus/usb" \
     "${DOCKER_IMAGE_TAG}" \
     bash "/home/$(id -un)/workspace/ubuntu_bare_minimum.bash"
 
