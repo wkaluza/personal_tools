@@ -33,7 +33,7 @@ RUN adduser \
 
 RUN mkdir --parents $_WORKSPACE
 COPY ubuntu_bare_minimum.bash $_WORKSPACE/
-RUN chown --recursive $USERNAME:$USERNAME $_HOME
+RUN chown --recursive $USERNAME:$USERNAME $_WORKSPACE
 
 RUN adduser "$USERNAME" sudo
 RUN echo "%sudo ALL=(ALL) NOPASSWD:ALL" >>"/etc/sudoers"
