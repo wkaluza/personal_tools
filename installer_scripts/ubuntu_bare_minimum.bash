@@ -271,12 +271,17 @@ function configure_git
 
   git config --global rerere.enabled true
 
-  git config --global url."git@github.com:".insteadOf "https://github.com/"
-
   git config --global advice.detachedHead false
   git config --global advice.fetchShowForcedUpdates false
 
   git config --global fetch.showForcedUpdates false
+}
+
+function configure_git_ssh_substitutions
+{
+  print_trace
+
+  git config --global url."git@github.com:".insteadOf "https://github.com/"
 }
 
 function ensure_user_is_in_docker_group
@@ -351,6 +356,8 @@ function main
   prepare_umask_and_home_permissions
 
   install_latest_git
+  configure_git
+
   clone_personal_tools
 
   set_up_pass
@@ -360,11 +367,13 @@ function main
   bash "${TEMP_DIR}/installer_scripts/install_docker.bash"
   bash "${TEMP_DIR}/installer_scripts/configure_docker.bash"
 
-  configure_git
-
   bash "${TEMP_DIR}/installer_scripts/install_jetbrains.bash" \
     "${jetbrains_toolbox_tar_gz}"
   bash "${TEMP_DIR}/installer_scripts/install_applications.bash"
+
+  # This has to be done late in the setup process
+  # or it interferes with docker testing
+  configure_git_ssh_substitutions
 
   log_info "Success: $(basename $0)"
 }
