@@ -26,7 +26,6 @@ function main
     --build-arg "GROUP_ID=$(id -g)" \
     --build-arg "USERNAME=$(id -un)" \
     --build-arg "TIMEZONE=$(readlink -e /etc/localtime)" \
-    --build-arg "WORKSPACE=$(pwd)" \
     --build-arg "DOCKER_GROUP_ID=$(getent group docker | awk -F: '{print $3}')" \
     --file "${THIS_SCRIPT_DIR}/test_ubuntu_bare_minimum.dockerfile" \
     --tag "${DOCKER_IMAGE_TAG}" \
