@@ -189,7 +189,7 @@ EOF
   fi
 }
 
-function prepare_umask_and_home_permissions
+function set_umask_and_home_permissions
 {
   print_trace
 
@@ -353,7 +353,6 @@ function main
   install_rng_tools
 
   prepare_gnupg
-  prepare_umask_and_home_permissions
 
   install_latest_git
   configure_git
@@ -374,6 +373,8 @@ function main
   # This has to be done late in the setup process
   # or it interferes with docker testing
   configure_git_ssh_substitutions
+
+  set_umask_and_home_permissions
 
   log_info "Success: $(basename $0)"
 }
