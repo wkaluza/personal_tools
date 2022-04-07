@@ -197,6 +197,7 @@ function set_umask_and_home_permissions
     find "${HOME}" \
       -user "$(id -un)" \
       -group "$(id -gn)" \
+      \( -type f -or -type d \) \
       -exec chmod "g-rwx,o-rwx" -- {} \;
   fi
 
