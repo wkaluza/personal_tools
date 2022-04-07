@@ -5,6 +5,7 @@ SIGNING_KEY_FINGERPRINT="143EE89AAC97053810D13E378A7E8CA85A62CF20"
 BASHRC_PATH="${HOME}/.bashrc"
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 TEMP_DIR="___not_a_real_path___"
+ERR_JETBRAINS_PATH_NOT_SET="___ERR_JETBRAINS_PATH_NOT_SET___"
 
 function log_info
 {
@@ -338,6 +339,11 @@ function main
   local jetbrains_toolbox_tar_gz
   jetbrains_toolbox_tar_gz="$(realpath "$1")"
 
+  if [[ "$(basename "${jetbrains_toolbox_tar_gz}")" == "${ERR_JETBRAINS_PATH_NOT_SET}" ]]; then
+    log_error "Path to jetbrains toolbox tar.gz archive required as argument"
+    exit 1
+  fi
+
   if ! test -f "${jetbrains_toolbox_tar_gz}"; then
     log_error "File not found: ${jetbrains_toolbox_tar_gz}"
     exit 1
@@ -380,4 +386,4 @@ function main
   log_info "Success: $(basename $0)"
 }
 
-main "$1"
+main "${1-"${ERR_JETBRAINS_PATH_NOT_SET}"}"
