@@ -1,5 +1,9 @@
 set -euo pipefail
 
+THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
+source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
+
 function main
 {
   local restore_destination
@@ -10,16 +14,16 @@ function main
   mkdir --parents "${restore_destination}"
 
   if ! test -z "$(ls -A "${restore_destination}")"; then
-    echo "${restore_destination} is not empty"
+    log_error "${restore_destination} is not empty"
     exit 1
   fi
 
   mkdir --parents "${backup_dir}"
 
-  echo "Performing restoration..."
+  log_info "Performing restoration..."
 
   for f in $(find "${backup_dir}" -type f -name '*_backup.secret' | sort); do
-    echo "- Extracting $(realpath "${f}")"
+    log_info "- Extracting $(realpath "${f}")"
 
     cat "$(realpath "${f}")" |
       gpg \
@@ -31,7 +35,7 @@ function main
         --gzip
   done
 
-  echo Success
+  log_info "Success: $(basename $0)"
 }
 
 # Entry point

@@ -2,6 +2,10 @@ set -euo pipefail
 
 TEMP_UNPACK_DIR="$HOME/not_a_real_directory"
 
+THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
+source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
+
 function on_exit
 {
   rm -rf "${TEMP_UNPACK_DIR}"
@@ -20,7 +24,7 @@ function main
   backup_dir="$(realpath "$2")"
 
   if ! test -d "${dir_to_back_up}"; then
-    echo "${dir_to_back_up} is not a directory"
+    log_error "${dir_to_back_up} is not a directory"
     exit 1
   fi
 
@@ -38,9 +42,10 @@ function main
   if test -f "${last_snapshot_file}"; then
     cat "${last_snapshot_file}" |
       gpg \
-        --decrypt >"${snapshot_file}.decrypted"
+        --decrypt \
+        --quiet >"${snapshot_file}.decrypted"
   else
-    echo No snapshot file: perfoming initial full backup...
+    log_info No snapshot file: perfoming initial full backup...
   fi
 
   tar \
@@ -67,14 +72,15 @@ function main
   TEMP_UNPACK_DIR="$(dirname "${backup_dir}")/temp_unpack_$(basename "${backup_dir}")"
   mkdir --parents "${TEMP_UNPACK_DIR}"
 
-  echo "Performing test restoration..."
+  log_info "Performing test restoration..."
 
   for f in $(find "${backup_dir}" -type f -name '*_backup.secret' | sort); do
-    echo "- Extracting $(realpath "${f}")"
+    log_info "- Extracting $(realpath "${f}")"
 
     cat "$(realpath "${f}")" |
       gpg \
-        --decrypt |
+        --decrypt \
+        --quiet |
       tar \
         --directory "${TEMP_UNPACK_DIR}" \
         --listed-incremental=/dev/null \
@@ -82,8 +88,8 @@ function main
         --gzip
   done
 
-  echo "Test restoration done"
-  echo "Performing comparison..."
+  log_info "Test restoration done"
+  log_info "Performing comparison..."
 
   if ! diff \
     --recursive \
@@ -92,7 +98,7 @@ function main
     --exclude 'node_modules' \
     "${TEMP_UNPACK_DIR}/$(basename "${dir_to_back_up}")" \
     "${dir_to_back_up}"; then
-    echo "Test recovery failed: diff did not match with original"
+    log_error "Test recovery failed: diff did not match with original"
 
     rm "${backup_dir}/${now}_gpg_${encryption_subkey}_backup.secret"
     rm "${snapshot_file}"
@@ -100,7 +106,7 @@ function main
     exit 1
   fi
 
-  echo Success
+  log_info "Success: $(basename $0)"
 }
 
 # Entry point
