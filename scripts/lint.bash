@@ -10,6 +10,23 @@ function format_shell_scripts
   shfmt -i 2 -fn -w "${f}" >/dev/null
 }
 
+function analyse_shell_scripts
+{
+  local f="$1"
+
+  local severity="style"
+  # local severity="info"
+  # local severity="warning"
+  # local severity="error"
+
+  shellcheck \
+    --enable=all \
+    --exclude="SC1090,SC1091,SC2002,SC2154,SC2310,SC2312" \
+    --severity "${severity}" \
+    --shell=bash \
+    "${f}"
+}
+
 function format_json
 {
   local f="$1"
@@ -25,31 +42,46 @@ function main
   local project_root_dir
   project_root_dir="$(realpath "${THIS_SCRIPT_DIR}/..")"
 
-  for f in $(find "${project_root_dir}" \
+  echo "Formatting..."
+
+  export -f format_json
+  find "${project_root_dir}" \
     -type f \
     -name '*.json' \
     -and -not \( \
     -path "${project_root_dir}/*___*/*" -or \
     -path "${project_root_dir}/.git/*" -or \
-    -path "${project_root_dir}/.idea/*" \)); do
-    echo "$f"
-    format_json "$f" &
-  done
+    -path "${project_root_dir}/.idea/*" \) \
+    -exec bash -c 'set -euo pipefail ; shopt -s inherit_errexit ; format_json "$1"' -- {} \;
 
-  for f in $(find "${project_root_dir}" \
+  export -f format_shell_scripts
+  find "${project_root_dir}" \
     -type f \
     -name '*.bash' \
     -and -not \( \
     -path "${project_root_dir}/*___*/*" -or \
     -path "${project_root_dir}/.git/*" -or \
-    -path "${project_root_dir}/.idea/*" \)); do
-    echo "$f"
-    format_shell_scripts "$f" &
-  done
+    -path "${project_root_dir}/.idea/*" \) \
+    -exec bash -c 'set -euo pipefail ; shopt -s inherit_errexit ; format_shell_scripts "$1"' -- {} \;
 
-  echo Waiting...
   wait
-  echo Success
+  echo "Formatting done"
+
+  echo "Performing static analysis..."
+  export -f analyse_shell_scripts
+  find "${project_root_dir}" \
+    -type f \
+    -name '*.bash' \
+    -and -not \( \
+    -path "${project_root_dir}/*___*/*" -or \
+    -path "${project_root_dir}/.git/*" -or \
+    -path "${project_root_dir}/.idea/*" \) \
+    -exec bash -c 'set -euo pipefail ; shopt -s inherit_errexit ; analyse_shell_scripts "$1"' -- {} \;
+
+  wait
+  echo "Static analysis done"
+
+  echo "Success: $(basename "$0")"
 }
 
 # Entry point

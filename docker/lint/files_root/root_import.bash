@@ -42,3 +42,9 @@ EOF
 
   untar_gzip_to "./${go_archive}" "${target_dir}"
 }
+
+function install_shellcheck
+{
+  apt-get install --yes \
+    shellcheck
+}

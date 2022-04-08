@@ -8,6 +8,7 @@ function main
   install_basics
   install_jq
   install_golang
+  install_shellcheck
 }
 
 # Entry point
