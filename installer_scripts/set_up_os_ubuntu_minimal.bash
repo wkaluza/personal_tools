@@ -107,8 +107,10 @@ function install_jetbrains_toolbox
     rm -rf "${extracted_dir}"
     popd >/dev/null
 
-    local uid="$(id -u)"
-    local gid="$(id -g)"
+    local uid
+    uid="$(id -u)"
+    local gid
+    gid="$(id -g)"
 
     sudo chown "${uid}:${gid}" "${install_destination}"
   fi
@@ -145,8 +147,10 @@ function install_yubico_utilities
     --output "${installation_dir}/${mgr_name}" \
     "${mgr_url}"
 
-  local uid="$(id -u)"
-  local gid="$(id -g)"
+  local uid
+  uid="$(id -u)"
+  local gid
+  gid="$(id -g)"
 
   sudo chmod "u+x" \
     "${installation_dir}/${auth_name}" \

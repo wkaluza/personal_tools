@@ -10,7 +10,8 @@ function get_swarm_state
 # Note: recursive function
 function ensure_docker_swarm_init
 {
-  local swarm_state="$(get_swarm_state)"
+  local swarm_state
+  swarm_state="$(get_swarm_state)"
 
   local swarm_key_pass_id="wk_local_swarm_key"
   local swarm_key_magic_prefix="SWMKEY"

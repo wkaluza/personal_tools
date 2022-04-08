@@ -106,7 +106,8 @@ function main
   host_workspace="$(realpath "$4")"
   local command="$5"
 
-  local aggregate_digest="$(compute_digest "$DIGESTS" | cut -c1-8)"
+  local aggregate_digest
+  aggregate_digest="$(compute_digest "${DIGESTS}" | cut -c1-8)"
 
   local image_name="${job_name}_${aggregate_digest}"
   local container_name="${job_name}"

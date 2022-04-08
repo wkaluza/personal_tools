@@ -10,7 +10,8 @@ function install_jetbrains_toolbox
 {
   print_trace
 
-  local jetbrains_toolbox_tar_gz_path="$(realpath "$1")"
+  local jetbrains_toolbox_tar_gz_path
+  jetbrains_toolbox_tar_gz_path="$(realpath "$1")"
   local install_destination="/opt/jetbrains/jetbrains-toolbox"
 
   if test -x "${install_destination}"; then

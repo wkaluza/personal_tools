@@ -22,7 +22,8 @@ function format_json
 
 function main
 {
-  local project_root_dir="$(realpath "${THIS_SCRIPT_DIR}/..")"
+  local project_root_dir
+  project_root_dir="$(realpath "${THIS_SCRIPT_DIR}/..")"
 
   for f in $(find "${project_root_dir}" \
     -type f \

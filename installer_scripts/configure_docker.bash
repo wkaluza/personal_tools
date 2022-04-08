@@ -95,6 +95,11 @@ main \n \
 " | bash -
 EOF
 
+    local uid
+    uid="$(id -u)"
+    local gid
+    gid="$(id -g)"
+
     local cmd="mv \
 \"/workspace/temp/bin/docker-credential-pass\" \
 \"${docker_mount_dir}\" \
