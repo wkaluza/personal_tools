@@ -254,11 +254,13 @@ function install_golang
     sudo rm "./${go_archive}"
     popd >/dev/null
 
-    echo 'export GOROOT="/usr/local/go"' >>"${HOME}/.bashrc"
-    echo 'export GOPATH="${HOME}/go"' >>"${HOME}/.bashrc"
-    echo 'export GOPRIVATE="github.com/wkaluza/*"' >>"${HOME}/.bashrc"
-    echo 'export CGO_ENABLED=0' >>"${HOME}/.bashrc"
-    echo 'export PATH="$PATH:${GOROOT}/bin:${GOPATH}/bin"' >>"${HOME}/.bashrc"
+    cat <<'EOF' >>"${HOME}/.bashrc"
+export GOROOT="/usr/local/go"
+export GOPATH="${HOME}/go"
+export GOPRIVATE="github.com/wkaluza/*"
+export CGO_ENABLED=0
+export PATH="${PATH}:${GOROOT}/bin:${GOPATH}/bin"
+EOF
   fi
 }
 
