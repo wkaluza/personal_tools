@@ -1,7 +1,5 @@
 set -euo pipefail
 
-THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-
 function get_swarm_state
 {
   docker system info --format='{{json .}}' |
