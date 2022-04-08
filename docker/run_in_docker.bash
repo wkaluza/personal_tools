@@ -55,6 +55,7 @@ function docker_run
       'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
   )"
 
+  echo "Running command..."
   docker run \
     --rm \
     --tty \
@@ -72,7 +73,7 @@ function docker_run
 
   docker image rm \
     --no-prune \
-    "${image_name}"
+    "${image_name}" >/dev/null
 }
 
 function docker_build
@@ -84,13 +85,14 @@ function docker_build
   local build_context="$5"
   local image_name="$6"
 
+  echo "Building image..."
   docker build \
     --tag "${image_name}" \
     --file "${dockerfile}" \
     --build-arg UID="${uid}" \
     --build-arg GID="${gid}" \
     --build-arg USERNAME="${username}" \
-    "${build_context}"
+    "${build_context}" >/dev/null
 }
 
 function main
@@ -171,6 +173,8 @@ function main_json
     "${build_context}" \
     "${host_workspace}" \
     "${command}"
+
+  echo "Success: $(basename "$0")"
 }
 
 # Entry point
