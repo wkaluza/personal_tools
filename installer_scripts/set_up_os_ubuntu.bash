@@ -98,7 +98,7 @@ function install_github_cli
   sudo apt-get install --yes \
     gh
 
-  echo 'eval "$(gh completion --shell bash)"'
+  echo "eval \"\$(gh completion --shell bash)\"" >>"${HOME}/.bashrc"
 }
 
 function install_rust
@@ -109,7 +109,7 @@ function install_rust
   source "${HOME}/.cargo/env"
   rustup update
 
-  echo 'eval "$(rustup completions bash)"' >>"${HOME}/.bashrc"
+  echo "eval \"\$(rustup completions bash)\"" >>"${HOME}/.bashrc"
 }
 
 function install_python
