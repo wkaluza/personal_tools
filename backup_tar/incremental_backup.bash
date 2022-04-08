@@ -45,7 +45,7 @@ function main
         --decrypt \
         --quiet >"${snapshot_file}.decrypted"
   else
-    log_info No snapshot file: perfoming initial full backup...
+    log_info "No snapshot file: performing initial full backup..."
   fi
 
   tar \
