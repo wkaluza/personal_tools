@@ -1,4 +1,5 @@
 set -euo pipefail
+shopt -s inherit_errexit
 
 SET_UP_ENV="/etc/profile.d/wk_env.sh"
 

@@ -1,4 +1,5 @@
 set -euo pipefail
+shopt -s inherit_errexit
 
 function log_info
 {

@@ -1,4 +1,5 @@
 set -euo pipefail
+shopt -s inherit_errexit
 
 TEMP_UNPACK_DIR="$HOME/not_a_real_directory"
 
