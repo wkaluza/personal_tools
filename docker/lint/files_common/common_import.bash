@@ -26,6 +26,6 @@ function untar_gzip_to
 
   pushd "${target_dir}"
   tar -xzf "${target_dir}/${archive}"
-  rm "${target_dir}/${go_archive}"
+  rm "${target_dir}/${archive}"
   popd
 }
