@@ -61,7 +61,7 @@ function up_to_128_random_hex_chars
       awk '{ print $1 }'
   )"
 
-  echo -n "${long:0:$num_chars}"
+  echo -n "${long:0:num_chars}"
 }
 
 function os_version_codename
