@@ -26,7 +26,7 @@ function set_up_new_gpg_homedir
   local temp_gpg_homedir="$1"
 
   mkdir "${temp_gpg_homedir}"
-  chmod u+rwx,go-rwx "${temp_gpg_homedir}"
+  chmod "u+rwx,go-rwx" "${temp_gpg_homedir}"
 
   if test -z "${GNUPGHOME+a}"; then
     cp "$HOME/.gnupg/gpg.conf" "${temp_gpg_homedir}"
