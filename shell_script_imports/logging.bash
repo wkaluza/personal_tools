@@ -5,21 +5,21 @@ function log_info
 {
   local message="$1"
 
-  echo "INFO: $message"
+  echo "INFO: ${message}"
 }
 
 function log_warning
 {
   local message="$1"
 
-  echo "WARNING: $message"
+  echo "WARNING: ${message}"
 }
 
 function log_error
 {
   local message="$1"
 
-  echo "ERROR: $message"
+  echo "ERROR: ${message}"
 }
 
 function print_trace
@@ -30,5 +30,5 @@ function print_trace
 
   local trace="Entered ${func} on line ${line} of ${file}"
 
-  echo "[***TRACE***]: $trace"
+  echo "[***TRACE***]: ${trace}"
 }

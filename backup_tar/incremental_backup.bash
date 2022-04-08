@@ -1,7 +1,7 @@
 set -euo pipefail
 shopt -s inherit_errexit
 
-TEMP_UNPACK_DIR="$HOME/not_a_real_directory"
+TEMP_UNPACK_DIR="${HOME}/not_a_real_directory"
 
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 

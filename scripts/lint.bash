@@ -7,7 +7,7 @@ function format_shell_scripts
 {
   local f="$1"
 
-  shfmt -i 2 -fn -w "$f" >/dev/null
+  shfmt -i 2 -fn -w "${f}" >/dev/null
 }
 
 function format_json
@@ -15,9 +15,9 @@ function format_json
   local f="$1"
 
   local json_text
-  json_text="$(cat "$f")"
-  echo "$json_text" |
-    jq --sort-keys '.' - >"$f"
+  json_text="$(cat "${f}")"
+  echo "${json_text}" |
+    jq --sort-keys '.' - >"${f}"
 }
 
 function main

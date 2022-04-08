@@ -13,7 +13,7 @@ function on_exit
 {
   local exit_code=$?
 
-  if [[ $exit_code -eq 0 ]]; then
+  if [[ ${exit_code} -eq 0 ]]; then
     rm -f "${JETBRAINS_TOOLBOX_TAR_GZ_PATH}"
     rm -f "${CHROME_DEB_PATH}"
   fi
@@ -130,7 +130,7 @@ function install_python
     pipenv
 
   curl -sSL "${poetry_url}" | python3 -
-  "$HOME"/.local/bin/poetry completions bash |
+  "${HOME}/.local/bin/poetry" completions bash |
     sudo tee "${poetry_bash_completion}"
 }
 
@@ -385,7 +385,7 @@ function configure_bash
   print_trace
 
   local config_preamble="# WK workstation setup"
-  local bashrc_path="$HOME/.bashrc"
+  local bashrc_path="${HOME}/.bashrc"
 
   if test -f "${bashrc_path}" &&
     grep --silent "^${config_preamble}$" "${bashrc_path}"; then
@@ -435,10 +435,10 @@ function configure_gpg
 
   local pgp_primary_key_fingerprint="$1"
 
-  local gpg_home="$HOME/.gnupg"
+  local gpg_home="${HOME}/.gnupg"
   local gpg_config_dir="gpg_config"
 
-  mkdir --parents "$gpg_home"
+  mkdir --parents "${gpg_home}"
   cp "${THIS_SCRIPT_DIR}/${gpg_config_dir}/gpg.conf" "${gpg_home}"
   cp "${THIS_SCRIPT_DIR}/${gpg_config_dir}/gpg-agent.conf" "${gpg_home}"
   chmod u+rwx,go-rwx "${gpg_home}"

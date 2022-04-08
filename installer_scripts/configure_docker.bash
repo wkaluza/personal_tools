@@ -14,7 +14,7 @@ function on_exit
 {
   local exit_code=$?
 
-  if [[ $exit_code -eq 0 ]]; then
+  if [[ ${exit_code} -eq 0 ]]; then
     rm -rf "${CREDENTIAL_HELPERS_DIR}"
   fi
 
@@ -99,7 +99,7 @@ EOF
 \"/workspace/temp/bin/docker-credential-pass\" \
 \"${docker_mount_dir}\" \
 && \
-chown $(id -u):$(id -g) \"${docker_mount_dir}/docker-credential-pass\" \
+chown ${uid}:${gid} \"${docker_mount_dir}/docker-credential-pass\" \
 && \
 chmod 700 \"${docker_mount_dir}/docker-credential-pass\""
 
@@ -130,7 +130,7 @@ function install_docker_pass_credential_helper
     build_docker_pass_credential_helper \
     "${dest_dir}"
 
-  echo "export PATH=\"\$PATH:${dest_dir}\"" >>"${BASHRC}"
+  echo "export PATH=\"\${PATH}:${dest_dir}\"" >>"${BASHRC}"
   source "${BASHRC}"
 
   if ! test -f "${docker_config}"; then

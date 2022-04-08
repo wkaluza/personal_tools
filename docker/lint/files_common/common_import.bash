@@ -10,7 +10,7 @@ function run_in_context
   mkdir --parents "${dir_path}"
 
   pushd "${dir_path}"
-  $fn_arg "${@:3}"
+  ${fn_arg} "${@:3}"
   popd
 }
 

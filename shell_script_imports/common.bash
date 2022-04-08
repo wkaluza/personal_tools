@@ -17,7 +17,7 @@ function run_in_context
 
   mkdir --parents "${dir_path}"
   pushd "${dir_path}"
-  $fn_arg "${@:3}"
+  ${fn_arg} "${@:3}"
   popd
 }
 
@@ -29,9 +29,9 @@ function set_up_new_gpg_homedir
   chmod "u+rwx,go-rwx" "${temp_gpg_homedir}"
 
   if test -z "${GNUPGHOME+a}"; then
-    cp "$HOME/.gnupg/gpg.conf" "${temp_gpg_homedir}"
+    cp "${HOME}/.gnupg/gpg.conf" "${temp_gpg_homedir}"
   else
-    cp "$GNUPGHOME/gpg.conf" "${temp_gpg_homedir}"
+    cp "${GNUPGHOME}/gpg.conf" "${temp_gpg_homedir}"
   fi
 
   gpgconf --kill gpg-agent

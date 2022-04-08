@@ -12,7 +12,7 @@ function on_exit
 {
   local exit_code=$?
 
-  if [[ $exit_code -eq 0 ]]; then
+  if [[ ${exit_code} -eq 0 ]]; then
     rm -f "${CHROME_DEB_PATH}"
   fi
 
