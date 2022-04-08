@@ -44,7 +44,7 @@ function main
     "/home/$(id -un)/workspace/ubuntu_bare_minimum.bash" \
     "/home/$(id -un)/workspace/jetbrains-toolbox___.tar.gz"
 
-  log_info "Success: $(basename $0)"
+  log_info "Success: $(basename "$0")"
 }
 
 main

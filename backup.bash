@@ -104,7 +104,7 @@ function main
   sync_archive "${dir_archive_home}" "${dir_archive_sdb}"
   sync_archive "${dir_archive_home}" "${dir_archive_sdc}"
 
-  log_info "Success: $(basename $0)"
+  log_info "Success: $(basename "$0")"
 }
 
 # Entry point

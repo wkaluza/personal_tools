@@ -18,7 +18,7 @@ function on_exit
     rm -f "${CHROME_DEB_PATH}"
   fi
 
-  exit $exit_code
+  exit "${exit_code}"
 }
 
 trap on_exit EXIT
@@ -497,7 +497,7 @@ function main
 
   disable_swap
 
-  log_info "Success: $(basename $0)"
+  log_info "Success: $(basename "$0")"
   log_info "Reboot required."
 }
 

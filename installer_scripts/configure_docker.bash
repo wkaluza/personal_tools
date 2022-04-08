@@ -18,7 +18,7 @@ function on_exit
     rm -rf "${CREDENTIAL_HELPERS_DIR}"
   fi
 
-  exit $exit_code
+  exit "${exit_code}"
 }
 
 trap on_exit EXIT
@@ -179,7 +179,7 @@ function main
   install_docker_pass_credential_helper
   install_docker_compose_if_absent
 
-  log_info "Success: $(basename $0)"
+  log_info "Success: $(basename "$0")"
 }
 
 # Entry point

@@ -12,7 +12,7 @@ function main
     "${project_root_dir}/docker/docker_jobs.json" \
     "lint"
 
-  echo Success
+  echo "Success: $(basename "$0")"
 }
 
 # Entry point

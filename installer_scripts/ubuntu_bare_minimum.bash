@@ -383,7 +383,7 @@ function main
 
   set_umask_and_home_permissions
 
-  log_info "Success: $(basename $0)"
+  log_info "Success: $(basename "$0")"
 }
 
 main "${1-"${ERR_JETBRAINS_PATH_NOT_SET}"}"

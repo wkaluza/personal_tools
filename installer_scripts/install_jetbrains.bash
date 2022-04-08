@@ -81,7 +81,7 @@ function main
 
   install_jetbrains_toolbox "${jetbrains_toolbox_tar_gz_path}"
 
-  log_info "Success: $(basename $0)"
+  log_info "Success: $(basename "$0")"
 }
 
 # Entry point

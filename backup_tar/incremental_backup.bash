@@ -107,7 +107,7 @@ function main
     exit 1
   fi
 
-  log_info "Success: $(basename $0)"
+  log_info "Success: $(basename "$0")"
 }
 
 # Entry point
