@@ -362,12 +362,6 @@ function install_heroku_cli
   sudo apt-get update
   sudo apt-get install --yes \
     heroku
-
-  echo "heroku installed to $(which heroku)"
-  heroku version
-
-  printf "$(heroku autocomplete:script bash)" >>"$HOME/.bashrc"
-  source "$HOME/.bashrc"
 }
 
 function install_inkscape
