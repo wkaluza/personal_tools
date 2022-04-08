@@ -25,16 +25,18 @@ function install_golang
   local download_url="https://dl.google.com/go/go${v}.linux-amd64.tar.gz"
   local target_dir="/usr/local"
 
-  export GOROOT="${target_dir}/go"
-  echo export GOROOT="\"${target_dir}/go\"" >>"${SET_UP_ENV}"
+  cat <<EOF >>"${SET_UP_ENV}"
+export GOROOT="${target_dir}/go"
+export PATH="\${GOROOT}/bin:\${PATH}"
+EOF
 
-  export PATH="${GOROOT}/bin:${PATH}"
-  echo export PATH="\"\${GOROOT}/bin:\${PATH}\"" >>"${SET_UP_ENV}"
-
-  for d in $(ls -w1 /home/); do
-    export PATH="/home/${d}/go/bin:${PATH}"
-    echo export PATH="\"/home/${d}/go/bin:\${PATH}\"" >>"${SET_UP_ENV}"
+  for d in /home/*; do
+    cat <<EOF >>"${SET_UP_ENV}"
+export PATH="${d}/go/bin:\${PATH}"
+EOF
   done
+
+  source "${SET_UP_ENV}"
 
   curl -fsSL --output "./${go_archive}" "${download_url}"
 
