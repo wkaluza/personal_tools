@@ -12,9 +12,6 @@ function ensure_docker_swarm_init
 {
   local swarm_state="$(get_swarm_state)"
 
-  local primary_key="174C9368811039C87F0C806A896572D1E78ED6A7"
-  local encryption_subkey="217BB178444E212F714DBAC90FBB9BD0E486C169"
-
   local swarm_key_pass_id="wk_local_swarm_key"
   local swarm_key_magic_prefix="SWMKEY"
 
