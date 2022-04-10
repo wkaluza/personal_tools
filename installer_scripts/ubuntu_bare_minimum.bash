@@ -317,17 +317,11 @@ function configure_bash
 ${config_preamble}
 shopt -s histappend
 shopt -s cmdhist
-HISTFILESIZE=1000000
-HISTSIZE=1000000
-HISTIGNORE="pwd:top:ps"
-HISTCONTROL=ignorespace:erasedups
-PROMPT_COMMAND="history -n ; history -a"
-
-export HISTFILESIZE \
-  HISTSIZE \
-  HISTIGNORE \
-  HISTCONTROL \
-  PROMPT_COMMAND
+export HISTFILESIZE=1000000
+export HISTSIZE=1000000
+export HISTIGNORE="pwd:top:ps"
+export HISTCONTROL=ignorespace:erasedups
+export PROMPT_COMMAND="history -n ; history -a"
 EOF
 
     source "${bashrc_path}"
