@@ -14,7 +14,6 @@ function main
   mkdir --parents "${mount_point}"
 
   sudo cryptsetup open "${encrypted_device}" "${mapping_name}"
-  sleep 5
   sudo mount "${mapped_device}" "${mount_point}"
 }
 
