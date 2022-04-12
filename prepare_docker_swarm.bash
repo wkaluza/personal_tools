@@ -149,7 +149,7 @@ function retry_until_success
   local command="$2"
   local args=("${@:3}")
 
-  local i=0
+  local i=1
   until ${command} "${args[@]}" >/dev/null 2>&1; do
     echo "Retrying: ${task_name}"
 
@@ -162,7 +162,7 @@ function retry_until_success
     sleep 5
   done
 
-  if [[ ${i} -gt 0 ]]; then
+  if [[ ${i} -gt 1 ]]; then
     echo "Successful (${i} retries): ${task_name}"
   fi
 }
