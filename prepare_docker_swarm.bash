@@ -1,10 +1,12 @@
 set -euo pipefail
 shopt -s inherit_errexit
 
+THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
 function get_swarm_state
 {
   docker system info --format='{{json .}}' |
-    jq -r --sort-keys '.Swarm.LocalNodeState' -
+    jq -r '.Swarm.LocalNodeState' -
 }
 
 # Note: recursive function
@@ -46,33 +48,36 @@ function ensure_docker_swarm_init
   fi
 }
 
-function is_docker_registry_running
+function is_bootstrap_registry_running
 {
   local registry_service_name="$1"
 
-  docker service ls --format='{{json .Name}}' |
-    jq -r --sort-keys '.' - |
+  docker service ls --format='{{ json . }}' |
+    jq -s "map(select( .Name == \"${registry_service_name}\" ))" - |
+    jq -r 'if . | length == 1 then .[0].Name else error("Expected service not found") end' - 2>/dev/null |
+    head -n 1 |
     grep -E "^${registry_service_name}$" >/dev/null
 }
 
 function get_local_node_id
 {
   docker node ls --format='{{ json . }}' |
-    jq -s --sort-keys '.' - |
-    jq --sort-keys '. | map(select( .Self == true ))' - |
-    jq -r --sort-keys 'if . | length == 1 then .[0].ID else error("Expected exactly one local node") end' -
+    jq -s '.' - |
+    jq '. | map(select( .Self == true ))' - |
+    jq -r 'if . | length == 1 then .[0].ID else error("Expected exactly one local node") end' -
 }
 
-function start_docker_registry
+function start_bootstrap_registry
 {
   local registry_service_name="$1"
-  local registry_port="$2"
-  local local_node_id="$3"
+  local bootstrap_registry_volume_name="$2"
+  local registry_port="$3"
+  local local_node_id="$4"
 
   local registry_image_version="2.8.1"
 
   local port_info="published=${registry_port},target=5000,mode=ingress,protocol=tcp"
-  local volume_info="type=volume,source=${registry_service_name}_volume,destination=/var/lib/registry"
+  local volume_info="type=volume,source=${bootstrap_registry_volume_name},destination=/var/lib/registry"
 
   echo "Starting service ${registry_service_name}..."
 
@@ -90,26 +95,158 @@ function start_docker_registry
   fi
 }
 
+function is_registry_stack_running
+{
+  local stack_name="$1"
+
+  docker stack ls --format '{{ json . }}' |
+    jq -s "map(select( .Name == \"${stack_name}\" ))" - |
+    jq -r 'if . | length == 1 then .[0].Name else error("Expected stack not found") end' - 2>/dev/null |
+    head -n 1 |
+    grep -E "^${stack_name}$" &>/dev/null
+}
+
+function start_registry_stack
+{
+  local registry_host="$1"
+  local local_node_id="$2"
+  local compose_file="$3"
+  local stack_name="$4"
+
+  echo "Building registry stack images..."
+
+  DOCKER_REGISTRY_HOST="${registry_host}" \
+    LOCAL_NODE_ID="${local_node_id}" \
+    PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
+    docker compose \
+    --file "${compose_file}" \
+    build >/dev/null
+
+  echo "Pushing registry stack images..."
+
+  DOCKER_REGISTRY_HOST="${registry_host}" \
+    LOCAL_NODE_ID="${local_node_id}" \
+    PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
+    docker compose \
+    --file "${compose_file}" \
+    push >/dev/null 2>&1
+
+  echo "Deploying registry stack..."
+
+  DOCKER_REGISTRY_HOST="${registry_host}" \
+    LOCAL_NODE_ID="${local_node_id}" \
+    PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
+    docker stack deploy \
+    --compose-file "${compose_file}" \
+    "${stack_name}" >/dev/null
+
+  echo "Registry stack deployed successfully"
+}
+
+function retry_until_success
+{
+  local task_name="$1"
+  local command="$2"
+  local args=("${@:3}")
+
+  local i=0
+  until ${command} "${args[@]}" >/dev/null 2>&1; do
+    echo "Retrying: ${task_name}"
+    i="$((i + 1))"
+    if [[ ${i} -gt 30 ]]; then
+      echo "Timed out: ${task_name}"
+      exit 1
+    fi
+    sleep 2
+  done
+}
+
+function ping_registry
+{
+  local registry_host="$1"
+
+  local scheme="http"
+  local endpoint="v2/_catalog"
+
+  curl --silent \
+    "${scheme}://${registry_host}/${endpoint}" |
+    grep "repositories"
+}
+
+function rm_volume
+{
+  local volume_name="$1"
+
+  docker volume rm \
+    --force \
+    "${volume_name}"
+}
+
 function ensure_local_docker_registry_is_running
 {
+  local local_registry_host="$1"
+
   local registry_port=5555
-  local local_docker_registry_service_name="local_docker_registry"
+  local bootstrap_registry_host="localhost:${registry_port}"
+  local bootstrap_registry_service_name="bootstrap_local_registry"
+  local bootstrap_registry_volume_name="bootstrap_local_registry_volume"
+  local compose_file="${THIS_SCRIPT_DIR}/local_docker_registry.json"
+  local stack_name="local_registry_stack"
+
+  local hosts_file="/etc/hosts"
+  if ! cat "${hosts_file}" | grep "${local_registry_host}" >/dev/null; then
+    echo "Need to add ${local_registry_host} to ${hosts_file} ..."
+    echo "127.0.0.1 ${local_registry_host}" | sudo tee --append "${hosts_file}"
+  fi
 
   local local_node_id
   local_node_id="$(get_local_node_id)"
 
-  if ! is_docker_registry_running "${local_docker_registry_service_name}"; then
-    start_docker_registry \
-      "${local_docker_registry_service_name}" \
-      "${registry_port}" \
-      "${local_node_id}"
+  if is_registry_stack_running "${stack_name}"; then
+    echo "Registry stack is already up"
+  else
+    if is_bootstrap_registry_running "${bootstrap_registry_service_name}"; then
+      echo "Bootstrap registry service is already up"
+    else
+      start_bootstrap_registry \
+        "${bootstrap_registry_service_name}" \
+        "${bootstrap_registry_volume_name}" \
+        "${registry_port}" \
+        "${local_node_id}"
+    fi
+
+    retry_until_success \
+      "ping_registry ${bootstrap_registry_host}" \
+      ping_registry "${bootstrap_registry_host}"
+
+    start_registry_stack \
+      "${bootstrap_registry_host}" \
+      "${local_node_id}" \
+      "${compose_file}" \
+      "${stack_name}"
+
+    retry_until_success \
+      "ping_registry ${local_registry_host}" \
+      ping_registry "${local_registry_host}"
+
+    docker service rm \
+      "${bootstrap_registry_service_name}" >/dev/null
+
+    retry_until_success \
+      "rm_volume ${bootstrap_registry_volume_name}" \
+      rm_volume "${bootstrap_registry_volume_name}"
   fi
 }
 
 function main
 {
+  local local_registry_host="docker.registry.local"
+
   ensure_docker_swarm_init
-  ensure_local_docker_registry_is_running
+  ensure_local_docker_registry_is_running \
+    "${local_registry_host}"
+
+  echo "Success $(basename "$0")"
 }
 
 main

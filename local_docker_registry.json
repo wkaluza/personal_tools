@@ -1,0 +1,65 @@
+{
+  "networks": {
+    "frontend": {},
+    "internal": {}
+  },
+  "services": {
+    "docker_registry": {
+      "build": {
+        "context": "$PROJECT_ROOT_DIR/docker_registry/registry",
+        "dockerfile": "$PROJECT_ROOT_DIR/docker_registry/registry/registry.dockerfile"
+      },
+      "deploy": {
+        "mode": "global",
+        "placement": {
+          "constraints": [
+            "node.id==$LOCAL_NODE_ID"
+          ]
+        }
+      },
+      "image": "$DOCKER_REGISTRY_HOST/registry",
+      "networks": [
+        "internal"
+      ],
+      "ports": [
+        "5000:5000"
+      ],
+      "volumes": [
+        {
+          "source": "local_registry_volume",
+          "target": "/var/lib/registry",
+          "type": "volume"
+        }
+      ]
+    },
+    "reverse_proxy": {
+      "build": {
+        "context": "$PROJECT_ROOT_DIR/docker_registry/reverse_proxy",
+        "dockerfile": "$PROJECT_ROOT_DIR/docker_registry/reverse_proxy/reverse_proxy.dockerfile"
+      },
+      "depends_on": [
+        "docker_registry"
+      ],
+      "deploy": {
+        "mode": "global",
+        "placement": {
+          "constraints": [
+            "node.id==$LOCAL_NODE_ID"
+          ]
+        }
+      },
+      "image": "$DOCKER_REGISTRY_HOST/nginx",
+      "networks": [
+        "frontend",
+        "internal"
+      ],
+      "ports": [
+        "80:80"
+      ]
+    }
+  },
+  "version": "3.9",
+  "volumes": {
+    "local_registry_volume": {}
+  }
+}
