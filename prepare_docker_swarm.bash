@@ -157,7 +157,8 @@ function retry_until_success
       echo "Timed out: ${task_name}"
       exit 1
     fi
-    sleep 2
+
+    sleep 5
   done
 }
 
