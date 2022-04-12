@@ -3,6 +3,8 @@ shopt -s inherit_errexit
 
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
+source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"
+
 function get_swarm_state
 {
   docker system info --format='{{json .}}' |
@@ -19,31 +21,31 @@ function ensure_docker_swarm_init
   local swarm_key_magic_prefix="SWMKEY"
 
   if [[ "${swarm_state}" == "locked" ]]; then
-    echo "Swarm is locked, unlocking..."
+    log_info "Swarm is locked, unlocking..."
     if pass show "${swarm_key_pass_id}" >/dev/null &&
       pass show "${swarm_key_pass_id}" |
       docker swarm unlock >/dev/null 2>&1; then
-      echo "Swarm unlocked successfully"
+      log_info "Swarm unlocked successfully"
     else
-      echo "Cannot unlock swarm, need to leave and re-init..."
+      log_info "Cannot unlock swarm, need to leave and re-init..."
 
       docker swarm leave --force
 
       ensure_docker_swarm_init
     fi
   elif [[ "${swarm_state}" == "inactive" ]]; then
-    echo "Swarm is inactive, initialising..."
+    log_info "Swarm is inactive, initialising..."
 
     docker swarm init --autolock |
       grep "${swarm_key_magic_prefix}" |
       sed -E "s/^.*(${swarm_key_magic_prefix}.*)$/\1/" |
       pass insert --multiline "${swarm_key_pass_id}" >/dev/null
 
-    echo "Swarm is now active"
+    log_info "Swarm is now active"
   elif [[ "${swarm_state}" == "active" ]]; then
-    echo "Swarm is active"
+    log_info "Swarm is active"
   else
-    echo "Error: unexpected docker swarm state '${swarm_state}'"
+    log_error "Unexpected docker swarm state '${swarm_state}'"
     exit 1
   fi
 }
@@ -79,7 +81,7 @@ function start_bootstrap_registry
   local port_info="published=${registry_port},target=5000,mode=ingress,protocol=tcp"
   local volume_info="type=volume,source=${bootstrap_registry_volume_name},destination=/var/lib/registry"
 
-  echo "Starting service ${registry_service_name}..."
+  log_info "Starting service ${registry_service_name}..."
 
   if docker service create \
     --constraint "node.id==${local_node_id}" \
@@ -89,9 +91,9 @@ function start_bootstrap_registry
     --publish "${port_info}" \
     --quiet \
     "registry:${registry_image_version}" >/dev/null; then
-    echo "Service ${registry_service_name} started successfully"
+    log_info "Service ${registry_service_name} started successfully"
   else
-    echo "Error: failed to start service ${registry_service_name}"
+    log_error "Failed to start service ${registry_service_name}"
   fi
 }
 
@@ -113,7 +115,7 @@ function start_registry_stack
   local compose_file="$3"
   local stack_name="$4"
 
-  echo "Building registry stack images..."
+  log_info "Building registry stack images..."
 
   DOCKER_REGISTRY_HOST="${registry_host}" \
     LOCAL_NODE_ID="${local_node_id}" \
@@ -122,7 +124,7 @@ function start_registry_stack
     --file "${compose_file}" \
     build >/dev/null
 
-  echo "Pushing registry stack images..."
+  log_info "Pushing registry stack images..."
 
   DOCKER_REGISTRY_HOST="${registry_host}" \
     LOCAL_NODE_ID="${local_node_id}" \
@@ -131,7 +133,7 @@ function start_registry_stack
     --file "${compose_file}" \
     push >/dev/null 2>&1
 
-  echo "Deploying registry stack..."
+  log_info "Deploying registry stack..."
 
   DOCKER_REGISTRY_HOST="${registry_host}" \
     LOCAL_NODE_ID="${local_node_id}" \
@@ -140,7 +142,7 @@ function start_registry_stack
     --compose-file "${compose_file}" \
     "${stack_name}" >/dev/null
 
-  echo "Registry stack deployed successfully"
+  log_info "Registry stack deployed successfully"
 }
 
 function retry_until_success
@@ -151,11 +153,11 @@ function retry_until_success
 
   local i=1
   until ${command} "${args[@]}" >/dev/null 2>&1; do
-    echo "Retrying: ${task_name}"
+    log_info "Retrying: ${task_name}"
 
     i="$((i + 1))"
     if [[ ${i} -gt 30 ]]; then
-      echo "Timed out: ${task_name}"
+      log_error "Timed out: ${task_name}"
       exit 1
     fi
 
@@ -163,7 +165,7 @@ function retry_until_success
   done
 
   if [[ ${i} -gt 1 ]]; then
-    echo "Success (attempt ${i}): ${task_name}"
+    log_info "Success (attempt ${i}): ${task_name}"
   fi
 }
 
@@ -201,7 +203,7 @@ function ensure_local_docker_registry_is_running
 
   local hosts_file="/etc/hosts"
   if ! cat "${hosts_file}" | grep "${local_registry_host}" >/dev/null; then
-    echo "Need to add ${local_registry_host} to ${hosts_file} ..."
+    log_info "Need to add ${local_registry_host} to ${hosts_file} ..."
     echo "127.0.0.1 ${local_registry_host}" | sudo tee --append "${hosts_file}"
   fi
 
@@ -209,10 +211,10 @@ function ensure_local_docker_registry_is_running
   local_node_id="$(get_local_node_id)"
 
   if is_registry_stack_running "${stack_name}"; then
-    echo "Registry stack is already up"
+    log_info "Registry stack is already up"
   else
     if is_bootstrap_registry_running "${bootstrap_registry_service_name}"; then
-      echo "Bootstrap registry service is already up"
+      log_info "Bootstrap registry service is already up"
     else
       start_bootstrap_registry \
         "${bootstrap_registry_service_name}" \
@@ -252,7 +254,7 @@ function main
   ensure_local_docker_registry_is_running \
     "${local_registry_host}"
 
-  echo "Success $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
 main
