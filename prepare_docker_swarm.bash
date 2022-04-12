@@ -163,7 +163,7 @@ function retry_until_success
   done
 
   if [[ ${i} -gt 1 ]]; then
-    echo "Successful (${i} retries): ${task_name}"
+    echo "Success (attempt ${i}): ${task_name}"
   fi
 }
 
