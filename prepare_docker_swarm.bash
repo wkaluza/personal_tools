@@ -74,12 +74,11 @@ function start_bootstrap_registry
 {
   local registry_service_name="$1"
   local bootstrap_registry_volume_name="$2"
-  local registry_port="$3"
-  local local_node_id="$4"
+  local local_node_id="$3"
 
   local registry_image_version="2.8.1"
 
-  local port_info="published=${registry_port},target=5000,mode=ingress,protocol=tcp"
+  local port_info="target=5000,mode=ingress,protocol=tcp"
   local volume_info="type=volume,source=${bootstrap_registry_volume_name},destination=/var/lib/registry"
 
   log_info "Starting service ${registry_service_name}..."
@@ -168,12 +167,18 @@ function rm_volume
     "${volume_name}"
 }
 
+function get_bootstrap_registry_port
+{
+  local service_name="$1"
+
+  docker service inspect "${service_name}" |
+    jq -r '.[0].Endpoint.Ports[0].PublishedPort' -
+}
+
 function ensure_local_docker_registry_is_running
 {
   local local_registry_host="$1"
 
-  local registry_port=5555
-  local bootstrap_registry_host="localhost:${registry_port}"
   local bootstrap_registry_service_name="bootstrap_local_registry"
   local bootstrap_registry_volume_name="bootstrap_local_registry_volume"
   local compose_file="${THIS_SCRIPT_DIR}/local_docker_registry.json"
@@ -197,9 +202,14 @@ function ensure_local_docker_registry_is_running
       start_bootstrap_registry \
         "${bootstrap_registry_service_name}" \
         "${bootstrap_registry_volume_name}" \
-        "${registry_port}" \
         "${local_node_id}"
     fi
+
+    local registry_port
+    registry_port=$(get_bootstrap_registry_port "${bootstrap_registry_service_name}")
+
+    local bootstrap_registry_host
+    bootstrap_registry_host="localhost:${registry_port}"
 
     retry_until_success \
       "ping_registry ${bootstrap_registry_host}" \
