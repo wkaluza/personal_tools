@@ -10,7 +10,6 @@ function main
   local mount_point="${HOME}/luks/${mapping_name}"
 
   sudo umount "${mount_point}"
-  sleep 5
   sudo cryptsetup close "${mapping_name}"
 }
 
