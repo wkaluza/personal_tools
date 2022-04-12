@@ -95,6 +95,7 @@ function start_bootstrap_registry
     log_info "Service ${registry_service_name} started successfully"
   else
     log_error "Failed to start service ${registry_service_name}"
+    exit 1
   fi
 }
 
