@@ -4,6 +4,7 @@ shopt -s inherit_errexit
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"
+source "${THIS_SCRIPT_DIR}/shell_script_imports/common.bash"
 
 function get_swarm_state
 {
@@ -143,30 +144,6 @@ function start_registry_stack
     "${stack_name}" >/dev/null
 
   log_info "Registry stack deployed successfully"
-}
-
-function retry_until_success
-{
-  local task_name="$1"
-  local command="$2"
-  local args=("${@:3}")
-
-  local i=1
-  until ${command} "${args[@]}" >/dev/null 2>&1; do
-    log_info "Retrying: ${task_name}"
-
-    i="$((i + 1))"
-    if [[ ${i} -gt 30 ]]; then
-      log_error "Timed out: ${task_name}"
-      exit 1
-    fi
-
-    sleep 5
-  done
-
-  if [[ ${i} -gt 1 ]]; then
-    log_info "Success (attempt ${i}): ${task_name}"
-  fi
 }
 
 function ping_registry

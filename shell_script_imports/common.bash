@@ -72,3 +72,27 @@ function os_version_codename
 
   echo "${output}"
 }
+
+function retry_until_success
+{
+  local task_name="$1"
+  local command="$2"
+  local args=("${@:3}")
+
+  local i=1
+  until ${command} "${args[@]}" >/dev/null 2>&1; do
+    echo "Retrying: ${task_name}"
+
+    i="$((i + 1))"
+    if [[ ${i} -gt 30 ]]; then
+      echo "Timed out: ${task_name}"
+      exit 1
+    fi
+
+    sleep 5
+  done
+
+  if [[ ${i} -gt 1 ]]; then
+    echo "Success (attempt ${i}): ${task_name}"
+  fi
+}
