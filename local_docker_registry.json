@@ -17,12 +17,12 @@
           ]
         }
       },
+      "expose": [
+        "5000"
+      ],
       "image": "$DOCKER_REGISTRY_HOST/registry",
       "networks": [
         "internal"
-      ],
-      "ports": [
-        "5000:5000"
       ],
       "volumes": [
         {
