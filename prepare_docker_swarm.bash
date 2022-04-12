@@ -152,6 +152,7 @@ function retry_until_success
   local i=0
   until ${command} "${args[@]}" >/dev/null 2>&1; do
     echo "Retrying: ${task_name}"
+
     i="$((i + 1))"
     if [[ ${i} -gt 30 ]]; then
       echo "Timed out: ${task_name}"
@@ -160,6 +161,10 @@ function retry_until_success
 
     sleep 5
   done
+
+  if [[ ${i} -gt 0 ]]; then
+    echo "Successful (${i} retries): ${task_name}"
+  fi
 }
 
 function ping_registry
