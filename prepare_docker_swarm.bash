@@ -73,13 +73,13 @@ function get_local_node_id
 function start_bootstrap_registry
 {
   local registry_service_name="$1"
-  local bootstrap_registry_volume_name="$2"
+  local registry_volume_name="$2"
   local local_node_id="$3"
 
   local registry_image_version="2.8.1"
 
   local port_info="target=5000,mode=ingress,protocol=tcp"
-  local volume_info="type=volume,source=${bootstrap_registry_volume_name},destination=/var/lib/registry"
+  local volume_info="type=volume,source=${registry_volume_name},destination=/var/lib/registry"
 
   log_info "Starting service ${registry_service_name}..."
 
