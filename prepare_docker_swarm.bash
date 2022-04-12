@@ -231,10 +231,6 @@ function ensure_local_docker_registry_is_running
       "${compose_file}" \
       "${stack_name}"
 
-    retry_until_success \
-      "ping_registry ${local_registry_host}" \
-      ping_registry "${local_registry_host}"
-
     docker service rm \
       "${bootstrap_registry_service_name}" >/dev/null
 
@@ -242,6 +238,10 @@ function ensure_local_docker_registry_is_running
       "rm_volume ${bootstrap_registry_volume_name}" \
       rm_volume "${bootstrap_registry_volume_name}"
   fi
+
+  retry_until_success \
+    "ping_registry ${local_registry_host}" \
+    ping_registry "${local_registry_host}"
 }
 
 function main
