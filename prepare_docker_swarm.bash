@@ -123,7 +123,7 @@ function start_registry_stack
     PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
     docker compose \
     --file "${compose_file}" \
-    build >/dev/null
+    build >/dev/null 2>&1
 
   log_info "Pushing registry stack images..."
 
@@ -141,7 +141,7 @@ function start_registry_stack
     PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
     docker stack deploy \
     --compose-file "${compose_file}" \
-    "${stack_name}" >/dev/null
+    "${stack_name}" >/dev/null 2>&1
 
   log_info "Registry stack deployed successfully"
 }
