@@ -8,8 +8,8 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/common.bash"
 
 function get_swarm_state
 {
-  docker system info --format='{{json .}}' |
-    jq -r '.Swarm.LocalNodeState' -
+  docker system info --format='{{ json . }}' |
+    jq --raw-output '.Swarm.LocalNodeState' -
 }
 
 # Note: recursive function
@@ -56,8 +56,12 @@ function is_bootstrap_registry_running
   local registry_service_name="$1"
 
   docker service ls --format='{{ json . }}' |
-    jq -s "map(select( .Name == \"${registry_service_name}\" ))" - |
-    jq -r 'if . | length == 1 then .[0].Name else error("Expected service not found") end' - 2>/dev/null |
+    jq \
+      --slurp \
+      "map(select( .Name == \"${registry_service_name}\" ))" - |
+    jq \
+      --raw-output \
+      'if . | length == 1 then .[0].Name else error("Expected service not found") end' - 2>/dev/null |
     head -n 1 |
     grep -E "^${registry_service_name}$" >/dev/null
 }
@@ -65,9 +69,10 @@ function is_bootstrap_registry_running
 function get_local_node_id
 {
   docker node ls --format='{{ json . }}' |
-    jq -s '.' - |
-    jq '. | map(select( .Self == true ))' - |
-    jq -r 'if . | length == 1 then .[0].ID else error("Expected exactly one local node") end' -
+    jq --slurp '. | map(select( .Self == true ))' - |
+    jq \
+      --raw-output \
+      'if . | length == 1 then .[0].ID else error("Expected exactly one local node") end' -
 }
 
 function start_bootstrap_registry
@@ -103,8 +108,12 @@ function is_registry_stack_running
   local stack_name="$1"
 
   docker stack ls --format '{{ json . }}' |
-    jq -s "map(select( .Name == \"${stack_name}\" ))" - |
-    jq -r 'if . | length == 1 then .[0].Name else error("Expected stack not found") end' - 2>/dev/null |
+    jq \
+      --slurp \
+      "map(select( .Name == \"${stack_name}\" ))" - |
+    jq \
+      --raw-output \
+      'if . | length == 1 then .[0].Name else error("Expected stack not found") end' - 2>/dev/null |
     head -n 1 |
     grep -E "^${stack_name}$" &>/dev/null
 }
