@@ -172,7 +172,10 @@ function get_bootstrap_registry_port
   local service_name="$1"
 
   docker service inspect "${service_name}" |
-    jq -r '.[0].Endpoint.Ports[0].PublishedPort' -
+    jq 'if . | length == 1 then .[0].Endpoint.Ports else error("Expected exactly one element") end' - |
+    jq \
+      --raw-output \
+      'if . | length == 1 then .[0].PublishedPort else error("Expected exactly one element") end' -
 }
 
 function ensure_local_docker_registry_is_running
