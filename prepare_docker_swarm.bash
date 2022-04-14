@@ -78,7 +78,7 @@ function get_local_node_id
       'if . | length == 1 then .[0].ID else error("Expected exactly one local node") end' -
 }
 
-function is_registry_stack_running
+function is_stack_running
 {
   local stack_name="$1"
 
@@ -90,7 +90,21 @@ function is_registry_stack_running
       --raw-output \
       'if . | length == 1 then .[0].Name else error("Expected stack not found") end' - 2>/dev/null |
     head -n 1 |
-    grep -E "^${stack_name}$" &>/dev/null
+    grep -E "^${stack_name}$" >/dev/null
+}
+
+function is_registry_ready
+{
+  local stack_name="$1"
+  local registry_host="$2"
+
+  if is_stack_running "${stack_name}"; then
+    retry_until_success \
+      "ping_registry ${registry_host}" \
+      ping_registry "${registry_host}"
+  else
+    false
+  fi
 }
 
 function start_registry_stack
@@ -114,7 +128,9 @@ function start_registry_stack
     --file "${compose_file}" \
     build >/dev/null 2>&1
 
-  if is_registry_stack_running "${stack_name}"; then
+  if is_registry_ready \
+    "${stack_name}" \
+    "${registry_host}"; then
     docker_compose_push \
       "${registry_image_ref}" \
       "${reverse_proxy_image_ref}" \
