@@ -12,6 +12,22 @@ function get_swarm_state
     jq --raw-output '.Swarm.LocalNodeState' -
 }
 
+function docker_compose_push
+{
+  local registry_host="$1"
+  local local_node_id="$2"
+  local compose_file="$3"
+
+  log_info "Pushing registry stack images..."
+
+  DOCKER_REGISTRY_HOST="${registry_host}" \
+    LOCAL_NODE_ID="${local_node_id}" \
+    PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
+    docker compose \
+    --file "${compose_file}" \
+    push >/dev/null 2>&1
+}
+
 # Note: recursive function
 function ensure_docker_swarm_init
 {
@@ -51,21 +67,6 @@ function ensure_docker_swarm_init
   fi
 }
 
-function is_bootstrap_registry_running
-{
-  local registry_service_name="$1"
-
-  docker service ls --format='{{ json . }}' |
-    jq \
-      --slurp \
-      "map(select( .Name == \"${registry_service_name}\" ))" - |
-    jq \
-      --raw-output \
-      'if . | length == 1 then .[0].Name else error("Expected service not found") end' - 2>/dev/null |
-    head -n 1 |
-    grep -E "^${registry_service_name}$" >/dev/null
-}
-
 function get_local_node_id
 {
   docker node ls --format='{{ json . }}' |
@@ -73,34 +74,6 @@ function get_local_node_id
     jq \
       --raw-output \
       'if . | length == 1 then .[0].ID else error("Expected exactly one local node") end' -
-}
-
-function start_bootstrap_registry
-{
-  local registry_service_name="$1"
-  local registry_volume_name="$2"
-  local local_node_id="$3"
-
-  local registry_image_version="2.8.1"
-
-  local port_info="target=5000,mode=ingress,protocol=tcp"
-  local volume_info="type=volume,source=${registry_volume_name},destination=/var/lib/registry"
-
-  log_info "Starting service ${registry_service_name}..."
-
-  if docker service create \
-    --constraint "node.id==${local_node_id}" \
-    --mode "global" \
-    --mount "${volume_info}" \
-    --name "${registry_service_name}" \
-    --publish "${port_info}" \
-    --quiet \
-    "registry:${registry_image_version}" >/dev/null; then
-    log_info "Service ${registry_service_name} started successfully"
-  else
-    log_error "Failed to start service ${registry_service_name}"
-    exit 1
-  fi
 }
 
 function is_registry_stack_running
@@ -125,6 +98,8 @@ function start_registry_stack
   local compose_file="$3"
   local stack_name="$4"
 
+  local defer_push="false"
+
   log_info "Building registry stack images..."
 
   DOCKER_REGISTRY_HOST="${registry_host}" \
@@ -134,14 +109,14 @@ function start_registry_stack
     --file "${compose_file}" \
     build >/dev/null 2>&1
 
-  log_info "Pushing registry stack images..."
-
-  DOCKER_REGISTRY_HOST="${registry_host}" \
-    LOCAL_NODE_ID="${local_node_id}" \
-    PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
-    docker compose \
-    --file "${compose_file}" \
-    push >/dev/null 2>&1
+  if is_registry_stack_running "${stack_name}"; then
+    docker_compose_push \
+      "${registry_host}" \
+      "${local_node_id}" \
+      "${compose_file}"
+  else
+    defer_push="true"
+  fi
 
   log_info "Deploying registry stack..."
 
@@ -153,7 +128,18 @@ function start_registry_stack
     --prune \
     "${stack_name}" >/dev/null 2>&1
 
+  retry_until_success \
+    "ping_registry ${registry_host}" \
+    ping_registry "${registry_host}"
+
   log_info "Registry stack deployed successfully"
+
+  if [[ "${defer_push}" == "true" ]]; then
+    docker_compose_push \
+      "${registry_host}" \
+      "${local_node_id}" \
+      "${compose_file}"
+  fi
 }
 
 function ping_registry
@@ -177,23 +163,10 @@ function rm_volume
     "${volume_name}"
 }
 
-function get_bootstrap_registry_port
-{
-  local service_name="$1"
-
-  docker service inspect "${service_name}" |
-    jq 'if . | length == 1 then .[0].Endpoint.Ports else error("Expected exactly one element") end' - |
-    jq \
-      --raw-output \
-      'if . | length == 1 then .[0].PublishedPort else error("Expected exactly one element") end' -
-}
-
 function ensure_local_docker_registry_is_running
 {
   local local_registry_host="$1"
 
-  local bootstrap_registry_service_name="bootstrap_local_registry"
-  local bootstrap_registry_volume_name="bootstrap_local_registry_volume"
   local compose_file="${THIS_SCRIPT_DIR}/local_docker_registry.json"
   local stack_name="local_registry_stack"
 
@@ -209,37 +182,11 @@ function ensure_local_docker_registry_is_running
   if is_registry_stack_running "${stack_name}"; then
     log_info "Registry stack is already up"
   else
-    if is_bootstrap_registry_running "${bootstrap_registry_service_name}"; then
-      log_info "Bootstrap registry service is already up"
-    else
-      start_bootstrap_registry \
-        "${bootstrap_registry_service_name}" \
-        "${bootstrap_registry_volume_name}" \
-        "${local_node_id}"
-    fi
-
-    local registry_port
-    registry_port=$(get_bootstrap_registry_port "${bootstrap_registry_service_name}")
-
-    local bootstrap_registry_host
-    bootstrap_registry_host="localhost:${registry_port}"
-
-    retry_until_success \
-      "ping_registry ${bootstrap_registry_host}" \
-      ping_registry "${bootstrap_registry_host}"
-
     start_registry_stack \
-      "${bootstrap_registry_host}" \
+      "${local_registry_host}" \
       "${local_node_id}" \
       "${compose_file}" \
       "${stack_name}"
-
-    docker service rm \
-      "${bootstrap_registry_service_name}" >/dev/null
-
-    retry_until_success \
-      "rm_volume ${bootstrap_registry_volume_name}" \
-      rm_volume "${bootstrap_registry_volume_name}"
   fi
 
   retry_until_success \
