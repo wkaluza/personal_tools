@@ -38,7 +38,7 @@
         },
         "update_config": {
           "delay": "10s",
-          "failure_action": "pause",
+          "failure_action": "rollback",
           "max_failure_ratio": 0,
           "monitor": "10s",
           "order": "start-first",
@@ -94,7 +94,7 @@
         },
         "update_config": {
           "delay": "10s",
-          "failure_action": "pause",
+          "failure_action": "rollback",
           "max_failure_ratio": 0,
           "monitor": "10s",
           "order": "start-first",
