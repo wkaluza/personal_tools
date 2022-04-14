@@ -20,7 +20,7 @@
       "expose": [
         "5000"
       ],
-      "image": "$DOCKER_REGISTRY_HOST/registry",
+      "image": "$DOCKER_REGISTRY_IMAGE_REFERENCE",
       "networks": [
         "internal"
       ],
@@ -48,7 +48,7 @@
           ]
         }
       },
-      "image": "$DOCKER_REGISTRY_HOST/nginx",
+      "image": "$REVERSE_PROXY_IMAGE_REFERENCE",
       "networks": [
         "frontend",
         "internal"

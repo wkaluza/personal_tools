@@ -14,13 +14,15 @@ function get_swarm_state
 
 function docker_compose_push
 {
-  local registry_host="$1"
-  local local_node_id="$2"
-  local compose_file="$3"
+  local registry_image_ref="$1"
+  local reverse_proxy_image_ref="$2"
+  local local_node_id="$3"
+  local compose_file="$4"
 
   log_info "Pushing registry stack images..."
 
-  DOCKER_REGISTRY_HOST="${registry_host}" \
+  DOCKER_REGISTRY_IMAGE_REFERENCE="${registry_image_ref}" \
+    REVERSE_PROXY_IMAGE_REFERENCE="${reverse_proxy_image_ref}" \
     LOCAL_NODE_ID="${local_node_id}" \
     PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
     docker compose \
@@ -97,12 +99,15 @@ function start_registry_stack
   local local_node_id="$2"
   local compose_file="$3"
   local stack_name="$4"
+  local registry_image_ref="$5"
+  local reverse_proxy_image_ref="$6"
 
   local defer_push="false"
 
   log_info "Building registry stack images..."
 
-  DOCKER_REGISTRY_HOST="${registry_host}" \
+  DOCKER_REGISTRY_IMAGE_REFERENCE="${registry_image_ref}" \
+    REVERSE_PROXY_IMAGE_REFERENCE="${reverse_proxy_image_ref}" \
     LOCAL_NODE_ID="${local_node_id}" \
     PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
     docker compose \
@@ -111,7 +116,8 @@ function start_registry_stack
 
   if is_registry_stack_running "${stack_name}"; then
     docker_compose_push \
-      "${registry_host}" \
+      "${registry_image_ref}" \
+      "${reverse_proxy_image_ref}" \
       "${local_node_id}" \
       "${compose_file}"
   else
@@ -120,7 +126,8 @@ function start_registry_stack
 
   log_info "Deploying registry stack..."
 
-  DOCKER_REGISTRY_HOST="${registry_host}" \
+  DOCKER_REGISTRY_IMAGE_REFERENCE="${registry_image_ref}" \
+    REVERSE_PROXY_IMAGE_REFERENCE="${reverse_proxy_image_ref}" \
     LOCAL_NODE_ID="${local_node_id}" \
     PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
     docker stack deploy \
@@ -136,7 +143,8 @@ function start_registry_stack
 
   if [[ "${defer_push}" == "true" ]]; then
     docker_compose_push \
-      "${registry_host}" \
+      "${registry_image_ref}" \
+      "${reverse_proxy_image_ref}" \
       "${local_node_id}" \
       "${compose_file}"
   fi
@@ -169,6 +177,8 @@ function ensure_local_docker_registry_is_running
 
   local compose_file="${THIS_SCRIPT_DIR}/local_docker_registry.json"
   local stack_name="local_registry_stack"
+  local registry_image_ref="${local_registry_host}/registry"
+  local reverse_proxy_image_ref="${local_registry_host}/nginx"
 
   local hosts_file="/etc/hosts"
   if ! cat "${hosts_file}" | grep "${local_registry_host}" >/dev/null; then
@@ -183,11 +193,9 @@ function ensure_local_docker_registry_is_running
     "${local_registry_host}" \
     "${local_node_id}" \
     "${compose_file}" \
-    "${stack_name}"
-
-  retry_until_success \
-    "ping_registry ${local_registry_host}" \
-    ping_registry "${local_registry_host}"
+    "${stack_name}" \
+    "${registry_image_ref}" \
+    "${reverse_proxy_image_ref}"
 }
 
 function main
