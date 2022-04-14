@@ -165,7 +165,7 @@ function rm_volume
 
 function ensure_local_docker_registry_is_running
 {
-  local local_registry_host="$1"
+  local local_registry_host="docker.registry.local"
 
   local compose_file="${THIS_SCRIPT_DIR}/local_docker_registry.json"
   local stack_name="local_registry_stack"
@@ -196,11 +196,8 @@ function ensure_local_docker_registry_is_running
 
 function main
 {
-  local local_registry_host="docker.registry.local"
-
   ensure_docker_swarm_init
-  ensure_local_docker_registry_is_running \
-    "${local_registry_host}"
+  ensure_local_docker_registry_is_running
 
   log_info "Success $(basename "$0")"
 }
