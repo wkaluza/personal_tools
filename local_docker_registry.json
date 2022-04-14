@@ -1,4 +1,10 @@
 {
+  "configs": {
+    "nginx_config": {
+      "file": "$PROJECT_ROOT_DIR/docker_registry/reverse_proxy/nginx.conf",
+      "name": "local_docker_registry_nginx_config_$NGINX_CONFIG_CHECKSUM"
+    }
+  },
   "networks": {
     "frontend": {},
     "internal": {}
@@ -37,6 +43,12 @@
         "context": "$PROJECT_ROOT_DIR/docker_registry/reverse_proxy",
         "dockerfile": "$PROJECT_ROOT_DIR/docker_registry/reverse_proxy/reverse_proxy.dockerfile"
       },
+      "configs": [
+        {
+          "source": "nginx_config",
+          "target": "/etc/nginx/nginx.conf"
+        }
+      ],
       "depends_on": [
         "docker_registry"
       ],

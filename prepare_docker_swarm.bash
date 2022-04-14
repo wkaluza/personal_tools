@@ -6,10 +6,22 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/common.bash"
 
+NGINX_CONFIG="${THIS_SCRIPT_DIR}/docker_registry/reverse_proxy/nginx.conf"
+
 function get_swarm_state
 {
   docker system info --format='{{ json . }}' |
     jq --raw-output '.Swarm.LocalNodeState' -
+}
+
+function hash_file
+{
+  local file_path="$1"
+
+  cat "${file_path}" |
+    sha256sum - |
+    awk '{ print $1 }' |
+    cut -c '1-8' -
 }
 
 function docker_compose_push
@@ -22,9 +34,10 @@ function docker_compose_push
   log_info "Pushing registry stack images..."
 
   DOCKER_REGISTRY_IMAGE_REFERENCE="${registry_image_ref}" \
-    REVERSE_PROXY_IMAGE_REFERENCE="${reverse_proxy_image_ref}" \
     LOCAL_NODE_ID="${local_node_id}" \
+    NGINX_CONFIG_CHECKSUM="$(hash_file "${NGINX_CONFIG}")" \
     PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
+    REVERSE_PROXY_IMAGE_REFERENCE="${reverse_proxy_image_ref}" \
     docker compose \
     --file "${compose_file}" \
     push >/dev/null 2>&1
@@ -121,9 +134,10 @@ function start_registry_stack
   log_info "Building registry stack images..."
 
   DOCKER_REGISTRY_IMAGE_REFERENCE="${registry_image_ref}" \
-    REVERSE_PROXY_IMAGE_REFERENCE="${reverse_proxy_image_ref}" \
     LOCAL_NODE_ID="${local_node_id}" \
+    NGINX_CONFIG_CHECKSUM="$(hash_file "${NGINX_CONFIG}")" \
     PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
+    REVERSE_PROXY_IMAGE_REFERENCE="${reverse_proxy_image_ref}" \
     docker compose \
     --file "${compose_file}" \
     build >/dev/null 2>&1
@@ -143,9 +157,10 @@ function start_registry_stack
   log_info "Deploying registry stack..."
 
   DOCKER_REGISTRY_IMAGE_REFERENCE="${registry_image_ref}" \
-    REVERSE_PROXY_IMAGE_REFERENCE="${reverse_proxy_image_ref}" \
     LOCAL_NODE_ID="${local_node_id}" \
+    NGINX_CONFIG_CHECKSUM="$(hash_file "${NGINX_CONFIG}")" \
     PROJECT_ROOT_DIR="${THIS_SCRIPT_DIR}" \
+    REVERSE_PROXY_IMAGE_REFERENCE="${reverse_proxy_image_ref}" \
     docker stack deploy \
     --compose-file "${compose_file}" \
     --prune \
