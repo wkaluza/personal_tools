@@ -179,15 +179,11 @@ function ensure_local_docker_registry_is_running
   local local_node_id
   local_node_id="$(get_local_node_id)"
 
-  if is_registry_stack_running "${stack_name}"; then
-    log_info "Registry stack is already up"
-  else
-    start_registry_stack \
-      "${local_registry_host}" \
-      "${local_node_id}" \
-      "${compose_file}" \
-      "${stack_name}"
-  fi
+  start_registry_stack \
+    "${local_registry_host}" \
+    "${local_node_id}" \
+    "${compose_file}" \
+    "${stack_name}"
 
   retry_until_success \
     "ping_registry ${local_registry_host}" \
