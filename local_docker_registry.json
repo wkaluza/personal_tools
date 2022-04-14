@@ -23,9 +23,6 @@
           ]
         }
       },
-      "expose": [
-        "5000"
-      ],
       "image": "$DOCKER_REGISTRY_IMAGE_REFERENCE",
       "networks": [
         "internal"
