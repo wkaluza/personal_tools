@@ -21,6 +21,28 @@
           "constraints": [
             "node.id==$LOCAL_NODE_ID"
           ]
+        },
+        "restart_policy": {
+          "condition": "on-failure",
+          "delay": "10s",
+          "max_attempts": 5,
+          "window": "120s"
+        },
+        "rollback_config": {
+          "delay": "10s",
+          "failure_action": "pause",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        },
+        "update_config": {
+          "delay": "10s",
+          "failure_action": "pause",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
         }
       },
       "image": "$DOCKER_REGISTRY_IMAGE_REFERENCE",
@@ -55,6 +77,28 @@
           "constraints": [
             "node.id==$LOCAL_NODE_ID"
           ]
+        },
+        "restart_policy": {
+          "condition": "on-failure",
+          "delay": "10s",
+          "max_attempts": 5,
+          "window": "120s"
+        },
+        "rollback_config": {
+          "delay": "10s",
+          "failure_action": "pause",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        },
+        "update_config": {
+          "delay": "10s",
+          "failure_action": "pause",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
         }
       },
       "image": "$REVERSE_PROXY_IMAGE_REFERENCE",
