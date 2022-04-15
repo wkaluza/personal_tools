@@ -138,7 +138,8 @@ function start_registry_stack
   run_with_compose_env \
     docker compose \
     --file "${compose_file}" \
-    build
+    build \
+    --pull
 
   if is_registry_ready \
     "${stack_name}" \
