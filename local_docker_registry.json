@@ -61,6 +61,13 @@
           "parallelism": 1
         }
       },
+      "healthcheck": {
+        "disable": false,
+        "interval": "1s",
+        "retries": 30,
+        "start_period": "60s",
+        "timeout": "1s"
+      },
       "image": "${DOCKER_REGISTRY_IMAGE_REFERENCE:?}",
       "networks": [
         "internal"
@@ -128,6 +135,13 @@
           "order": "start-first",
           "parallelism": 1
         }
+      },
+      "healthcheck": {
+        "disable": false,
+        "interval": "1s",
+        "retries": 30,
+        "start_period": "60s",
+        "timeout": "1s"
       },
       "image": "${REVERSE_PROXY_IMAGE_REFERENCE:?}",
       "networks": [
