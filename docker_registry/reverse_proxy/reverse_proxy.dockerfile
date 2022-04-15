@@ -1,10 +1,10 @@
 FROM nginx:1.20.2
 
+COPY ./healthcheck.sh /docker/
+
 HEALTHCHECK \
 --interval=10s \
 --retries=10 \
 --start-period=60s \
 --timeout=5s \
-CMD curl -s http://localhost:8080/_nginx_healthcheck | grep "HEALTHY" \
-|| \
-exit 1
+CMD ["/bin/sh", "/docker/healthcheck.sh"]

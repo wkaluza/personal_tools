@@ -12,7 +12,7 @@
   "services": {
     "docker_registry": {
       "build": {
-        "context": "${PROJECT_ROOT_DIR:?}/registry",
+        "context": "${PROJECT_ROOT_DIR:?}/registry/context",
         "dockerfile": "${PROJECT_ROOT_DIR:?}/registry/registry.dockerfile",
         "network": "none"
       },
@@ -60,7 +60,7 @@
     },
     "reverse_proxy": {
       "build": {
-        "context": "${PROJECT_ROOT_DIR:?}/reverse_proxy",
+        "context": "${PROJECT_ROOT_DIR:?}/reverse_proxy/context",
         "dockerfile": "${PROJECT_ROOT_DIR:?}/reverse_proxy/reverse_proxy.dockerfile",
         "network": "none"
       },

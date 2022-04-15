@@ -57,7 +57,9 @@ function main
   export -f format_shell_scripts
   find "${project_root_dir}" \
     -type f \
-    -name '*.bash' \
+    -and \( \
+    -name '*.bash' -or \
+    -name '*.sh' \) \
     -and -not \( \
     -path "${project_root_dir}/*___*/*" -or \
     -path "${project_root_dir}/.git/*" -or \
@@ -71,7 +73,9 @@ function main
   export -f analyse_shell_scripts
   find "${project_root_dir}" \
     -type f \
-    -name '*.bash' \
+    -and \( \
+    -name '*.bash' -or \
+    -name '*.sh' \) \
     -and -not \( \
     -path "${project_root_dir}/*___*/*" -or \
     -path "${project_root_dir}/.git/*" -or \
