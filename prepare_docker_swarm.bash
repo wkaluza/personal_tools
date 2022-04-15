@@ -11,7 +11,9 @@ LOCAL_REGISTRY_HOST="docker.registry.local"
 DOCKER_REGISTRY_ROOT_DIR="${THIS_SCRIPT_DIR}/docker_registry"
 LOCAL_SWARM_NODE_ID="<___not_a_valid_id___>"
 NGINX_CONFIG_PATH="${THIS_SCRIPT_DIR}/docker_registry/reverse_proxy/nginx.conf"
-NGINX_CONFIG_SHA256="$(cat "${NGINX_CONFIG_PATH}" | sha256 | take_first 8)"
+NGINX_CONFIG_SHA256="$(cat "${NGINX_CONFIG_PATH}" |
+  sha256 |
+  take_first 8)"
 NGINX_IMAGE="${LOCAL_REGISTRY_HOST}/nginx"
 REGISTRY_IMAGE="${LOCAL_REGISTRY_HOST}/registry"
 
@@ -77,7 +79,10 @@ function ensure_docker_swarm_init
     docker swarm init --autolock |
       grep "${swarm_key_magic_prefix}" |
       sed -E "s/^.*(${swarm_key_magic_prefix}.*)$/\1/" |
-      pass insert --multiline "${swarm_key_pass_id}" >/dev/null
+      pass insert \
+        --force \
+        --multiline \
+        "${swarm_key_pass_id}" >/dev/null
 
     log_info "Swarm is now active"
   elif [[ "${swarm_state}" == "active" ]]; then
