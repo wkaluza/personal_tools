@@ -13,7 +13,8 @@
     "docker_registry": {
       "build": {
         "context": "${PROJECT_ROOT_DIR:?}/registry",
-        "dockerfile": "${PROJECT_ROOT_DIR:?}/registry/registry.dockerfile"
+        "dockerfile": "${PROJECT_ROOT_DIR:?}/registry/registry.dockerfile",
+        "network": "none"
       },
       "deploy": {
         "mode": "global",
@@ -60,7 +61,8 @@
     "reverse_proxy": {
       "build": {
         "context": "${PROJECT_ROOT_DIR:?}/reverse_proxy",
-        "dockerfile": "${PROJECT_ROOT_DIR:?}/reverse_proxy/reverse_proxy.dockerfile"
+        "dockerfile": "${PROJECT_ROOT_DIR:?}/reverse_proxy/reverse_proxy.dockerfile",
+        "network": "none"
       },
       "configs": [
         {
