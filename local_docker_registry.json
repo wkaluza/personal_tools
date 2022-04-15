@@ -6,8 +6,12 @@
     }
   },
   "networks": {
-    "frontend": {},
-    "internal": {}
+    "frontend": {
+      "name": "local_registry_frontend"
+    },
+    "internal": {
+      "name": "local_registry_internal"
+    }
   },
   "services": {
     "docker_registry": {
@@ -117,6 +121,8 @@
   },
   "version": "3.9",
   "volumes": {
-    "local_registry_volume": {}
+    "local_registry_volume": {
+      "name": "local_docker_registry_data"
+    }
   }
 }
