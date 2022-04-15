@@ -96,3 +96,13 @@ function retry_until_success
     echo "Success (attempt ${i}): ${task_name}"
   fi
 }
+
+function file_sha256_digest
+{
+  local file_path="$1"
+
+  cat "${file_path}" |
+    sha256sum - |
+    awk '{ print $1 }' |
+    cut -c '1-8' -
+}

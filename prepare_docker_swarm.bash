@@ -14,16 +14,6 @@ function get_swarm_state
     jq --raw-output '.Swarm.LocalNodeState' -
 }
 
-function hash_file
-{
-  local file_path="$1"
-
-  cat "${file_path}" |
-    sha256sum - |
-    awk '{ print $1 }' |
-    cut -c '1-8' -
-}
-
 function docker_compose_push
 {
   local registry_image_ref="$1"
