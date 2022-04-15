@@ -101,6 +101,14 @@ function install_rng_tools
     rng-tools
 }
 
+function install_openssl
+{
+  print_trace
+
+  sudo apt-get install --yes \
+    openssl
+}
+
 function prepare_gnupg
 {
   print_trace
@@ -352,6 +360,7 @@ function main
   prepare_apt
 
   install_rng_tools
+  install_openssl
 
   prepare_gnupg
 
