@@ -105,7 +105,31 @@ function take_first
   local number_of_chars="$1"
 
   cat - |
-    cut -c "1-${number_of_chars}" -
+    head -c "+${number_of_chars}"
+}
+
+function take_last
+{
+  local number_of_chars="$1"
+
+  cat - |
+    tail -c "-${number_of_chars}"
+}
+
+function drop_first
+{
+  local number_of_chars="$1"
+
+  cat - |
+    tail -c "+$((number_of_chars + 1))"
+}
+
+function drop_last
+{
+  local number_of_chars="$1"
+
+  cat - |
+    head -c "-${number_of_chars}"
 }
 
 function sha256
