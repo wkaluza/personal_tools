@@ -149,7 +149,12 @@
         "internal"
       ],
       "ports": [
-        "80:80"
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "published": 80,
+          "target": 80
+        }
       ]
     }
   },
