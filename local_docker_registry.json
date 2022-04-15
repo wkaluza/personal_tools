@@ -20,7 +20,8 @@
         "mode": "global",
         "placement": {
           "constraints": [
-            "node.id==${LOCAL_NODE_ID:?}"
+            "node.id==${LOCAL_NODE_ID:?}",
+            "node.role==manager"
           ]
         },
         "restart_policy": {
@@ -77,7 +78,8 @@
         "mode": "global",
         "placement": {
           "constraints": [
-            "node.id==${LOCAL_NODE_ID:?}"
+            "node.id==${LOCAL_NODE_ID:?}",
+            "node.role==manager"
           ]
         },
         "restart_policy": {
