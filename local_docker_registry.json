@@ -28,6 +28,16 @@
             "node.role==manager"
           ]
         },
+        "resources": {
+          "limits": {
+            "cpus": "0.5",
+            "memory": "50MB"
+          },
+          "reservations": {
+            "cpus": "0.25",
+            "memory": "25MB"
+          }
+        },
         "restart_policy": {
           "condition": "on-failure",
           "delay": "10s",
@@ -85,6 +95,16 @@
             "node.id==${LOCAL_NODE_ID:?}",
             "node.role==manager"
           ]
+        },
+        "resources": {
+          "limits": {
+            "cpus": "0.5",
+            "memory": "50MB"
+          },
+          "reservations": {
+            "cpus": "0.25",
+            "memory": "25MB"
+          }
         },
         "restart_policy": {
           "condition": "on-failure",
