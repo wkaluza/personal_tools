@@ -46,17 +46,9 @@ function clone_or_fetch
 
 function repo_is_clean
 {
-  local repo_state="clean"
-
-  git add . >/dev/null
-
-  if ! git diff --cached; then
-    repo_state="dirty"
-  fi
-
-  git reset --mixed "HEAD" >/dev/null
-
-  if [[ "${repo_state}" == "dirty" ]]; then
+  if [[ "$(git status --short | wc -l)" == "0" ]]; then
+    true
+  else
     false
   fi
 }
