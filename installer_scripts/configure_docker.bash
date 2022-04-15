@@ -37,7 +37,7 @@ function build_docker_pass_credential_helper
     local docker_mount_dir="/external_mount"
 
     local random_tag
-    random_tag="$(up_to_128_random_hex_chars 16)"
+    random_tag="$(random_bytes | hex | take_first 16)"
 
     cat <<EOF | docker build \
       --tag "${random_tag}" \

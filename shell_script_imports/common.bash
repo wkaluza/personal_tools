@@ -50,18 +50,21 @@ function set_up_new_gpg_homedir
   sleep 2
 }
 
-function up_to_128_random_hex_chars
+function hex
 {
-  local num_chars="${1:-128}"
+  cat - |
+    xxd -ps |
+    tr -d '\n'
+}
 
-  local long
-  long="$(
-    dd if=/dev/urandom bs=4096 count=1 2>/dev/null |
-      sha512sum |
-      awk '{ print $1 }'
-  )"
+function random_bytes
+{
+  local how_many="${1:-4096}"
 
-  echo -n "${long:0:num_chars}"
+  dd \
+    if=/dev/urandom \
+    bs="${how_many}" \
+    count=1 2>/dev/null
 }
 
 function os_version_codename
@@ -97,12 +100,17 @@ function retry_until_success
   fi
 }
 
-function file_sha256_digest
+function take_first
 {
-  local file_path="$1"
+  local number_of_chars="$1"
 
-  cat "${file_path}" |
+  cat - |
+    cut -c "1-${number_of_chars}" -
+}
+
+function sha256
+{
+  cat - |
     sha256sum - |
-    awk '{ print $1 }' |
-    cut -c '1-8' -
+    awk '{ print $1 }'
 }

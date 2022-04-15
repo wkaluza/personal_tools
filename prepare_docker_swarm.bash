@@ -11,7 +11,7 @@ LOCAL_REGISTRY_HOST="docker.registry.local"
 DOCKER_REGISTRY_ROOT_DIR="${THIS_SCRIPT_DIR}/docker_registry"
 LOCAL_SWARM_NODE_ID="<___not_a_valid_id___>"
 NGINX_CONFIG_PATH="${THIS_SCRIPT_DIR}/docker_registry/reverse_proxy/nginx.conf"
-NGINX_CONFIG_SHA256="$(file_sha256_digest "${NGINX_CONFIG_PATH}")"
+NGINX_CONFIG_SHA256="$(cat "${NGINX_CONFIG_PATH}" | sha256 | take_first 8)"
 NGINX_IMAGE="${LOCAL_REGISTRY_HOST}/nginx"
 REGISTRY_IMAGE="${LOCAL_REGISTRY_HOST}/registry"
 
