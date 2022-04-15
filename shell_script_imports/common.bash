@@ -138,3 +138,38 @@ function sha256
     sha256sum - |
     awk '{ print $1 }'
 }
+
+function encrypt_deterministically
+{
+  local key
+  key="$(echo -n "$1" |
+    sha256 |
+    take_first 16)"
+
+  local secret_id="disposable_secret_160_${key}"
+
+  if ! pass show "${secret_id}" >/dev/null; then
+    random_bytes 80 |
+      hex |
+      pass insert \
+        --force \
+        --multiline \
+        "${secret_id}" >/dev/null
+  fi
+
+  local bytes
+  bytes="$(pass show "${secret_id}")"
+
+  cat - |
+    openssl enc \
+      -e \
+      -aes-256-cbc \
+      -salt \
+      -pbkdf2 \
+      -iter 1000000 \
+      -iv "$(echo -n "${bytes}" | take_first 32)" \
+      -K "$(echo -n "${bytes}" | drop_first 32 | take_first 64)" \
+      -S "$(echo -n "${bytes}" | take_last 64)" \
+      -md sha256 \
+      -
+}
