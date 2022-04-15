@@ -1,8 +1,8 @@
 {
   "configs": {
     "nginx_config": {
-      "file": "$NGINX_CONFIG",
-      "name": "local_docker_registry_nginx_config_$NGINX_CONFIG_DIGEST"
+      "file": "${NGINX_CONFIG:?}",
+      "name": "local_docker_registry_nginx_config_${NGINX_CONFIG_DIGEST:?}"
     }
   },
   "networks": {
@@ -12,14 +12,14 @@
   "services": {
     "docker_registry": {
       "build": {
-        "context": "$PROJECT_ROOT_DIR/registry",
-        "dockerfile": "$PROJECT_ROOT_DIR/registry/registry.dockerfile"
+        "context": "${PROJECT_ROOT_DIR:?}/registry",
+        "dockerfile": "${PROJECT_ROOT_DIR:?}/registry/registry.dockerfile"
       },
       "deploy": {
         "mode": "global",
         "placement": {
           "constraints": [
-            "node.id==$LOCAL_NODE_ID"
+            "node.id==${LOCAL_NODE_ID:?}"
           ]
         },
         "restart_policy": {
@@ -45,7 +45,7 @@
           "parallelism": 1
         }
       },
-      "image": "$DOCKER_REGISTRY_IMAGE_REFERENCE",
+      "image": "${DOCKER_REGISTRY_IMAGE_REFERENCE:?}",
       "networks": [
         "internal"
       ],
@@ -59,8 +59,8 @@
     },
     "reverse_proxy": {
       "build": {
-        "context": "$PROJECT_ROOT_DIR/reverse_proxy",
-        "dockerfile": "$PROJECT_ROOT_DIR/reverse_proxy/reverse_proxy.dockerfile"
+        "context": "${PROJECT_ROOT_DIR:?}/reverse_proxy",
+        "dockerfile": "${PROJECT_ROOT_DIR:?}/reverse_proxy/reverse_proxy.dockerfile"
       },
       "configs": [
         {
@@ -75,7 +75,7 @@
         "mode": "global",
         "placement": {
           "constraints": [
-            "node.id==$LOCAL_NODE_ID"
+            "node.id==${LOCAL_NODE_ID:?}"
           ]
         },
         "restart_policy": {
@@ -101,7 +101,7 @@
           "parallelism": 1
         }
       },
-      "image": "$REVERSE_PROXY_IMAGE_REFERENCE",
+      "image": "${REVERSE_PROXY_IMAGE_REFERENCE:?}",
       "networks": [
         "frontend",
         "internal"
