@@ -17,6 +17,17 @@ NGINX_CONFIG_SHA256="$(cat "${NGINX_CONFIG_PATH}" |
 NGINX_IMAGE="${LOCAL_REGISTRY_HOST}/nginx"
 REGISTRY_IMAGE="${LOCAL_REGISTRY_HOST}/registry"
 
+DOCKER_REGISTRY_LOCAL_CERT_PATH="${THIS_SCRIPT_DIR}/certificates___/docker.registry.local.pem"
+DOCKER_REGISTRY_LOCAL_CERT_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_LOCAL_CERT_PATH}" |
+  encrypt_deterministically "${DOCKER_REGISTRY_LOCAL_CERT_PATH}" |
+  sha256 |
+  take_first 8)"
+DOCKER_REGISTRY_LOCAL_KEY_PATH="${THIS_SCRIPT_DIR}/certificates___/docker.registry.local-key.pem"
+DOCKER_REGISTRY_LOCAL_KEY_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_LOCAL_KEY_PATH}" |
+  encrypt_deterministically "${DOCKER_REGISTRY_LOCAL_KEY_PATH}" |
+  sha256 |
+  take_first 8)"
+
 function run_with_compose_env
 {
   local command="$1"
@@ -24,6 +35,10 @@ function run_with_compose_env
 
   env \
     DOCKER_REGISTRY_IMAGE_REFERENCE="${REGISTRY_IMAGE}" \
+    DOCKER_REGISTRY_LOCAL_CERT="${DOCKER_REGISTRY_LOCAL_CERT_PATH}" \
+    DOCKER_REGISTRY_LOCAL_CERT_DIGEST="${DOCKER_REGISTRY_LOCAL_CERT_SECURE_DIGEST}" \
+    DOCKER_REGISTRY_LOCAL_KEY="${DOCKER_REGISTRY_LOCAL_KEY_PATH}" \
+    DOCKER_REGISTRY_LOCAL_KEY_DIGEST="${DOCKER_REGISTRY_LOCAL_KEY_SECURE_DIGEST}" \
     LOCAL_NODE_ID="${LOCAL_SWARM_NODE_ID}" \
     NGINX_CONFIG="${NGINX_CONFIG_PATH}" \
     NGINX_CONFIG_DIGEST="${NGINX_CONFIG_SHA256}" \
@@ -179,7 +194,7 @@ function ping_registry
 {
   local registry_host="$1"
 
-  local scheme="http"
+  local scheme="https"
   local endpoint="v2/_catalog"
 
   curl --silent \

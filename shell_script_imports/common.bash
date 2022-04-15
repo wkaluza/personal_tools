@@ -148,7 +148,7 @@ function encrypt_deterministically
 
   local secret_id="disposable_secret_160_${key}"
 
-  if ! pass show "${secret_id}" >/dev/null; then
+  if ! pass show "${secret_id}" >/dev/null 2>&1; then
     random_bytes 80 |
       hex |
       pass insert \
