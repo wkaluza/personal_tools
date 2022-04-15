@@ -1,8 +1,8 @@
 {
   "configs": {
     "nginx_config": {
-      "file": "$PROJECT_ROOT_DIR/docker_registry/reverse_proxy/nginx.conf",
-      "name": "local_docker_registry_nginx_config_$NGINX_CONFIG_CHECKSUM"
+      "file": "$NGINX_CONFIG",
+      "name": "local_docker_registry_nginx_config_$NGINX_CONFIG_DIGEST"
     }
   },
   "networks": {
@@ -12,8 +12,8 @@
   "services": {
     "docker_registry": {
       "build": {
-        "context": "$PROJECT_ROOT_DIR/docker_registry/registry",
-        "dockerfile": "$PROJECT_ROOT_DIR/docker_registry/registry/registry.dockerfile"
+        "context": "$PROJECT_ROOT_DIR/registry",
+        "dockerfile": "$PROJECT_ROOT_DIR/registry/registry.dockerfile"
       },
       "deploy": {
         "mode": "global",
@@ -59,8 +59,8 @@
     },
     "reverse_proxy": {
       "build": {
-        "context": "$PROJECT_ROOT_DIR/docker_registry/reverse_proxy",
-        "dockerfile": "$PROJECT_ROOT_DIR/docker_registry/reverse_proxy/reverse_proxy.dockerfile"
+        "context": "$PROJECT_ROOT_DIR/reverse_proxy",
+        "dockerfile": "$PROJECT_ROOT_DIR/reverse_proxy/reverse_proxy.dockerfile"
       },
       "configs": [
         {
