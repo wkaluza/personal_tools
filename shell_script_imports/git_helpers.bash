@@ -76,7 +76,7 @@ function git_get_latest
   if repo_is_clean; then
     git checkout \
       --force \
-      "${branch_name}" >/dev/null
+      "${branch_name}" >/dev/null 2>&1
     git fetch \
       --all \
       --force \

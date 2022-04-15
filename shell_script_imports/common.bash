@@ -16,9 +16,9 @@ function run_in_context
   local fn_arg="$2"
 
   mkdir --parents "${dir_path}"
-  pushd "${dir_path}"
+  pushd "${dir_path}" >/dev/null
   ${fn_arg} "${@:3}"
-  popd
+  popd >/dev/null
 }
 
 function set_up_new_gpg_homedir
