@@ -1,8 +1,6 @@
 set -euo pipefail
 shopt -s inherit_errexit
 
-THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-
 function main
 {
   local certs_dir="${HOME}/.certificates___"
