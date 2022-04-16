@@ -102,11 +102,13 @@ function main
   local dir_backup_sda="${HOME}/luks/pcspec_sda_luks/backup"
   local dir_backup_sdb="${HOME}/luks/pcspec_sdb_luks/backup"
   local dir_backup_sdc="${HOME}/luks/pcspec_sdc_luks/backup"
+  local dir_backup_sdd="${HOME}/luks/pcspec_sdd_luks/backup"
 
   local dir_archive_home="${HOME}/archive"
   local dir_archive_sda="${HOME}/luks/pcspec_sda_luks/archive"
   local dir_archive_sdb="${HOME}/luks/pcspec_sdb_luks/archive"
   local dir_archive_sdc="${HOME}/luks/pcspec_sdc_luks/archive"
+  local dir_archive_sdd="${HOME}/luks/pcspec_sdd_luks/archive"
 
   perform_backup \
     "${dir_wk_home}" \
@@ -118,10 +120,12 @@ function main
   sync_backup "${dir_backup_home}" "${dir_backup_sda}"
   sync_backup "${dir_backup_home}" "${dir_backup_sdb}"
   sync_backup "${dir_backup_home}" "${dir_backup_sdc}"
+  sync_backup "${dir_backup_home}" "${dir_backup_sdd}"
 
   sync_archive "${dir_archive_home}" "${dir_archive_sda}"
   sync_archive "${dir_archive_home}" "${dir_archive_sdb}"
   sync_archive "${dir_archive_home}" "${dir_archive_sdc}"
+  sync_archive "${dir_archive_home}" "${dir_archive_sdd}"
 
   log_info "Success: $(basename "$0")"
 }
