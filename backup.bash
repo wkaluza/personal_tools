@@ -23,6 +23,21 @@ function perform_backup
   fi
 }
 
+function list_all_files_in
+{
+  local dir_to_search
+  dir_to_search="$(realpath "$1")"
+
+  find \
+    "${dir_to_search}" \
+    -type f \
+    -exec realpath \
+    --relative-to="$(dirname "${dir_to_search}")" \
+    -- {} \; |
+    sort |
+    uniq
+}
+
 function sync_archive
 {
   local dir_source
@@ -41,10 +56,14 @@ function sync_archive
     log_info "Comparing archive ${dir_source} to ${dir_destination}"
 
     diff \
-      --recursive \
-      --no-dereference \
-      "${dir_source}" \
-      "${dir_destination}"
+      <(list_all_files_in "${dir_source}") \
+      <(list_all_files_in "${dir_destination}")
+
+    # diff \
+    #   --recursive \
+    #   --no-dereference \
+    #   "${dir_source}" \
+    #   "${dir_destination}"
   fi
 }
 
