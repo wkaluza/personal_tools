@@ -5,7 +5,7 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 function main
 {
-  local certs_dir="${THIS_SCRIPT_DIR}/certificates___"
+  local certs_dir="${HOME}/.certificates___"
 
   mkcert -install
 

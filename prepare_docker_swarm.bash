@@ -17,12 +17,14 @@ NGINX_CONFIG_SHA256="$(cat "${NGINX_CONFIG_PATH}" |
 NGINX_IMAGE="${LOCAL_REGISTRY_HOST}/nginx"
 REGISTRY_IMAGE="${LOCAL_REGISTRY_HOST}/registry"
 
-DOCKER_REGISTRY_LOCAL_CERT_PATH="${THIS_SCRIPT_DIR}/certificates___/docker.registry.local.pem"
+CERTS_DIR="${HOME}/.certificates___"
+
+DOCKER_REGISTRY_LOCAL_CERT_PATH="${CERTS_DIR}/docker.registry.local.pem"
 DOCKER_REGISTRY_LOCAL_CERT_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_LOCAL_CERT_PATH}" |
   encrypt_deterministically "${DOCKER_REGISTRY_LOCAL_CERT_PATH}" |
   sha256 |
   take_first 8)"
-DOCKER_REGISTRY_LOCAL_KEY_PATH="${THIS_SCRIPT_DIR}/certificates___/docker.registry.local-key.pem"
+DOCKER_REGISTRY_LOCAL_KEY_PATH="${CERTS_DIR}/docker.registry.local-key.pem"
 DOCKER_REGISTRY_LOCAL_KEY_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_LOCAL_KEY_PATH}" |
   encrypt_deterministically "${DOCKER_REGISTRY_LOCAL_KEY_PATH}" |
   sha256 |
