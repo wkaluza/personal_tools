@@ -10,7 +10,7 @@ function main
 {
   run_in_context \
     "${THIS_SCRIPT_DIR}" \
-    git_get_latest
+    git_get_latest >/dev/null 2>&1
 
   bash "${THIS_SCRIPT_DIR}/startup_impl.bash"
 }
