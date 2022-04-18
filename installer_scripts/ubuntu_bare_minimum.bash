@@ -341,6 +341,8 @@ export HISTSIZE=1000000
 export HISTIGNORE="pwd:top:ps"
 export HISTCONTROL=ignorespace:erasedups
 export PROMPT_COMMAND="history -n ; history -a"
+
+PS1="----------------------------------------\n\u@\H\n\\\$(pwd)\n\\\$ "
 EOF
 
     source "${bashrc_path}"
