@@ -244,6 +244,17 @@ function set_up_pass
   pass init "${PRIMARY_KEY_FINGERPRINT}"
 }
 
+function install_tmux
+{
+  sudo apt-get install --yes \
+    tmux
+
+  cat <<EOF >"${HOME}/.tmux.conf"
+set -g mouse on
+set -g display-panes-time 10000
+EOF
+}
+
 function install_latest_git
 {
   print_trace
@@ -361,6 +372,7 @@ function main
 
   install_rng_tools
   install_openssl
+  install_tmux
 
   prepare_gnupg
 
