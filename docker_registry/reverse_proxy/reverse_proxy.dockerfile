@@ -1,4 +1,5 @@
-FROM nginx:1.20.2
+ARG IMAGE="nginx:1.20.2"
+FROM $IMAGE
 
 COPY ./healthcheck.sh /docker/
 
