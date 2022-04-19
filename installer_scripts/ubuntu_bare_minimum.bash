@@ -101,6 +101,14 @@ function install_rng_tools
     rng-tools
 }
 
+function install_xxd
+{
+  print_trace
+
+  sudo apt-get install --yes \
+    xxd
+}
+
 function install_openssl
 {
   print_trace
@@ -446,6 +454,7 @@ function main
   install_rng_tools
   install_openssl
   install_tmux
+  install_xxd
 
   prepare_gnupg
 
