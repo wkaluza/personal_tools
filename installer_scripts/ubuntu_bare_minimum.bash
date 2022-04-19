@@ -379,6 +379,43 @@ EOF
   fi
 }
 
+function manage_sudo_password_in_pass
+{
+  local script_dir="${HOME}/.local/bin"
+
+  cat <<'EOF' >"${script_dir}/sudo_askpass"
+#!/usr/bin/env bash
+
+function main
+{
+  pass show "sudo_$(whoami)_at_$(hostname)"
+}
+
+main
+EOF
+
+  cat <<'EOF' >"${script_dir}/sudo"
+#!/usr/bin/env bash
+
+THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
+function main
+{
+  env \
+    SUDO_ASKPASS="${THIS_SCRIPT_DIR}/sudo_askpass" \
+    /usr/bin/sudo \
+    --askpass \
+    "$@"
+}
+
+main "$@"
+EOF
+
+  chmod 700 \
+    "${script_dir}/sudo_askpass" \
+    "${script_dir}/sudo"
+}
+
 function main
 {
   local jetbrains_toolbox_tar_gz
@@ -429,6 +466,8 @@ function main
   configure_git_ssh_substitutions
 
   set_umask_and_home_permissions
+
+  manage_sudo_password_in_pass
 
   log_info "Success: $(basename "$0")"
 }
