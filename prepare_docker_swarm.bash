@@ -134,26 +134,10 @@ function is_stack_running
     grep -E "^${stack_name}$" >/dev/null
 }
 
-function is_registry_ready
-{
-  local stack_name="$1"
-  local registry_host="$2"
-
-  if is_stack_running "${stack_name}"; then
-    retry_until_success \
-      "ping_registry ${registry_host}" \
-      ping_registry "${registry_host}"
-  else
-    false
-  fi
-}
-
 function start_registry_stack
 {
   local compose_file="$1"
   local stack_name="$2"
-
-  local defer_push="false"
 
   log_info "Building registry stack images..."
 
@@ -163,14 +147,9 @@ function start_registry_stack
     build \
     --pull
 
-  if is_registry_ready \
-    "${stack_name}" \
-    "${LOCAL_REGISTRY_HOST}"; then
-    docker_compose_push \
-      "${compose_file}"
-  else
-    defer_push="true"
-  fi
+  docker_compose_push \
+    "${compose_file}" ||
+    true
 
   log_info "Deploying registry stack..."
 
@@ -186,10 +165,8 @@ function start_registry_stack
 
   log_info "Registry stack deployed successfully"
 
-  if [[ "${defer_push}" == "true" ]]; then
-    docker_compose_push \
-      "${compose_file}"
-  fi
+  docker_compose_push \
+    "${compose_file}"
 }
 
 function ping_registry
