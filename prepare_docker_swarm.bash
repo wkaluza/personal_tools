@@ -139,6 +139,10 @@ function start_registry_stack
   local compose_file="$1"
   local stack_name="$2"
 
+  docker stack rm \
+    "${stack_name}" >/dev/null 2>&1 ||
+    true
+
   log_info "Building registry stack images..."
 
   run_with_compose_env \
@@ -146,10 +150,6 @@ function start_registry_stack
     --file "${compose_file}" \
     build \
     --pull
-
-  docker_compose_push \
-    "${compose_file}" ||
-    true
 
   log_info "Deploying registry stack..."
 
