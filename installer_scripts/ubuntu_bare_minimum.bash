@@ -246,6 +246,8 @@ function set_up_pass
 
 function install_tmux
 {
+  print_trace
+
   sudo apt-get install --yes \
     tmux
 
@@ -381,6 +383,8 @@ EOF
 
 function manage_sudo_password_in_pass
 {
+  print_trace
+
   local script_dir="${HOME}/.local/bin"
 
   cat <<'EOF' >"${script_dir}/sudo_askpass"
