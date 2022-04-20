@@ -79,6 +79,13 @@
         "timeout": "1s"
       },
       "image": "${DOCKER_REGISTRY_IMAGE_REFERENCE:?}",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": 5,
+          "max-size": "200k"
+        }
+      },
       "networks": [
         "internal"
       ],
@@ -154,6 +161,13 @@
         "timeout": "1s"
       },
       "image": "${REVERSE_PROXY_IMAGE_REFERENCE:?}",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": 5,
+          "max-size": "200k"
+        }
+      },
       "networks": [
         "frontend",
         "internal"
