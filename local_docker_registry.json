@@ -183,11 +183,11 @@
       "secrets": [
         {
           "source": "docker_registry_local_cert",
-          "target": "/etc/nginx/certs/docker.registry.local.cert"
+          "target": "/etc/nginx/certs/${LOCAL_REGISTRY_HOST:?}.cert"
         },
         {
           "source": "docker_registry_local_key",
-          "target": "/etc/nginx/certs/docker.registry.local.key"
+          "target": "/etc/nginx/certs/${LOCAL_REGISTRY_HOST:?}.key"
         }
       ]
     }
