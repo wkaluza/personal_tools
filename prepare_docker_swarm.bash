@@ -200,6 +200,9 @@ function start_registry_stack
     "${stack_name}"
 
   retry_until_success \
+    "wait_for_rolling_update ${LOCAL_REGISTRY_HOST}" \
+    wait_for_rolling_update "${LOCAL_REGISTRY_HOST}"
+  retry_until_success \
     "ping_registry ${LOCAL_REGISTRY_HOST}" \
     ping_registry "${LOCAL_REGISTRY_HOST}"
 
@@ -207,6 +210,20 @@ function start_registry_stack
 
   docker_compose_push \
     "${compose_file}"
+}
+
+function wait_for_rolling_update
+{
+  local registry_host="$1"
+
+  local scheme="https"
+  local endpoint="_/revision"
+
+  if is_git_repo; then
+    curl --silent \
+      "${scheme}://${registry_host}/${endpoint}" |
+      grep "$(git rev-parse HEAD)"
+  fi
 }
 
 function ping_registry
