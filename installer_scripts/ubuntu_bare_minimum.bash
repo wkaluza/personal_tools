@@ -334,6 +334,7 @@ function configure_git
 
   git config --global advice.detachedHead false
   git config --global advice.fetchShowForcedUpdates false
+  git config --global advice.skippedCherryPicks false
 
   git config --global fetch.showForcedUpdates false
 }
