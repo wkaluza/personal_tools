@@ -69,7 +69,7 @@ function docker_run
     "${image_name}" \
     "/bin/bash" \
     "-c" \
-    "source /etc/profile && ${command}"
+    "${command}"
 
   docker image rm \
     --no-prune \

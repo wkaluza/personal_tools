@@ -1,15 +1,6 @@
 set -euo pipefail
 shopt -s inherit_errexit
 
-SET_UP_ENV="/etc/profile.d/wk_env.sh"
-
-function install_basics
-{
-  apt-get install --yes \
-    curl \
-    git
-}
-
 function install_jq
 {
   apt-get install --yes \
@@ -25,18 +16,15 @@ function install_golang
   local download_url="https://dl.google.com/go/go${v}.linux-amd64.tar.gz"
   local target_dir="/usr/local"
 
-  cat <<EOF >>"${SET_UP_ENV}"
+  cat <<EOF >>"${DOCKER_PROFILE}"
 export GOROOT="${target_dir}/go"
 export PATH="\${GOROOT}/bin:\${PATH}"
 EOF
 
-  for d in /home/*; do
-    cat <<EOF >>"${SET_UP_ENV}"
-export PATH="${d}/go/bin:\${PATH}"
-EOF
-  done
+  source "${DOCKER_PROFILE}"
 
-  source "${SET_UP_ENV}"
+  apt-get install --yes \
+    curl
 
   curl -fsSL --output "./${go_archive}" "${download_url}"
 

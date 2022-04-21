@@ -20,6 +20,7 @@ function main
   echo "Group ID: $(id -g)"
   echo ""
   echo "HOME is ${HOME}"
+  echo "DOCKER_PROFILE is ${DOCKER_PROFILE}"
   echo "WORKSPACE is ${WORKSPACE}"
   echo "pwd is $(pwd)"
   echo "THIS_SCRIPT_DIR is ${THIS_SCRIPT_DIR}"

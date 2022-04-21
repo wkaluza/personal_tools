@@ -5,11 +5,6 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 function main
 {
-  # python3 -m pip install --upgrade pip
-  # python3 -m pip install --upgrade \
-  #   certifi setuptools wheel
-  # python3 -m pip install --upgrade pipenv
-
   echo "========================================"
 
   echo "Script running as:"
@@ -18,6 +13,7 @@ function main
   echo "Group ID: $(id -g)"
   echo ""
   echo "HOME is ${HOME}"
+  echo "DOCKER_PROFILE is ${DOCKER_PROFILE}"
   echo "WORKSPACE is ${WORKSPACE}"
   echo "pwd is $(pwd)"
   echo "THIS_SCRIPT_DIR is ${THIS_SCRIPT_DIR}"
