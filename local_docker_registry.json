@@ -154,6 +154,7 @@
         }
       },
       "environment": {
+        "LOCAL_REGISTRY_HOST": "${LOCAL_REGISTRY_HOST:?}",
         "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx",
         "REVISION_DATA_JSON": "${REVISION_DATA_JSON:?}"
       },
