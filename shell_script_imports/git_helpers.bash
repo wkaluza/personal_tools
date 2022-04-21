@@ -44,8 +44,22 @@ function clone_or_fetch
   popd
 }
 
+function is_git_repo
+{
+  if git status --short >/dev/null 2>&1; then
+    true
+  else
+    false
+  fi
+}
+
 function repo_is_clean
 {
+  if ! is_git_repo; then
+    echo "Error: not a git repo (pwd ${pwd})"
+    exit 1
+  fi
+
   if [[ "$(git status --short | wc -l)" == "0" ]]; then
     true
   else

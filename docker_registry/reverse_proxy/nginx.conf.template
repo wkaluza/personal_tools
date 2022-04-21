@@ -65,6 +65,10 @@ http {
     # Prevents HTTP 411
     chunked_transfer_encoding on;
 
+    location = /_/revision {
+      return 200 '${REVISION_DATA_JSON}\n';
+    }
+
     location /v2/ {
       proxy_read_timeout 900;
 

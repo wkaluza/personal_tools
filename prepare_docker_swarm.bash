@@ -5,12 +5,50 @@ THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/common.bash"
+source "${THIS_SCRIPT_DIR}/shell_script_imports/git_helpers.bash"
 
 LOCAL_REGISTRY_HOST="docker.registry.local"
 
+function generate_git_commit
+{
+  echo \
+    "commit:" \
+    "\"$(git rev-parse 'HEAD' 2>/dev/null)\""
+}
+
+function generate_git_branch
+{
+  echo \
+    "branch:" \
+    "\"$(git branch --show-current)\""
+}
+
+function generate_git_wip
+{
+  echo \
+    "work_in_progress:" \
+    "$(if is_git_repo && ! repo_is_clean; then echo "true"; else echo "false"; fi)"
+}
+
+function generate_revision_data
+{
+  local output='{"vcs_in_use":""}'
+
+  if is_git_repo; then
+    output=$(echo '{ "vcs_in_use": "git" }' |
+      jq ". + { git: { $(generate_git_commit), $(generate_git_wip), $(generate_git_branch) }}" -)
+  fi
+
+  echo "${output}" |
+    jq --sort-keys --compact-output '.' - |
+    tr -d '\n'
+}
+
+REVISION_DATA_JSON="$(cd "${THIS_SCRIPT_DIR}" && generate_revision_data)"
+
 DOCKER_REGISTRY_ROOT_DIR="${THIS_SCRIPT_DIR}/docker_registry"
 LOCAL_SWARM_NODE_ID="<___not_a_valid_id___>"
-NGINX_CONFIG_PATH="${THIS_SCRIPT_DIR}/docker_registry/reverse_proxy/nginx.conf"
+NGINX_CONFIG_PATH="${THIS_SCRIPT_DIR}/docker_registry/reverse_proxy/nginx.conf.template"
 NGINX_CONFIG_SHA256="$(cat "${NGINX_CONFIG_PATH}" |
   sha256 |
   take_first 8)"
@@ -47,6 +85,7 @@ function run_with_compose_env
     NGINX_CONFIG_DIGEST="${NGINX_CONFIG_SHA256}" \
     PROJECT_ROOT_DIR="${DOCKER_REGISTRY_ROOT_DIR}" \
     REVERSE_PROXY_IMAGE_REFERENCE="${NGINX_IMAGE}" \
+    REVISION_DATA_JSON="${REVISION_DATA_JSON}" \
     "${command}" \
     "${args[@]}" >/dev/null 2>&1
 }
