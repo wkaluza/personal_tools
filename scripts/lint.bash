@@ -21,7 +21,7 @@ function analyse_shell_scripts
 
   shellcheck \
     --enable=all \
-    --exclude="SC1090,SC1091,SC2002,SC2154" \
+    --exclude="SC1090,SC1091,SC2002,SC2154,SC2310,SC2312" \
     --severity "${severity}" \
     --shell=bash \
     "${f}"
