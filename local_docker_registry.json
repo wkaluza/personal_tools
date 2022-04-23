@@ -7,10 +7,10 @@
   },
   "networks": {
     "frontend": {
-      "name": "local_registry_frontend"
+      "name": "${NETWORK_NAME_FRONTEND:?}"
     },
     "internal": {
-      "name": "local_registry_internal"
+      "name": "${NETWORK_NAME_INTERNAL:?}"
     }
   },
   "secrets": {
