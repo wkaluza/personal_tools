@@ -135,7 +135,10 @@ function install_docker_pass_credential_helper
     build_docker_pass_credential_helper \
     "${dest_dir}"
 
-  echo "export PATH=\"\${PATH}:${dest_dir}\"" >>"${BASHRC}"
+  cat <<EOF >>"${BASHRC}"
+export PATH="${dest_dir}:\${PATH}"
+EOF
+
   source "${BASHRC}"
 
   if ! test -f "${docker_config}"; then
