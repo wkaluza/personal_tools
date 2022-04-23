@@ -232,6 +232,14 @@ function set_umask_and_home_permissions
   source "${BASHRC_PATH}"
 }
 
+function clean_tools_repo
+{
+  pushd "${TOOLS_DIR}" >/dev/null
+  git clean -dffxn
+  git reset --hard 'HEAD'
+  popd >/dev/null
+}
+
 function clone_personal_tools
 {
   print_trace
@@ -492,6 +500,8 @@ function main
   set_umask_and_home_permissions
 
   manage_sudo_password_in_pass
+
+  clean_tools_repo
 
   log_info "Success: $(basename "$0")"
 }
