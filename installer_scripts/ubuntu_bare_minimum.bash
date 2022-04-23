@@ -4,7 +4,7 @@ shopt -s inherit_errexit
 PRIMARY_KEY_FINGERPRINT="174C9368811039C87F0C806A896572D1E78ED6A7"
 SIGNING_KEY_FINGERPRINT="143EE89AAC97053810D13E378A7E8CA85A62CF20"
 BASHRC_PATH="${HOME}/.bashrc"
-TEMP_DIR="___not_a_real_path___"
+TOOLS_DIR="___not_a_real_path___"
 ERR_JETBRAINS_PATH_NOT_SET="___ERR_JETBRAINS_PATH_NOT_SET___"
 
 function log_info
@@ -239,15 +239,15 @@ function clone_personal_tools
   sudo apt-get install --yes \
     git
 
-  TEMP_DIR="$(realpath "${HOME}/wk_personal_tools___deleteme")"
+  TOOLS_DIR="$(realpath "${HOME}/.wk_tools")"
   local url="https://github.com/wkaluza/personal_tools.git"
 
-  if ! test -d "${TEMP_DIR}"; then
+  if ! test -d "${TOOLS_DIR}"; then
     git clone \
       --recurse-submodules \
       --tags \
       "${url}" \
-      "${TEMP_DIR}"
+      "${TOOLS_DIR}"
   fi
 }
 
@@ -478,12 +478,12 @@ function main
 
   disable_swap
 
-  bash "${TEMP_DIR}/installer_scripts/install_docker.bash"
-  bash "${TEMP_DIR}/installer_scripts/configure_docker.bash"
+  bash "${TOOLS_DIR}/installer_scripts/install_docker.bash"
+  bash "${TOOLS_DIR}/installer_scripts/configure_docker.bash"
 
-  bash "${TEMP_DIR}/installer_scripts/install_jetbrains.bash" \
+  bash "${TOOLS_DIR}/installer_scripts/install_jetbrains.bash" \
     "${jetbrains_toolbox_tar_gz}"
-  bash "${TEMP_DIR}/installer_scripts/install_applications.bash"
+  bash "${TOOLS_DIR}/installer_scripts/install_applications.bash"
 
   # This has to be done late in the setup process
   # or it interferes with docker testing
