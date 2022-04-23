@@ -101,6 +101,15 @@ function install_rng_tools
     rng-tools
 }
 
+function install_mkcert
+{
+  print_trace
+
+  sudo apt-get install --yes \
+    libnss3-tools \
+    mkcert
+}
+
 function install_xxd
 {
   print_trace
@@ -456,6 +465,7 @@ function main
   install_openssl
   install_tmux
   install_xxd
+  install_mkcert
 
   prepare_gnupg
 
