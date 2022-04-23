@@ -14,6 +14,12 @@ function main
   local mapped_device="/dev/mapper/${mapping_name}"
   local mount_point="${HOME}/luks/${mapping_name}"
 
+  if mount | grep "${mapped_device} on ${mount_point}" >/dev/null; then
+    echo "Already mounted: ${mapped_device} on ${mount_point}"
+
+    exit 0
+  fi
+
   mkdir --parents "${mount_point}"
 
   if [[ "${key_type}" == "${KEY_TYPE_NOT_DEFINED}" ]]; then
