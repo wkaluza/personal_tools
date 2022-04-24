@@ -352,6 +352,8 @@ function ensure_docker_mirror_config
           ". + { \"${reg_mirrors}\": [ \"${url}\" ] }" \
           - |
         sudo tee "${config_file}" >/dev/null
+
+        sudo systemctl restart docker
     fi
   fi
 }
@@ -369,9 +371,9 @@ function ensure_hosts_file
 
 function main
 {
+  ensure_docker_mirror_config
   ensure_hosts_file
   ensure_docker_swarm_init
-  ensure_docker_mirror_config
   ensure_local_docker_registry_is_running
 
   log_info "Success $(basename "$0")"
