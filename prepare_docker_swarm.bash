@@ -233,8 +233,7 @@ function start_registry_stack
   run_with_compose_env \
     docker compose \
     --file "${compose_file}" \
-    build \
-    --pull
+    build
 
   log_info "Deploying registry stack..."
 
