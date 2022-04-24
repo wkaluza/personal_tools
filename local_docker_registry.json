@@ -62,8 +62,8 @@
         },
         "resources": {
           "limits": {
-            "cpus": "0.5",
-            "memory": "50MB"
+            "cpus": "1",
+            "memory": "100MB"
           },
           "reservations": {
             "cpus": "0.25",
@@ -141,8 +141,8 @@
         },
         "resources": {
           "limits": {
-            "cpus": "0.5",
-            "memory": "50MB"
+            "cpus": "1",
+            "memory": "100MB"
           },
           "reservations": {
             "cpus": "0.25",
