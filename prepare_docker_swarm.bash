@@ -298,10 +298,6 @@ function ensure_local_docker_registry_is_running
   local compose_file="${THIS_SCRIPT_DIR}/local_docker_registry.json"
   local stack_name="local_registry_stack"
 
-  ensure_host_is_in_etc_hosts_file \
-    "${LOCAL_REGISTRY_HOST}" \
-    "127.0.0.1"
-
   LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 
   start_registry_stack \
@@ -311,6 +307,10 @@ function ensure_local_docker_registry_is_running
 
 function main
 {
+  ensure_host_is_in_etc_hosts_file \
+    "${LOCAL_REGISTRY_HOST}" \
+    "127.0.0.1"
+
   ensure_docker_swarm_init
   ensure_local_docker_registry_is_running
 
