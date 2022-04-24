@@ -51,11 +51,17 @@ NETWORK_NAME_INTERNAL="local_registry_internal"
 
 DOCKER_REGISTRY_ROOT_DIR="${THIS_SCRIPT_DIR}/docker_registry"
 LOCAL_SWARM_NODE_ID="<___not_a_valid_id___>"
-NGINX_CONFIG_PATH="${THIS_SCRIPT_DIR}/docker_registry/reverse_proxy/nginx.conf.template"
+
+NGINX_CONFIG_PATH="${DOCKER_REGISTRY_ROOT_DIR}/reverse_proxy/nginx.conf.template"
 NGINX_CONFIG_SHA256="$(cat "${NGINX_CONFIG_PATH}" |
   sha256 |
   take_first 8)"
 NGINX_IMAGE="${LOCAL_REGISTRY_HOST}/nginx"
+
+REGISTRY_CONFIG_PATH="${DOCKER_REGISTRY_ROOT_DIR}/registry/config.yml"
+REGISTRY_CONFIG_SHA256="$(cat "${REGISTRY_CONFIG_PATH}" |
+  sha256 |
+  take_first 8)"
 REGISTRY_IMAGE="${LOCAL_REGISTRY_HOST}/registry"
 
 CERTS_DIR="${HOME}/.certificates___"
@@ -89,6 +95,8 @@ function run_with_compose_env
     NGINX_CONFIG="${NGINX_CONFIG_PATH}" \
     NGINX_CONFIG_DIGEST="${NGINX_CONFIG_SHA256}" \
     PROJECT_ROOT_DIR="${DOCKER_REGISTRY_ROOT_DIR}" \
+    REGISTRY_CONFIG="${REGISTRY_CONFIG_PATH}" \
+    REGISTRY_CONFIG_DIGEST="${REGISTRY_CONFIG_SHA256}" \
     REVERSE_PROXY_IMAGE_REFERENCE="${NGINX_IMAGE}" \
     REVISION_DATA_JSON="${REVISION_DATA_JSON}" \
     "${command}" \

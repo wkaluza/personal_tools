@@ -3,6 +3,10 @@
     "nginx_config": {
       "file": "${NGINX_CONFIG:?}",
       "name": "local_docker_registry_nginx_config_${NGINX_CONFIG_DIGEST:?}"
+    },
+    "registry_config": {
+      "file": "${REGISTRY_CONFIG:?}",
+      "name": "local_docker_registry_config_${REGISTRY_CONFIG_DIGEST:?}"
     }
   },
   "networks": {
@@ -30,6 +34,12 @@
         "dockerfile": "${PROJECT_ROOT_DIR:?}/registry/registry.dockerfile",
         "network": "none"
       },
+      "configs": [
+        {
+          "source": "registry_config",
+          "target": "/etc/docker/registry/config.yml"
+        }
+      ],
       "deploy": {
         "mode": "global",
         "placement": {

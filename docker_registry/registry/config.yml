@@ -1,0 +1,19 @@
+health:
+  storagedriver:
+    enabled: true
+    interval: 10s
+    threshold: 3
+http:
+  addr: :5000
+  headers:
+    X-Content-Type-Options:
+      - nosniff
+log:
+  fields:
+    service: registry
+storage:
+  cache:
+    blobdescriptor: inmemory
+  filesystem:
+    rootdirectory: /var/lib/registry
+version: 0.1
