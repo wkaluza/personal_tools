@@ -19,20 +19,32 @@ function populate_local_registry
     "debian" \
     "11.3"
   prefetch_base_image \
+    "debian" \
+    "11.3-slim"
+  prefetch_base_image \
     "gitlab/gitlab-ce" \
-    "14.9.3-ce.0"
+    "14.10.0-ce.0"
+  prefetch_base_image \
+    "gitlab/gitlab-runner" \
+    "alpine3.15-v14.10.0"
+  prefetch_base_image \
+    "gitlab/gitlab-runner" \
+    "ubuntu-v14.10.0"
   prefetch_base_image \
     "mongo" \
     "5.0.7"
   prefetch_base_image \
     "neo4j" \
-    "4.4.5"
+    "4.4.6"
   prefetch_base_image \
     "nginx" \
     "1.21.6-alpine"
   prefetch_base_image \
     "postgres" \
     "14.2"
+  prefetch_base_image \
+    "postgres" \
+    "14.2-alpine3.15"
   prefetch_base_image \
     "registry" \
     "2.8.1"
