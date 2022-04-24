@@ -9,9 +9,9 @@ function run_in_context
 
   mkdir --parents "${dir_path}"
 
-  pushd "${dir_path}"
+  pushd "${dir_path}" >/dev/null
   ${fn_arg} "${@:3}"
-  popd
+  popd >/dev/null
 }
 
 function untar_gzip_to
@@ -25,8 +25,8 @@ function untar_gzip_to
 
   mv "${archive}" "${target_dir}"
 
-  pushd "${target_dir}"
+  pushd "${target_dir}" >/dev/null
   tar -xzf "${target_dir}/${archive}"
   rm "${target_dir}/${archive}"
-  popd
+  popd >/dev/null
 }

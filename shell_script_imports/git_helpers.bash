@@ -39,9 +39,13 @@ function clone_or_fetch
       "${dir_path}"
   fi
 
-  pushd "${dir_path}"
-  git fetch --all --recurse-submodules --tags --force
-  popd
+  pushd "${dir_path}" >/dev/null
+  git fetch \
+    --all \
+    --force \
+    --recurse-submodules \
+    --tags
+  popd >/dev/null
 }
 
 function is_git_repo
