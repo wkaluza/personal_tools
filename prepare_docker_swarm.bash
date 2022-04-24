@@ -356,7 +356,7 @@ function ensure_docker_mirror_config
   fi
 }
 
-function main
+function ensure_hosts_file
 {
   ensure_host_is_in_etc_hosts_file \
     "${LOCAL_REGISTRY_HOST}" \
@@ -365,7 +365,11 @@ function main
   ensure_host_is_in_etc_hosts_file \
     "${MIRROR_REGISTRY_HOST}" \
     "127.0.0.1"
+}
 
+function main
+{
+  ensure_hosts_file
   ensure_docker_swarm_init
   ensure_docker_mirror_config
   ensure_local_docker_registry_is_running
