@@ -352,7 +352,7 @@ function ensure_docker_mirror_config
           - |
         sudo tee "${config_file}" >/dev/null
 
-        sudo systemctl restart docker
+      sudo systemctl restart docker
     fi
   fi
 }
