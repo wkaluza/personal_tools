@@ -60,8 +60,8 @@ function list_local_docker_tags
 {
   docker image ls --format '{{ .Repository }}:{{ .Tag }}' |
     grep -v '<none>' |
-    grep -v 'nginx' |
-    grep -v 'registry' |
+    grep -Ev '^nginx:' |
+    grep -Ev '^registry:' |
     sort |
     uniq
 }
