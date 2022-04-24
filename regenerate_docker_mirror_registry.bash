@@ -58,9 +58,9 @@ function untag_local_images
 {
   for img in $(list_local_docker_tags); do
     docker image rm \
-      --force \
       --no-prune \
-      "${img}"
+      "${img}" >/dev/null 2>&1 ||
+      true
   done
 }
 
