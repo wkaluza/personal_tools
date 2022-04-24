@@ -133,18 +133,6 @@ function get_swarm_state
     jq --raw-output '.Swarm.LocalNodeState' -
 }
 
-function docker_compose_push
-{
-  local compose_file="$1"
-
-  log_info "Pushing registry stack images..."
-
-  run_with_compose_env \
-    docker compose \
-    --file "${compose_file}" \
-    push
-}
-
 # Note: recursive function
 function ensure_docker_swarm_init
 {
@@ -267,9 +255,6 @@ function start_registry_stack
     ping_registry "${MIRROR_REGISTRY_HOST}"
 
   log_info "Registry stack deployed successfully"
-
-  docker_compose_push \
-    "${compose_file}"
 }
 
 function wait_for_rolling_update
