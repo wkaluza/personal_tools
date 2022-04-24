@@ -62,6 +62,8 @@ function list_local_docker_tags
     grep -v '<none>' |
     grep -Ev '^nginx:' |
     grep -Ev '^registry:' |
+    grep -Ev '^docker\.registry\.local/nginx:' |
+    grep -Ev '^docker\.registry\.local/registry:' |
     sort |
     uniq
 }
