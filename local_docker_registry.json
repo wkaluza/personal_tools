@@ -1,5 +1,9 @@
 {
   "configs": {
+    "mirror_registry_config": {
+      "file": "${MIRROR_REGISTRY_CONFIG:?}",
+      "name": "mirror_docker_registry_config_${MIRROR_REGISTRY_CONFIG_DIGEST:?}"
+    },
     "nginx_config": {
       "file": "${NGINX_CONFIG:?}",
       "name": "local_docker_registry_nginx_config_${NGINX_CONFIG_DIGEST:?}"
@@ -25,6 +29,14 @@
     "docker_registry_local_key": {
       "file": "${DOCKER_REGISTRY_LOCAL_KEY:?}",
       "name": "docker_registry_local_key_${DOCKER_REGISTRY_LOCAL_KEY_DIGEST:?}"
+    },
+    "docker_registry_mirror_cert": {
+      "file": "${DOCKER_REGISTRY_MIRROR_CERT:?}",
+      "name": "docker_registry_mirror_cert_${DOCKER_REGISTRY_MIRROR_CERT_DIGEST:?}"
+    },
+    "docker_registry_mirror_key": {
+      "file": "${DOCKER_REGISTRY_MIRROR_KEY:?}",
+      "name": "docker_registry_mirror_key_${DOCKER_REGISTRY_MIRROR_KEY_DIGEST:?}"
     }
   },
   "services": {
@@ -107,6 +119,85 @@
         }
       ]
     },
+    "mirror_docker_registry": {
+      "build": {
+        "context": "${PROJECT_ROOT_DIR:?}/registry/context",
+        "dockerfile": "${PROJECT_ROOT_DIR:?}/registry/registry.dockerfile",
+        "network": "none"
+      },
+      "configs": [
+        {
+          "source": "mirror_registry_config",
+          "target": "/etc/docker/registry/config.yml"
+        }
+      ],
+      "deploy": {
+        "mode": "global",
+        "placement": {
+          "constraints": [
+            "node.id==${LOCAL_NODE_ID:?}",
+            "node.role==manager"
+          ]
+        },
+        "resources": {
+          "limits": {
+            "cpus": "0.5",
+            "memory": "50MB"
+          },
+          "reservations": {
+            "cpus": "0.25",
+            "memory": "25MB"
+          }
+        },
+        "restart_policy": {
+          "condition": "on-failure",
+          "delay": "10s",
+          "max_attempts": 5,
+          "window": "120s"
+        },
+        "rollback_config": {
+          "delay": "10s",
+          "failure_action": "pause",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        },
+        "update_config": {
+          "delay": "10s",
+          "failure_action": "rollback",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        }
+      },
+      "healthcheck": {
+        "disable": false,
+        "interval": "1s",
+        "retries": 30,
+        "start_period": "60s",
+        "timeout": "1s"
+      },
+      "image": "${DOCKER_REGISTRY_IMAGE_REFERENCE:?}",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": 5,
+          "max-size": "200k"
+        }
+      },
+      "networks": [
+        "internal"
+      ],
+      "volumes": [
+        {
+          "source": "mirror_registry_volume",
+          "target": "/var/lib/registry",
+          "type": "volume"
+        }
+      ]
+    },
     "reverse_proxy": {
       "build": {
         "context": "${PROJECT_ROOT_DIR:?}/reverse_proxy/context",
@@ -120,7 +211,8 @@
         }
       ],
       "depends_on": [
-        "docker_registry"
+        "docker_registry",
+        "mirror_docker_registry"
       ],
       "deploy": {
         "mode": "global",
@@ -165,6 +257,7 @@
       },
       "environment": {
         "LOCAL_REGISTRY_HOST": "${LOCAL_REGISTRY_HOST:?}",
+        "MIRROR_REGISTRY_HOST": "${MIRROR_REGISTRY_HOST:?}",
         "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx",
         "REVISION_DATA_JSON": "${REVISION_DATA_JSON:?}"
       },
@@ -203,6 +296,14 @@
         {
           "source": "docker_registry_local_key",
           "target": "/etc/nginx/certs/${LOCAL_REGISTRY_HOST:?}.key"
+        },
+        {
+          "source": "docker_registry_mirror_cert",
+          "target": "/etc/nginx/certs/${MIRROR_REGISTRY_HOST:?}.cert"
+        },
+        {
+          "source": "docker_registry_mirror_key",
+          "target": "/etc/nginx/certs/${MIRROR_REGISTRY_HOST:?}.key"
         }
       ]
     }
@@ -211,6 +312,9 @@
   "volumes": {
     "local_registry_volume": {
       "name": "local_docker_registry_data"
+    },
+    "mirror_registry_volume": {
+      "name": "mirror_docker_registry_data"
     }
   }
 }

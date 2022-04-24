@@ -21,6 +21,7 @@ function main
 
   pushd "${certs_dir}" >/dev/null
   generate_cert "docker.registry.local"
+  generate_cert "docker.registry.mirror"
   popd >/dev/null
 }
 

@@ -13,6 +13,10 @@ http {
     server docker_registry:5000;
   }
 
+  upstream mirror_docker_registry {
+    server mirror_docker_registry:5000;
+  }
+
   include /etc/nginx/mime.types;
   default_type application/octet-stream;
 
@@ -80,6 +84,48 @@ http {
       proxy_set_header X-Real-IP $remote_addr;
 
       proxy_pass http://docker_registry;
+    }
+  }
+
+  # Docker registry mirror
+  server {
+    listen 443 ssl;
+
+    server_name ${MIRROR_REGISTRY_HOST};
+
+    ssl on;
+    ssl_certificate /etc/nginx/certs/${MIRROR_REGISTRY_HOST}.cert;
+    ssl_certificate_key /etc/nginx/certs/${MIRROR_REGISTRY_HOST}.key;
+
+    # Source https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+    ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
+    ssl_prefer_server_ciphers on;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
+
+    # Disable request body size check
+    # Prevents HTTP 413
+    client_max_body_size 0;
+
+    # See https://github.com/moby/moby/issues/1486
+    # Prevents HTTP 411
+    chunked_transfer_encoding on;
+
+    location = /_/revision {
+      return 200 '${REVISION_DATA_JSON}\n';
+    }
+
+    location /v2/ {
+      proxy_read_timeout 900;
+
+      # Required by docker client
+      proxy_set_header Host $http_host;
+
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header X-Real-IP $remote_addr;
+
+      proxy_pass http://mirror_docker_registry;
     }
   }
 }

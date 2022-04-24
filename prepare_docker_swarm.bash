@@ -8,6 +8,7 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/common.bash"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/git_helpers.bash"
 
 LOCAL_REGISTRY_HOST="docker.registry.local"
+MIRROR_REGISTRY_HOST="docker.registry.mirror"
 
 function generate_git_commit
 {
@@ -64,6 +65,11 @@ REGISTRY_CONFIG_SHA256="$(cat "${REGISTRY_CONFIG_PATH}" |
   take_first 8)"
 REGISTRY_IMAGE="${LOCAL_REGISTRY_HOST}/registry"
 
+MIRROR_CONFIG_PATH="${DOCKER_REGISTRY_ROOT_DIR}/registry/config_mirror.yml"
+MIRROR_CONFIG_SHA256="$(cat "${MIRROR_CONFIG_PATH}" |
+  sha256 |
+  take_first 8)"
+
 CERTS_DIR="${HOME}/.certificates___"
 
 DOCKER_REGISTRY_LOCAL_CERT_PATH="${CERTS_DIR}/${LOCAL_REGISTRY_HOST}.pem"
@@ -74,6 +80,17 @@ DOCKER_REGISTRY_LOCAL_CERT_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_LOCAL_CERT_PA
 DOCKER_REGISTRY_LOCAL_KEY_PATH="${CERTS_DIR}/${LOCAL_REGISTRY_HOST}-key.pem"
 DOCKER_REGISTRY_LOCAL_KEY_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_LOCAL_KEY_PATH}" |
   encrypt_deterministically "${DOCKER_REGISTRY_LOCAL_KEY_PATH}" |
+  sha256 |
+  take_first 8)"
+
+DOCKER_REGISTRY_MIRROR_CERT_PATH="${CERTS_DIR}/${MIRROR_REGISTRY_HOST}.pem"
+DOCKER_REGISTRY_MIRROR_CERT_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_MIRROR_CERT_PATH}" |
+  encrypt_deterministically "${DOCKER_REGISTRY_MIRROR_CERT_PATH}" |
+  sha256 |
+  take_first 8)"
+DOCKER_REGISTRY_MIRROR_KEY_PATH="${CERTS_DIR}/${MIRROR_REGISTRY_HOST}-key.pem"
+DOCKER_REGISTRY_MIRROR_KEY_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_MIRROR_KEY_PATH}" |
+  encrypt_deterministically "${DOCKER_REGISTRY_MIRROR_KEY_PATH}" |
   sha256 |
   take_first 8)"
 
@@ -88,8 +105,15 @@ function run_with_compose_env
     DOCKER_REGISTRY_LOCAL_CERT_DIGEST="${DOCKER_REGISTRY_LOCAL_CERT_SECURE_DIGEST}" \
     DOCKER_REGISTRY_LOCAL_KEY="${DOCKER_REGISTRY_LOCAL_KEY_PATH}" \
     DOCKER_REGISTRY_LOCAL_KEY_DIGEST="${DOCKER_REGISTRY_LOCAL_KEY_SECURE_DIGEST}" \
+    DOCKER_REGISTRY_MIRROR_CERT="${DOCKER_REGISTRY_MIRROR_CERT_PATH}" \
+    DOCKER_REGISTRY_MIRROR_CERT_DIGEST="${DOCKER_REGISTRY_MIRROR_CERT_SECURE_DIGEST}" \
+    DOCKER_REGISTRY_MIRROR_KEY="${DOCKER_REGISTRY_MIRROR_KEY_PATH}" \
+    DOCKER_REGISTRY_MIRROR_KEY_DIGEST="${DOCKER_REGISTRY_MIRROR_KEY_SECURE_DIGEST}" \
     LOCAL_NODE_ID="${LOCAL_SWARM_NODE_ID}" \
     LOCAL_REGISTRY_HOST="${LOCAL_REGISTRY_HOST}" \
+    MIRROR_REGISTRY_CONFIG="${MIRROR_CONFIG_PATH}" \
+    MIRROR_REGISTRY_CONFIG_DIGEST="${MIRROR_CONFIG_SHA256}" \
+    MIRROR_REGISTRY_HOST="${MIRROR_REGISTRY_HOST}" \
     NETWORK_NAME_FRONTEND="${NETWORK_NAME_FRONTEND}" \
     NETWORK_NAME_INTERNAL="${NETWORK_NAME_INTERNAL}" \
     NGINX_CONFIG="${NGINX_CONFIG_PATH}" \
@@ -238,6 +262,9 @@ function start_registry_stack
   retry_until_success \
     "ping_registry ${LOCAL_REGISTRY_HOST}" \
     ping_registry "${LOCAL_REGISTRY_HOST}"
+  retry_until_success \
+    "ping_registry ${MIRROR_REGISTRY_HOST}" \
+    ping_registry "${MIRROR_REGISTRY_HOST}"
 
   log_info "Registry stack deployed successfully"
 
@@ -305,13 +332,49 @@ function ensure_local_docker_registry_is_running
     "${stack_name}"
 }
 
+function ensure_docker_mirror_config
+{
+  local config_file="/etc/docker/daemon.json"
+  local reg_mirrors="registry-mirrors"
+  local url="https://${MIRROR_REGISTRY_HOST}"
+  local output=""
+
+  if test -f "${config_file}"; then
+    output="$(cat "${config_file}")"
+  else
+    output='{}'
+  fi
+
+  if ! echo "${output}" | grep "${url}" >/dev/null; then
+    if test -f "${config_file}"; then
+      local now
+      now="$(date --utc +'%Y%m%d%H%M%S%N')"
+      cp \
+        "${config_file}" \
+        "${THIS_SCRIPT_DIR}/$(basename "${config_file}")___${now}.bak"
+    fi
+
+    echo "${output}" |
+      jq \
+        --sort-keys \
+        ". + { \"${reg_mirrors}\": [ \"${url}\" ] }" \
+        - |
+      sudo tee "${config_file}" >/dev/null
+  fi
+}
+
 function main
 {
   ensure_host_is_in_etc_hosts_file \
     "${LOCAL_REGISTRY_HOST}" \
     "127.0.0.1"
 
+  ensure_host_is_in_etc_hosts_file \
+    "${MIRROR_REGISTRY_HOST}" \
+    "127.0.0.1"
+
   ensure_docker_swarm_init
+  ensure_docker_mirror_config
   ensure_local_docker_registry_is_running
 
   log_info "Success $(basename "$0")"
