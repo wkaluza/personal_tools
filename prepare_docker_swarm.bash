@@ -317,6 +317,12 @@ function ensure_local_docker_registry_is_running
     "${stack_name}"
 }
 
+function get_configured_registry_mirrors
+{
+  docker system info --format '{{ json . }}' |
+    jq --raw-output '.RegistryConfig.Mirrors[]' -
+}
+
 function ensure_docker_mirror_config
 {
   local config_file="/etc/docker/daemon.json"
@@ -324,27 +330,29 @@ function ensure_docker_mirror_config
   local url="https://${MIRROR_REGISTRY_HOST}"
   local output=""
 
-  if test -f "${config_file}"; then
-    output="$(cat "${config_file}")"
-  else
-    output='{}'
-  fi
-
-  if ! echo "${output}" | grep "${url}" >/dev/null; then
+  if ! get_configured_registry_mirrors | grep "${url}" >/dev/null; then
     if test -f "${config_file}"; then
-      local now
-      now="$(date --utc +'%Y%m%d%H%M%S%N')"
-      cp \
-        "${config_file}" \
-        "${THIS_SCRIPT_DIR}/$(basename "${config_file}")___${now}.bak"
+      output="$(cat "${config_file}")"
+    else
+      output='{}'
     fi
 
-    echo "${output}" |
-      jq \
-        --sort-keys \
-        ". + { \"${reg_mirrors}\": [ \"${url}\" ] }" \
-        - |
-      sudo tee "${config_file}" >/dev/null
+    if ! echo "${output}" | grep "${url}" >/dev/null; then
+      if test -f "${config_file}"; then
+        local now
+        now="$(date --utc +'%Y%m%d%H%M%S%N')"
+        cp \
+          "${config_file}" \
+          "${THIS_SCRIPT_DIR}/$(basename "${config_file}")___${now}.bak"
+      fi
+
+      echo "${output}" |
+        jq \
+          --sort-keys \
+          ". + { \"${reg_mirrors}\": [ \"${url}\" ] }" \
+          - |
+        sudo tee "${config_file}" >/dev/null
+    fi
   fi
 }
 
