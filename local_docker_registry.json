@@ -127,7 +127,7 @@
       },
       "configs": [
         {
-          "source": "mirror_registry_config",
+          "source": "${MIRROR_REGISTRY_CONFIG_SELECT:?}",
           "target": "/etc/docker/registry/config.yml"
         }
       ],

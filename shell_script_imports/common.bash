@@ -173,3 +173,10 @@ function encrypt_deterministically
       -md sha256 \
       -
 }
+
+function web_connection_working
+{
+  local host="example.com"
+
+  ping -c 1 "${host}" >/dev/null 2>&1
+}

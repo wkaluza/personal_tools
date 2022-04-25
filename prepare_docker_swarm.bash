@@ -94,6 +94,8 @@ DOCKER_REGISTRY_MIRROR_KEY_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_MIRROR_KEY_PA
   sha256 |
   take_first 8)"
 
+MIRROR_REGISTRY_CONFIG_SELECT=""
+
 function run_with_compose_env
 {
   local command="$1"
@@ -113,6 +115,7 @@ function run_with_compose_env
     LOCAL_REGISTRY_HOST="${LOCAL_REGISTRY_HOST}" \
     MIRROR_REGISTRY_CONFIG="${MIRROR_CONFIG_PATH}" \
     MIRROR_REGISTRY_CONFIG_DIGEST="${MIRROR_CONFIG_SHA256}" \
+    MIRROR_REGISTRY_CONFIG_SELECT="${MIRROR_REGISTRY_CONFIG_SELECT}" \
     MIRROR_REGISTRY_HOST="${MIRROR_REGISTRY_HOST}" \
     NETWORK_NAME_FRONTEND="${NETWORK_NAME_FRONTEND}" \
     NETWORK_NAME_INTERNAL="${NETWORK_NAME_INTERNAL}" \
@@ -368,8 +371,21 @@ function ensure_hosts_file
     "127.0.0.1"
 }
 
+function select_mirror_registry_config
+{
+  if web_connection_working; then
+    log_info "Mirror configuration: enabled"
+    MIRROR_REGISTRY_CONFIG_SELECT="mirror_registry_config"
+  else
+    log_info "Mirror configuration: disabled"
+    MIRROR_REGISTRY_CONFIG_SELECT="registry_config"
+  fi
+}
+
 function main
 {
+  select_mirror_registry_config
+
   ensure_docker_mirror_config
   ensure_hosts_file
   ensure_docker_swarm_init
