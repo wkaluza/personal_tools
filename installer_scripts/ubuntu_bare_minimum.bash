@@ -446,6 +446,39 @@ EOF
     "${script_dir}/sudo"
 }
 
+function install_kind
+{
+  print_trace
+
+  local output_path="${HOME}/.local/bin/kind"
+  local version="v0.12.0"
+
+  curl \
+    --location \
+    --output "${output_path}" \
+    --silent \
+    "https://kind.sigs.k8s.io/dl/${version}/kind-linux-amd64"
+
+  chmod "u+x" "${output_path}"
+}
+
+function install_kubectl
+{
+  print_trace
+
+  local output_path="${HOME}/.local/bin/kubectl"
+  local version="v1.23.6"
+  # version="$(curl -L -s https://dl.k8s.io/release/stable.txt)"
+
+  curl \
+    --location \
+    --output "${output_path}" \
+    --silent \
+    "https://dl.k8s.io/release/${version}/bin/linux/amd64/kubectl"
+
+  chmod "u+x" "${output_path}"
+}
+
 function main
 {
   local jetbrains_toolbox_tar_gz
@@ -492,6 +525,9 @@ function main
   bash "${TOOLS_DIR}/installer_scripts/install_jetbrains.bash" \
     "${jetbrains_toolbox_tar_gz}"
   bash "${TOOLS_DIR}/installer_scripts/install_applications.bash"
+
+  install_kind
+  install_kubectl
 
   # This has to be done late in the setup process
   # or it interferes with docker testing
