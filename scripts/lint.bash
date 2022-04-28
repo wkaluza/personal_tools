@@ -37,6 +37,39 @@ function format_json
     jq --sort-keys '.' - >"${f}"
 }
 
+function sort_yaml
+{
+  local f="$1"
+
+  cat <<EOF | python3 - >/dev/null
+import yaml
+
+def read_data(path):
+    with open(path, 'r') as f:
+        return yaml.safe_load(f)
+
+def main(path):
+    data = read_data(path)
+    with open(path, 'w') as f:
+        text = yaml.safe_dump(data, sort_keys=True)
+        f.write(text)
+
+if __name__ == '__main__':
+    main('${f}')
+EOF
+}
+
+function format_yaml
+{
+  local f="$1"
+
+  # Destructive to YAML comments, use discretion
+  # sort_yaml "${f}"
+
+  prettier \
+    --write "${f}" >/dev/null
+}
+
 function main
 {
   local project_root_dir
@@ -65,6 +98,19 @@ function main
     -path "${project_root_dir}/.git/*" -or \
     -path "${project_root_dir}/.idea/*" \) \
     -exec bash -c 'set -euo pipefail ; shopt -s inherit_errexit ; format_shell_scripts "$1"' -- {} \;
+
+  export -f format_yaml
+  export -f sort_yaml
+  find "${project_root_dir}" \
+    -type f \
+    -and \( \
+    -name '*.yaml' -or \
+    -name '*.yml' \) \
+    -and -not \( \
+    -path "${project_root_dir}/*___*/*" -or \
+    -path "${project_root_dir}/.git/*" -or \
+    -path "${project_root_dir}/.idea/*" \) \
+    -exec bash -c 'set -euo pipefail ; shopt -s inherit_errexit ; format_yaml "$1"' -- {} \;
 
   wait
   echo "Formatting done"

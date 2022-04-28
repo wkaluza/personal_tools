@@ -8,6 +8,8 @@ function main
   install_jq
   install_golang
   install_shellcheck
+  install_python3
+  install_nodejs
 }
 
 # Entry point

@@ -36,3 +36,26 @@ function install_shellcheck
   apt-get install --yes \
     shellcheck
 }
+
+function install_python3
+{
+  apt-get install --yes \
+    python3-dev \
+    python3-pip \
+    python3-venv
+}
+
+function install_nodejs
+{
+  apt-get install --yes \
+    curl
+
+  curl -fsSL "https://deb.nodesource.com/setup_lts.x" |
+    bash -
+
+  apt-get install --yes \
+    nodejs
+
+  npm config set ignore-scripts true --global
+  corepack enable
+}
