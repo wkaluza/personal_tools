@@ -47,7 +47,6 @@ function generate_revision_data
 
 REVISION_DATA_JSON="$(cd "${THIS_SCRIPT_DIR}" && generate_revision_data)"
 
-NETWORK_NAME_FRONTEND="local_registry_frontend"
 NETWORK_NAME_INTERNAL="local_registry_internal"
 
 DOCKER_REGISTRY_ROOT_DIR="${THIS_SCRIPT_DIR}/docker_registry"
@@ -119,7 +118,6 @@ MIRROR_REGISTRY_CONFIG="${MIRROR_CONFIG_PATH}"
 MIRROR_REGISTRY_CONFIG_DIGEST="${MIRROR_CONFIG_SHA256}"
 MIRROR_REGISTRY_CONFIG_SELECT="${MIRROR_REGISTRY_CONFIG_SELECT}"
 MIRROR_REGISTRY_HOST="${MIRROR_REGISTRY_HOST}"
-NETWORK_NAME_FRONTEND="${NETWORK_NAME_FRONTEND}"
 NETWORK_NAME_INTERNAL="${NETWORK_NAME_INTERNAL}"
 NGINX_CONFIG="${NGINX_CONFIG_PATH}"
 NGINX_CONFIG_DIGEST="${NGINX_CONFIG_SHA256}"
@@ -211,16 +209,8 @@ function is_stack_running
 
 function wait_for_networks_deletion
 {
-  local networks_regex
-  networks_regex="$(cat \
-    <(echo "${NETWORK_NAME_FRONTEND}") \
-    <(echo "${NETWORK_NAME_INTERNAL}") |
-    tr '\n' '=' |
-    sed 's/=/$|^/' |
-    drop_last 3)"
-
   if docker network ls --format '{{ .Name }}' |
-    grep -E "^${networks_regex}$" >/dev/null; then
+    grep -E "^${NETWORK_NAME_INTERNAL}$" >/dev/null; then
     false
   fi
 }

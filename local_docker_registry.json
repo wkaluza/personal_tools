@@ -14,9 +14,6 @@
     }
   },
   "networks": {
-    "frontend": {
-      "name": "${NETWORK_NAME_FRONTEND:?}"
-    },
     "internal": {
       "name": "${NETWORK_NAME_INTERNAL:?}"
     }
@@ -277,7 +274,6 @@
         }
       },
       "networks": [
-        "frontend",
         "internal"
       ],
       "ports": [
