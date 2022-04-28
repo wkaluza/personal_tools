@@ -47,7 +47,7 @@ http {
 
   # Docker registry
   server {
-    listen 443 ssl;
+    listen 443 http2 ssl;
 
     server_name ${LOCAL_REGISTRY_HOST};
 
@@ -89,7 +89,7 @@ http {
 
   # Docker registry mirror
   server {
-    listen 443 ssl;
+    listen 443 http2 ssl;
 
     server_name ${MIRROR_REGISTRY_HOST};
 

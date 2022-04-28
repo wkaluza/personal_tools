@@ -8,6 +8,8 @@ http:
   headers:
     X-Content-Type-Options:
       - nosniff
+  http2:
+    disabled: false
 log:
   fields:
     service: registry
