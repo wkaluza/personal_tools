@@ -1,0 +1,163 @@
+{
+  "configs": {
+    "main_nginx_config": {
+      "file": "${MAIN_NGINX_CONFIG:?}",
+      "name": "main_nginx_config_${MAIN_NGINX_CONFIG_DIGEST:?}"
+    }
+  },
+  "networks": {
+    "external_ba0a4168": {
+      "external": true,
+      "name": "${EXTERNAL_NETWORK_NAME:?}"
+    }
+  },
+  "secrets": {
+    "docker_registry_local_cert": {
+      "file": "${DOCKER_REGISTRY_LOCAL_CERT:?}",
+      "name": "docker_registry_local_cert_${DOCKER_REGISTRY_LOCAL_CERT_DIGEST:?}"
+    },
+    "docker_registry_local_key": {
+      "file": "${DOCKER_REGISTRY_LOCAL_KEY:?}",
+      "name": "docker_registry_local_key_${DOCKER_REGISTRY_LOCAL_KEY_DIGEST:?}"
+    },
+    "docker_registry_mirror_cert": {
+      "file": "${DOCKER_REGISTRY_MIRROR_CERT:?}",
+      "name": "docker_registry_mirror_cert_${DOCKER_REGISTRY_MIRROR_CERT_DIGEST:?}"
+    },
+    "docker_registry_mirror_key": {
+      "file": "${DOCKER_REGISTRY_MIRROR_KEY:?}",
+      "name": "docker_registry_mirror_key_${DOCKER_REGISTRY_MIRROR_KEY_DIGEST:?}"
+    },
+    "main_localhost_cert": {
+      "file": "${MAIN_LOCALHOST_CERT:?}",
+      "name": "main_localhost_cert_${MAIN_LOCALHOST_CERT_DIGEST:?}"
+    },
+    "main_localhost_key": {
+      "file": "${MAIN_LOCALHOST_KEY:?}",
+      "name": "main_localhost_key_${MAIN_LOCALHOST_KEY_DIGEST:?}"
+    }
+  },
+  "services": {
+    "main_reverse_proxy": {
+      "build": {
+        "context": "${REVERSE_PROXY_CONTEXT:?}",
+        "dockerfile": "${REVERSE_PROXY_DOCKERFILE:?}",
+        "network": "none"
+      },
+      "configs": [
+        {
+          "source": "main_nginx_config",
+          "target": "/etc/nginx/templates/nginx.conf.template"
+        }
+      ],
+      "deploy": {
+        "mode": "global",
+        "placement": {
+          "constraints": [
+            "node.id==${LOCAL_NODE_ID:?}",
+            "node.role==manager"
+          ]
+        },
+        "resources": {
+          "limits": {
+            "cpus": "0.5",
+            "memory": "50MB"
+          },
+          "reservations": {
+            "cpus": "0.25",
+            "memory": "25MB"
+          }
+        },
+        "restart_policy": {
+          "condition": "on-failure",
+          "delay": "10s",
+          "max_attempts": 5,
+          "window": "120s"
+        },
+        "rollback_config": {
+          "delay": "10s",
+          "failure_action": "pause",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        },
+        "update_config": {
+          "delay": "10s",
+          "failure_action": "rollback",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        }
+      },
+      "environment": {
+        "LOCAL_REGISTRY_HOST": "${LOCAL_REGISTRY_HOST:?}",
+        "MAIN_REVERSE_PROXY_HOST": "${MAIN_REVERSE_PROXY_HOST:?}",
+        "MIRROR_REGISTRY_HOST": "${MIRROR_REGISTRY_HOST:?}",
+        "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx",
+        "REGISTRY_STACK_REV_PROXY_SRV_NAME": "${REGISTRY_STACK_REV_PROXY_SRV_NAME:?}",
+        "REVISION_DATA_JSON": "${REVISION_DATA_JSON:?}"
+      },
+      "healthcheck": {
+        "disable": false,
+        "interval": "1s",
+        "retries": 30,
+        "start_period": "60s",
+        "timeout": "1s"
+      },
+      "image": "${REVERSE_PROXY_IMAGE_REFERENCE:?}",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": 5,
+          "max-size": "200k"
+        }
+      },
+      "networks": [
+        "external_ba0a4168"
+      ],
+      "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "published": 80,
+          "target": 80
+        },
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "published": 443,
+          "target": 443
+        }
+      ],
+      "secrets": [
+        {
+          "source": "docker_registry_local_cert",
+          "target": "/etc/nginx/certs/${LOCAL_REGISTRY_HOST:?}.cert"
+        },
+        {
+          "source": "docker_registry_local_key",
+          "target": "/etc/nginx/certs/${LOCAL_REGISTRY_HOST:?}.key"
+        },
+        {
+          "source": "docker_registry_mirror_cert",
+          "target": "/etc/nginx/certs/${MIRROR_REGISTRY_HOST:?}.cert"
+        },
+        {
+          "source": "docker_registry_mirror_key",
+          "target": "/etc/nginx/certs/${MIRROR_REGISTRY_HOST:?}.key"
+        },
+        {
+          "source": "main_localhost_cert",
+          "target": "/etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST:?}.cert"
+        },
+        {
+          "source": "main_localhost_key",
+          "target": "/etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST:?}.key"
+        }
+      ]
+    }
+  },
+  "version": "3.9"
+}

@@ -31,12 +31,7 @@ http {
   keepalive_timeout 65;
   # gzip on;
 
-  server {
-    location / {
-      return 404;
-    }
-  }
-
+  # Internal service healthcheck
   server {
     listen 8080;
 
@@ -47,19 +42,9 @@ http {
 
   # Docker registry
   server {
-    listen 443 http2 ssl;
+    listen 80;
 
     server_name ${LOCAL_REGISTRY_HOST};
-
-    ssl on;
-    ssl_certificate /etc/nginx/certs/${LOCAL_REGISTRY_HOST}.cert;
-    ssl_certificate_key /etc/nginx/certs/${LOCAL_REGISTRY_HOST}.key;
-
-    # Source https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
-    ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
-    ssl_prefer_server_ciphers on;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_session_cache shared:SSL:10m;
 
     # Disable request body size check
     # Prevents HTTP 413
@@ -68,10 +53,6 @@ http {
     # See https://github.com/moby/moby/issues/1486
     # Prevents HTTP 411
     chunked_transfer_encoding on;
-
-    location = /_/revision {
-      return 200 '${REVISION_DATA_JSON}\n';
-    }
 
     location /v2/ {
       proxy_read_timeout 900;
@@ -89,19 +70,9 @@ http {
 
   # Docker registry mirror
   server {
-    listen 443 http2 ssl;
+    listen 80;
 
     server_name ${MIRROR_REGISTRY_HOST};
-
-    ssl on;
-    ssl_certificate /etc/nginx/certs/${MIRROR_REGISTRY_HOST}.cert;
-    ssl_certificate_key /etc/nginx/certs/${MIRROR_REGISTRY_HOST}.key;
-
-    # Source https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
-    ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
-    ssl_prefer_server_ciphers on;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_session_cache shared:SSL:10m;
 
     # Disable request body size check
     # Prevents HTTP 413
@@ -110,10 +81,6 @@ http {
     # See https://github.com/moby/moby/issues/1486
     # Prevents HTTP 411
     chunked_transfer_encoding on;
-
-    location = /_/revision {
-      return 200 '${REVISION_DATA_JSON}\n';
-    }
 
     location /v2/ {
       proxy_read_timeout 900;

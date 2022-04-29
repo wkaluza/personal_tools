@@ -1,0 +1,135 @@
+user nginx;
+worker_processes auto;
+
+error_log /var/log/nginx/error.log notice;
+pid /var/run/nginx.pid;
+
+events {
+  worker_connections 1024;
+}
+
+http {
+  upstream docker_registries_rev_proxy_upstream {
+    server ${REGISTRY_STACK_REV_PROXY_SRV_NAME};
+  }
+
+  include /etc/nginx/mime.types;
+  default_type application/octet-stream;
+
+  log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+    '$status $body_bytes_sent "$http_referer" '
+    '"$http_user_agent" "$http_x_forwarded_for"';
+
+  access_log /var/log/nginx/access.log main;
+
+  sendfile on;
+  # tcp_nopush on;
+  keepalive_timeout 65;
+  # gzip on;
+
+  # Internal service healthcheck
+  server {
+    listen 8080;
+
+    location = /_/nginx_healthcheck {
+      return 200 'HEALTHY';
+    }
+  }
+
+  # This server's own endpoint
+  server {
+    listen 443 http2 ssl;
+
+    server_name ${MAIN_REVERSE_PROXY_HOST};
+
+    ssl on;
+    ssl_certificate /etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST}.cert;
+    ssl_certificate_key /etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST}.key;
+
+    # Source https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+    ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
+    ssl_prefer_server_ciphers on;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
+
+    location = /_/revision {
+      return 200 '${REVISION_DATA_JSON}\n';
+    }
+  }
+
+  # Docker registry
+  server {
+    listen 443 http2 ssl;
+
+    server_name ${LOCAL_REGISTRY_HOST};
+
+    ssl on;
+    ssl_certificate /etc/nginx/certs/${LOCAL_REGISTRY_HOST}.cert;
+    ssl_certificate_key /etc/nginx/certs/${LOCAL_REGISTRY_HOST}.key;
+
+    # Source https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+    ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
+    ssl_prefer_server_ciphers on;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
+
+    # Disable request body size check
+    # Prevents HTTP 413
+    client_max_body_size 0;
+
+    # See https://github.com/moby/moby/issues/1486
+    # Prevents HTTP 411
+    chunked_transfer_encoding on;
+
+    location /v2/ {
+      proxy_read_timeout 900;
+
+      # Required by docker client
+      proxy_set_header Host $http_host;
+
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header X-Real-IP $remote_addr;
+
+      proxy_pass http://docker_registries_rev_proxy_upstream;
+    }
+  }
+
+  # Docker mirror registry
+  server {
+    listen 443 http2 ssl;
+
+    server_name ${MIRROR_REGISTRY_HOST};
+
+    ssl on;
+    ssl_certificate /etc/nginx/certs/${MIRROR_REGISTRY_HOST}.cert;
+    ssl_certificate_key /etc/nginx/certs/${MIRROR_REGISTRY_HOST}.key;
+
+    # Source https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+    ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
+    ssl_prefer_server_ciphers on;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
+
+    # Disable request body size check
+    # Prevents HTTP 413
+    client_max_body_size 0;
+
+    # See https://github.com/moby/moby/issues/1486
+    # Prevents HTTP 411
+    chunked_transfer_encoding on;
+
+    location /v2/ {
+      proxy_read_timeout 900;
+
+      # Required by docker client
+      proxy_set_header Host $http_host;
+
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header X-Real-IP $remote_addr;
+
+      proxy_pass http://docker_registries_rev_proxy_upstream;
+    }
+  }
+}
