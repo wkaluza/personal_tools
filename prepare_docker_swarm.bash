@@ -384,6 +384,8 @@ function select_mirror_registry_config
 
 function main
 {
+  cd "${THIS_SCRIPT_DIR}"
+
   select_mirror_registry_config
 
   ensure_docker_mirror_config
