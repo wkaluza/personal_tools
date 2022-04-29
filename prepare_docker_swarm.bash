@@ -47,8 +47,6 @@ function generate_revision_data
 
 REVISION_DATA_JSON="$(generate_revision_data)"
 
-NETWORK_NAME_INTERNAL="local_registry_internal"
-
 DOCKER_REGISTRY_ROOT_DIR="${THIS_SCRIPT_DIR}/docker_registry"
 LOCAL_SWARM_NODE_ID="<___not_a_valid_id___>"
 
@@ -118,7 +116,6 @@ MIRROR_REGISTRY_CONFIG="${MIRROR_CONFIG_PATH}"
 MIRROR_REGISTRY_CONFIG_DIGEST="${MIRROR_CONFIG_SHA256}"
 MIRROR_REGISTRY_CONFIG_SELECT="${MIRROR_REGISTRY_CONFIG_SELECT}"
 MIRROR_REGISTRY_HOST="${MIRROR_REGISTRY_HOST}"
-NETWORK_NAME_INTERNAL="${NETWORK_NAME_INTERNAL}"
 NGINX_CONFIG="${NGINX_CONFIG_PATH}"
 NGINX_CONFIG_DIGEST="${NGINX_CONFIG_SHA256}"
 REGISTRY_CONFIG="${REGISTRY_CONFIG_PATH}"
@@ -212,8 +209,12 @@ function is_stack_running
 
 function wait_for_networks_deletion
 {
+  local stack_name="$1"
+
+  local network_name="internal_5f665f67"
+
   if docker network ls --format '{{ .Name }}' |
-    grep -E "^${NETWORK_NAME_INTERNAL}$" >/dev/null; then
+    grep -E "^${stack_name}_${network_name}$" >/dev/null; then
     false
   fi
 }
@@ -229,7 +230,8 @@ function start_registry_stack
 
   retry_until_success \
     "wait_for_networks_deletion" \
-    wait_for_networks_deletion
+    wait_for_networks_deletion \
+    "${stack_name}"
 
   log_info "Building registry stack images..."
 

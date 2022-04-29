@@ -14,9 +14,7 @@
     }
   },
   "networks": {
-    "internal": {
-      "name": "${NETWORK_NAME_INTERNAL:?}"
-    }
+    "internal_5f665f67": {}
   },
   "secrets": {
     "docker_registry_local_cert": {
@@ -106,7 +104,7 @@
         }
       },
       "networks": [
-        "internal"
+        "internal_5f665f67"
       ],
       "volumes": [
         {
@@ -185,7 +183,7 @@
         }
       },
       "networks": [
-        "internal"
+        "internal_5f665f67"
       ],
       "volumes": [
         {
@@ -274,7 +272,7 @@
         }
       },
       "networks": [
-        "internal"
+        "internal_5f665f67"
       ],
       "ports": [
         {
