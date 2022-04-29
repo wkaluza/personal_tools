@@ -274,7 +274,7 @@ function start_docker_stack
     wait_for_networks_deletion \
     "${stack_name}"
 
-  log_info "Building stack images..."
+  log_info "Building ${stack_name} images..."
 
   run_with_env \
     "${env_factory}" \
@@ -282,7 +282,7 @@ function start_docker_stack
     --file "${compose_file}" \
     build
 
-  log_info "Deploying stack..."
+  log_info "Deploying ${stack_name}..."
 
   run_with_env \
     "${env_factory}" \
@@ -291,7 +291,7 @@ function start_docker_stack
     --prune \
     "${stack_name}"
 
-  log_info "Stack deployed successfully"
+  log_info "Stack ${stack_name} deployed successfully"
 }
 
 function wait_for_rolling_update
