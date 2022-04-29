@@ -39,8 +39,8 @@
   "services": {
     "docker_registry": {
       "build": {
-        "context": "${PROJECT_ROOT_DIR:?}/registry/context",
-        "dockerfile": "${PROJECT_ROOT_DIR:?}/registry/registry.dockerfile",
+        "context": "${REGISTRY_CONTEXT:?}",
+        "dockerfile": "${REGISTRY_DOCKERFILE:?}",
         "network": "none"
       },
       "configs": [
@@ -118,8 +118,8 @@
     },
     "mirror_docker_registry": {
       "build": {
-        "context": "${PROJECT_ROOT_DIR:?}/registry/context",
-        "dockerfile": "${PROJECT_ROOT_DIR:?}/registry/registry.dockerfile",
+        "context": "${REGISTRY_CONTEXT:?}",
+        "dockerfile": "${REGISTRY_DOCKERFILE:?}",
         "network": "none"
       },
       "configs": [
@@ -197,8 +197,8 @@
     },
     "reverse_proxy": {
       "build": {
-        "context": "${PROJECT_ROOT_DIR:?}/reverse_proxy/context",
-        "dockerfile": "${PROJECT_ROOT_DIR:?}/reverse_proxy/reverse_proxy.dockerfile",
+        "context": "${REVERSE_PROXY_CONTEXT:?}",
+        "dockerfile": "${REVERSE_PROXY_DOCKERFILE:?}",
         "network": "none"
       },
       "configs": [
