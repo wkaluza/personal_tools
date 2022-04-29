@@ -312,8 +312,6 @@ function ensure_local_docker_registry_is_running
   local compose_file="${THIS_SCRIPT_DIR}/local_docker_registry.json"
   local stack_name="local_registry_stack"
 
-  LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
-
   start_registry_stack \
     "${compose_file}" \
     "${stack_name}"
@@ -391,6 +389,9 @@ function main
   ensure_docker_mirror_config
   ensure_hosts_file
   ensure_docker_swarm_init
+
+  LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
+
   ensure_local_docker_registry_is_running
 
   log_info "Success $(basename "$0")"
