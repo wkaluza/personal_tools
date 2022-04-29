@@ -9,11 +9,11 @@ events {
 }
 
 http {
-  upstream docker_registry {
+  upstream docker_registry_upstream {
     server docker_registry:5000;
   }
 
-  upstream mirror_docker_registry {
+  upstream mirror_docker_registry_upstream {
     server mirror_docker_registry:5000;
   }
 
@@ -83,7 +83,7 @@ http {
       proxy_set_header X-Forwarded-Proto $scheme;
       proxy_set_header X-Real-IP $remote_addr;
 
-      proxy_pass http://docker_registry;
+      proxy_pass http://docker_registry_upstream;
     }
   }
 
@@ -125,7 +125,7 @@ http {
       proxy_set_header X-Forwarded-Proto $scheme;
       proxy_set_header X-Real-IP $remote_addr;
 
-      proxy_pass http://mirror_docker_registry;
+      proxy_pass http://mirror_docker_registry_upstream;
     }
   }
 }
