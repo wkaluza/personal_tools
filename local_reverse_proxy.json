@@ -92,9 +92,9 @@
         }
       },
       "environment": {
-        "LOCAL_REGISTRY_HOST": "${LOCAL_REGISTRY_HOST:?}",
-        "MAIN_REVERSE_PROXY_HOST": "${MAIN_REVERSE_PROXY_HOST:?}",
-        "MIRROR_REGISTRY_HOST": "${MIRROR_REGISTRY_HOST:?}",
+        "LOCAL_REGISTRY_HOST_a8a1ce1e": "${LOCAL_REGISTRY_HOST_a8a1ce1e:?}",
+        "MAIN_REVERSE_PROXY_HOST_cab92795": "${MAIN_REVERSE_PROXY_HOST_cab92795:?}",
+        "MIRROR_REGISTRY_HOST_f334ec4f": "${MIRROR_REGISTRY_HOST_f334ec4f:?}",
         "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx",
         "REGISTRY_STACK_REV_PROXY_SRV_NAME": "${REGISTRY_STACK_REV_PROXY_SRV_NAME:?}",
         "REVISION_DATA_JSON": "${REVISION_DATA_JSON:?}"
@@ -134,27 +134,27 @@
       "secrets": [
         {
           "source": "docker_registry_local_cert",
-          "target": "/etc/nginx/certs/${LOCAL_REGISTRY_HOST:?}.cert"
+          "target": "/etc/nginx/certs/${LOCAL_REGISTRY_HOST_a8a1ce1e:?}.cert"
         },
         {
           "source": "docker_registry_local_key",
-          "target": "/etc/nginx/certs/${LOCAL_REGISTRY_HOST:?}.key"
+          "target": "/etc/nginx/certs/${LOCAL_REGISTRY_HOST_a8a1ce1e:?}.key"
         },
         {
           "source": "docker_registry_mirror_cert",
-          "target": "/etc/nginx/certs/${MIRROR_REGISTRY_HOST:?}.cert"
+          "target": "/etc/nginx/certs/${MIRROR_REGISTRY_HOST_f334ec4f:?}.cert"
         },
         {
           "source": "docker_registry_mirror_key",
-          "target": "/etc/nginx/certs/${MIRROR_REGISTRY_HOST:?}.key"
+          "target": "/etc/nginx/certs/${MIRROR_REGISTRY_HOST_f334ec4f:?}.key"
         },
         {
           "source": "main_localhost_cert",
-          "target": "/etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST:?}.cert"
+          "target": "/etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST_cab92795:?}.cert"
         },
         {
           "source": "main_localhost_key",
-          "target": "/etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST:?}.key"
+          "target": "/etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST_cab92795:?}.key"
         }
       ]
     }

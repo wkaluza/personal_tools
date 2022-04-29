@@ -1,0 +1,5 @@
+{
+  "LOCAL_REGISTRY_HOST_a8a1ce1e": "docker_private_registry.localhost",
+  "MAIN_REVERSE_PROXY_HOST_cab92795": "main.localhost",
+  "MIRROR_REGISTRY_HOST_f334ec4f": "docker_mirror_registry.localhost"
+}

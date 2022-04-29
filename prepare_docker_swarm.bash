@@ -7,9 +7,12 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/common.bash"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/git_helpers.bash"
 
-LOCAL_REGISTRY_HOST="docker.registry.local"
-MIRROR_REGISTRY_HOST="docker.registry.mirror"
-MAIN_REVERSE_PROXY_HOST="main.localhost"
+source <(cat "${THIS_SCRIPT_DIR}/local_domains.json" |
+  jq '. | to_entries' - |
+  jq '. | map( "\(.key)=\"\(.value)\"" )' - |
+  jq --raw-output '. | .[]' - |
+  sort)
+
 REGISTRY_STACK_REV_PROXY_SRV_NAME="<___not_a_real_service___>"
 
 EXTERNAL_NETWORK_NAME="<___not_a_real_network___>"
@@ -63,13 +66,13 @@ NGINX_CONFIG_PATH="${DOCKER_REGISTRY_ROOT_DIR}/reverse_proxy/nginx.conf.template
 NGINX_CONFIG_SHA256="$(cat "${NGINX_CONFIG_PATH}" |
   sha256 |
   take_first 8)"
-NGINX_IMAGE="${LOCAL_REGISTRY_HOST}/nginx"
+NGINX_IMAGE="${LOCAL_REGISTRY_HOST_a8a1ce1e}/nginx"
 
 REGISTRY_CONFIG_PATH="${DOCKER_REGISTRY_ROOT_DIR}/registry/config.yml"
 REGISTRY_CONFIG_SHA256="$(cat "${REGISTRY_CONFIG_PATH}" |
   sha256 |
   take_first 8)"
-REGISTRY_IMAGE="${LOCAL_REGISTRY_HOST}/registry"
+REGISTRY_IMAGE="${LOCAL_REGISTRY_HOST_a8a1ce1e}/registry"
 
 MIRROR_CONFIG_PATH="${DOCKER_REGISTRY_ROOT_DIR}/registry/config_mirror.yml"
 MIRROR_CONFIG_SHA256="$(cat "${MIRROR_CONFIG_PATH}" |
@@ -78,31 +81,31 @@ MIRROR_CONFIG_SHA256="$(cat "${MIRROR_CONFIG_PATH}" |
 
 CERTS_DIR="${HOME}/.certificates___"
 
-DOCKER_REGISTRY_LOCAL_CERT_PATH="${CERTS_DIR}/${LOCAL_REGISTRY_HOST}.pem"
+DOCKER_REGISTRY_LOCAL_CERT_PATH="${CERTS_DIR}/${LOCAL_REGISTRY_HOST_a8a1ce1e}.pem"
 DOCKER_REGISTRY_LOCAL_CERT_DIGEST="$(cat "${DOCKER_REGISTRY_LOCAL_CERT_PATH}" |
   sha256 |
   take_first 8)"
-DOCKER_REGISTRY_LOCAL_KEY_PATH="${CERTS_DIR}/${LOCAL_REGISTRY_HOST}.secret"
+DOCKER_REGISTRY_LOCAL_KEY_PATH="${CERTS_DIR}/${LOCAL_REGISTRY_HOST_a8a1ce1e}.secret"
 DOCKER_REGISTRY_LOCAL_KEY_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_LOCAL_KEY_PATH}" |
   encrypt_deterministically "${DOCKER_REGISTRY_LOCAL_KEY_PATH}" |
   sha256 |
   take_first 8)"
 
-DOCKER_REGISTRY_MIRROR_CERT_PATH="${CERTS_DIR}/${MIRROR_REGISTRY_HOST}.pem"
+DOCKER_REGISTRY_MIRROR_CERT_PATH="${CERTS_DIR}/${MIRROR_REGISTRY_HOST_f334ec4f}.pem"
 DOCKER_REGISTRY_MIRROR_CERT_DIGEST="$(cat "${DOCKER_REGISTRY_MIRROR_CERT_PATH}" |
   sha256 |
   take_first 8)"
-DOCKER_REGISTRY_MIRROR_KEY_PATH="${CERTS_DIR}/${MIRROR_REGISTRY_HOST}.secret"
+DOCKER_REGISTRY_MIRROR_KEY_PATH="${CERTS_DIR}/${MIRROR_REGISTRY_HOST_f334ec4f}.secret"
 DOCKER_REGISTRY_MIRROR_KEY_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_MIRROR_KEY_PATH}" |
   encrypt_deterministically "${DOCKER_REGISTRY_MIRROR_KEY_PATH}" |
   sha256 |
   take_first 8)"
 
-MAIN_LOCALHOST_CERT_PATH="${CERTS_DIR}/${MAIN_REVERSE_PROXY_HOST}.pem"
+MAIN_LOCALHOST_CERT_PATH="${CERTS_DIR}/${MAIN_REVERSE_PROXY_HOST_cab92795}.pem"
 MAIN_LOCALHOST_CERT_DIGEST="$(cat "${MAIN_LOCALHOST_CERT_PATH}" |
   sha256 |
   take_first 8)"
-MAIN_LOCALHOST_KEY_PATH="${CERTS_DIR}/${MAIN_REVERSE_PROXY_HOST}.secret"
+MAIN_LOCALHOST_KEY_PATH="${CERTS_DIR}/${MAIN_REVERSE_PROXY_HOST_cab92795}.secret"
 MAIN_LOCALHOST_KEY_SECURE_DIGEST="$(cat "${MAIN_LOCALHOST_KEY_PATH}" |
   encrypt_deterministically "${MAIN_LOCALHOST_KEY_PATH}" |
   sha256 |
@@ -115,11 +118,11 @@ function generate_registries_env
   cat <<EOF
 EXTERNAL_NETWORK_NAME='${EXTERNAL_NETWORK_NAME}'
 LOCAL_NODE_ID='${LOCAL_SWARM_NODE_ID}'
-LOCAL_REGISTRY_HOST='${LOCAL_REGISTRY_HOST}'
+LOCAL_REGISTRY_HOST_a8a1ce1e='${LOCAL_REGISTRY_HOST_a8a1ce1e}'
 MIRROR_REGISTRY_CONFIG='${MIRROR_CONFIG_PATH}'
 MIRROR_REGISTRY_CONFIG_DIGEST='${MIRROR_CONFIG_SHA256}'
 MIRROR_REGISTRY_CONFIG_SELECT='${MIRROR_REGISTRY_CONFIG_SELECT}'
-MIRROR_REGISTRY_HOST='${MIRROR_REGISTRY_HOST}'
+MIRROR_REGISTRY_HOST_f334ec4f='${MIRROR_REGISTRY_HOST_f334ec4f}'
 NGINX_CONFIG='${NGINX_CONFIG_PATH}'
 NGINX_CONFIG_DIGEST='${NGINX_CONFIG_SHA256}'
 REGISTRY_CONFIG='${REGISTRY_CONFIG_PATH}'
@@ -146,15 +149,15 @@ DOCKER_REGISTRY_MIRROR_KEY='${DOCKER_REGISTRY_MIRROR_KEY_PATH}'
 DOCKER_REGISTRY_MIRROR_KEY_DIGEST='${DOCKER_REGISTRY_MIRROR_KEY_SECURE_DIGEST}'
 EXTERNAL_NETWORK_NAME='${EXTERNAL_NETWORK_NAME}'
 LOCAL_NODE_ID='${LOCAL_SWARM_NODE_ID}'
-LOCAL_REGISTRY_HOST='${LOCAL_REGISTRY_HOST}'
+LOCAL_REGISTRY_HOST_a8a1ce1e='${LOCAL_REGISTRY_HOST_a8a1ce1e}'
 MAIN_LOCALHOST_CERT='${MAIN_LOCALHOST_CERT_PATH}'
 MAIN_LOCALHOST_CERT_DIGEST='${MAIN_LOCALHOST_CERT_DIGEST}'
 MAIN_LOCALHOST_KEY='${MAIN_LOCALHOST_KEY_PATH}'
 MAIN_LOCALHOST_KEY_DIGEST='${MAIN_LOCALHOST_KEY_SECURE_DIGEST}'
 MAIN_NGINX_CONFIG='${MAIN_NGINX_CONFIG_PATH}'
 MAIN_NGINX_CONFIG_DIGEST='${MAIN_NGINX_CONFIG_SHA256}'
-MAIN_REVERSE_PROXY_HOST='${MAIN_REVERSE_PROXY_HOST}'
-MIRROR_REGISTRY_HOST='${MIRROR_REGISTRY_HOST}'
+MAIN_REVERSE_PROXY_HOST_cab92795='${MAIN_REVERSE_PROXY_HOST_cab92795}'
+MIRROR_REGISTRY_HOST_f334ec4f='${MIRROR_REGISTRY_HOST_f334ec4f}'
 REGISTRY_STACK_REV_PROXY_SRV_NAME='${REGISTRY_STACK_REV_PROXY_SRV_NAME}'
 REVERSE_PROXY_CONTEXT='${DOCKER_REGISTRY_ROOT_DIR}/reverse_proxy/context'
 REVERSE_PROXY_DOCKERFILE='${DOCKER_REGISTRY_ROOT_DIR}/reverse_proxy/reverse_proxy.dockerfile'
@@ -329,35 +332,19 @@ function rm_volume
     "${volume_name}"
 }
 
-function ensure_host_is_in_etc_hosts_file
-{
-  local host="$1"
-  local ip="$2"
-
-  local hosts_file="/etc/hosts"
-
-  if ! cat "${hosts_file}" |
-    grep "${host}" >/dev/null; then
-    log_info "Need to add ${host} to ${hosts_file} ..."
-
-    echo "${ip} ${host}" |
-      sudo tee --append "${hosts_file}" >/dev/null
-  fi
-}
-
 function ensure_services_are_running
 {
   retry_until_success \
-    "wait_for_rolling_update ${MAIN_REVERSE_PROXY_HOST}" \
-    wait_for_rolling_update "${MAIN_REVERSE_PROXY_HOST}"
+    "wait_for_rolling_update ${MAIN_REVERSE_PROXY_HOST_cab92795}" \
+    wait_for_rolling_update "${MAIN_REVERSE_PROXY_HOST_cab92795}"
 
   retry_until_success \
-    "ping_registry ${LOCAL_REGISTRY_HOST}" \
-    ping_registry "${LOCAL_REGISTRY_HOST}"
+    "ping_registry ${LOCAL_REGISTRY_HOST_a8a1ce1e}" \
+    ping_registry "${LOCAL_REGISTRY_HOST_a8a1ce1e}"
 
   retry_until_success \
-    "ping_registry ${MIRROR_REGISTRY_HOST}" \
-    ping_registry "${MIRROR_REGISTRY_HOST}"
+    "ping_registry ${MIRROR_REGISTRY_HOST_f334ec4f}" \
+    ping_registry "${MIRROR_REGISTRY_HOST_f334ec4f}"
 }
 
 function get_configured_registry_mirrors
@@ -370,7 +357,7 @@ function ensure_docker_mirror_config
 {
   local config_file="/etc/docker/daemon.json"
   local reg_mirrors="registry-mirrors"
-  local url="https://${MIRROR_REGISTRY_HOST}"
+  local url="https://${MIRROR_REGISTRY_HOST_f334ec4f}"
   local output=""
 
   if ! get_configured_registry_mirrors | grep "${url}" >/dev/null; then
@@ -399,21 +386,6 @@ function ensure_docker_mirror_config
       sudo systemctl restart docker
     fi
   fi
-}
-
-function ensure_hosts_file
-{
-  ensure_host_is_in_etc_hosts_file \
-    "${LOCAL_REGISTRY_HOST}" \
-    "127.0.0.1"
-
-  ensure_host_is_in_etc_hosts_file \
-    "${MIRROR_REGISTRY_HOST}" \
-    "127.0.0.1"
-
-  ensure_host_is_in_etc_hosts_file \
-    "${MAIN_REVERSE_PROXY_HOST}" \
-    "127.0.0.1"
 }
 
 function select_mirror_registry_config
@@ -454,7 +426,6 @@ function main
   select_mirror_registry_config
 
   ensure_docker_mirror_config
-  ensure_hosts_file
   ensure_docker_swarm_init
 
   EXTERNAL_NETWORK_NAME="$(bash "${THIS_SCRIPT_DIR}/create_external_docker_network.bash")"

@@ -44,7 +44,7 @@ http {
   server {
     listen 80;
 
-    server_name ${LOCAL_REGISTRY_HOST};
+    server_name ${LOCAL_REGISTRY_HOST_a8a1ce1e};
 
     # Disable request body size check
     # Prevents HTTP 413
@@ -72,7 +72,7 @@ http {
   server {
     listen 80;
 
-    server_name ${MIRROR_REGISTRY_HOST};
+    server_name ${MIRROR_REGISTRY_HOST_f334ec4f};
 
     # Disable request body size check
     # Prevents HTTP 413

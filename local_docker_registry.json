@@ -239,8 +239,8 @@
         }
       },
       "environment": {
-        "LOCAL_REGISTRY_HOST": "${LOCAL_REGISTRY_HOST:?}",
-        "MIRROR_REGISTRY_HOST": "${MIRROR_REGISTRY_HOST:?}",
+        "LOCAL_REGISTRY_HOST_a8a1ce1e": "${LOCAL_REGISTRY_HOST_a8a1ce1e:?}",
+        "MIRROR_REGISTRY_HOST_f334ec4f": "${MIRROR_REGISTRY_HOST_f334ec4f:?}",
         "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx"
       },
       "healthcheck": {
