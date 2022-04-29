@@ -7,7 +7,7 @@ function generate_cert
 
   mkcert \
     -cert-file "${domain}.pem" \
-    -key-file "${domain}-key.pem" \
+    -key-file "${domain}.secret" \
     "${domain}"
 }
 
