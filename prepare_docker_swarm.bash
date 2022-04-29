@@ -45,7 +45,7 @@ function generate_revision_data
     tr -d '\n'
 }
 
-REVISION_DATA_JSON="$(cd "${THIS_SCRIPT_DIR}" && generate_revision_data)"
+REVISION_DATA_JSON="$(generate_revision_data)"
 
 NETWORK_NAME_INTERNAL="local_registry_internal"
 
