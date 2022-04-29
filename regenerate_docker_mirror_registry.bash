@@ -56,32 +56,9 @@ function populate_local_registry
     "22.04"
 }
 
-function list_local_docker_tags
-{
-  docker image ls --format '{{ .Repository }}:{{ .Tag }}' |
-    grep -v '<none>' |
-    grep -Ev '^nginx:' |
-    grep -Ev '^registry:' |
-    grep -Ev '^docker\.registry\.local/nginx:' |
-    grep -Ev '^docker\.registry\.local/registry:' |
-    sort |
-    uniq
-}
-
-function untag_local_images
-{
-  for img in $(list_local_docker_tags); do
-    docker image rm \
-      --no-prune \
-      "${img}" >/dev/null 2>&1 ||
-      true
-  done
-}
-
 function main
 {
   populate_local_registry
-  untag_local_images
 }
 
 main

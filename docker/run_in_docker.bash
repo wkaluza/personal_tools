@@ -70,10 +70,6 @@ function docker_run
     "/bin/bash" \
     "-c" \
     "${command}"
-
-  docker image rm \
-    --no-prune \
-    "${image_name}" >/dev/null
 }
 
 function docker_build
