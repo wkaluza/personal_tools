@@ -2,6 +2,8 @@ set -euo pipefail
 shopt -s inherit_errexit
 
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+cd "${THIS_SCRIPT_DIR}"
+
 DOCKER_IMAGE_TAG="test_ubuntu_bare_minimum:latest"
 
 function on_exit

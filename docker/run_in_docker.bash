@@ -1,6 +1,9 @@
 set -euo pipefail
 shopt -s inherit_errexit
 
+THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+cd "${THIS_SCRIPT_DIR}"
+
 DIGESTS=""
 
 function compute_digest

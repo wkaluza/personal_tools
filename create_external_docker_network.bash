@@ -1,6 +1,9 @@
 set -euo pipefail
 shopt -s inherit_errexit
 
+THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+cd "${THIS_SCRIPT_DIR}"
+
 EXTERNAL_NETWORK_NAME="local_network_95e6b7fd"
 
 function ensure_external_network_exists

@@ -2,6 +2,7 @@ set -euo pipefail
 shopt -s inherit_errexit
 
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+cd "${THIS_SCRIPT_DIR}"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/common.bash"
@@ -421,8 +422,6 @@ function start_main_reverse_proxy
 
 function main
 {
-  cd "${THIS_SCRIPT_DIR}"
-
   select_mirror_registry_config
 
   ensure_docker_mirror_config
