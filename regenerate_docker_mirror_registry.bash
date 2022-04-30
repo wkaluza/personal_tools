@@ -26,7 +26,7 @@ function populate_local_registry
     "14.10.0-ce.0"
   prefetch_base_image \
     "gitlab/gitlab-runner" \
-    "alpine3.15-v14.10.0"
+    "alpine-v14.10.0"
   prefetch_base_image \
     "gitlab/gitlab-runner" \
     "ubuntu-v14.10.0"
@@ -44,7 +44,7 @@ function populate_local_registry
     "14.2"
   prefetch_base_image \
     "postgres" \
-    "14.2-alpine3.15"
+    "14.2-alpine"
   prefetch_base_image \
     "registry" \
     "2.8.1"
