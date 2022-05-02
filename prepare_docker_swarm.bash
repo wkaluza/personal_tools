@@ -252,16 +252,31 @@ function is_stack_running
     grep -E "^${stack_name}$" >/dev/null
 }
 
+function stack_internal_networks
+{
+  local stack_name="$1"
+  local compose_file="$2"
+
+  cat "${compose_file}" |
+    jq --raw-output '.networks | keys | .[]' - |
+    grep "internal" |
+    awk "{ print \"${stack_name}_\" \$0 }" |
+    sort
+}
+
 function wait_for_networks_deletion
 {
   local stack_name="$1"
+  local compose_file="$2"
 
-  local network_name="internal_5f665f67"
-
-  if docker network ls --format '{{ .Name }}' |
-    grep -E "^${stack_name}_${network_name}$" >/dev/null; then
-    false
-  fi
+  for network_name in $(stack_internal_networks \
+    "${stack_name}" \
+    "${compose_file}"); do
+    if docker network ls --format '{{ .Name }}' |
+      grep -E "^${network_name}$" >/dev/null; then
+      false
+    fi
+  done
 }
 
 function start_docker_stack
@@ -277,7 +292,8 @@ function start_docker_stack
   retry_until_success \
     "wait_for_networks_deletion" \
     wait_for_networks_deletion \
-    "${stack_name}"
+    "${stack_name}" \
+    "${compose_file}"
 
   log_info "Building ${stack_name} images..."
 
