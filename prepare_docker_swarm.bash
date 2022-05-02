@@ -14,7 +14,9 @@ source <(cat "${THIS_SCRIPT_DIR}/local_domains.json" |
   jq --raw-output '. | .[]' - |
   sort)
 
-REGISTRY_STACK_REV_PROXY_SRV_NAME="<___not_a_real_service___>"
+DOCKER_REGISTRY_STACK_NAME="local_registry_stack"
+REGISTRY_STACK_REV_PROXY_SRV_NAME="${DOCKER_REGISTRY_STACK_NAME}_reverse_proxy_ab0e9c4c"
+REVERSE_PROXY_STACK_NAME="local_reverse_proxy_stack"
 
 EXTERNAL_NETWORK_NAME="<___not_a_real_network___>"
 
@@ -73,7 +75,6 @@ REGISTRY_CONFIG_PATH="${DOCKER_REGISTRY_ROOT_DIR}/registry/config.yml"
 REGISTRY_CONFIG_SHA256="$(cat "${REGISTRY_CONFIG_PATH}" |
   sha256 |
   take_first 8)"
-REGISTRY_IMAGE="${LOCAL_REGISTRY_HOST_a8a1ce1e}/registry"
 
 MIRROR_CONFIG_PATH="${DOCKER_REGISTRY_ROOT_DIR}/registry/config_mirror.yml"
 MIRROR_CONFIG_SHA256="$(cat "${MIRROR_CONFIG_PATH}" |
@@ -130,7 +131,7 @@ REGISTRY_CONFIG='${REGISTRY_CONFIG_PATH}'
 REGISTRY_CONFIG_DIGEST='${REGISTRY_CONFIG_SHA256}'
 REGISTRY_CONTEXT='${DOCKER_REGISTRY_ROOT_DIR}/registry/context'
 REGISTRY_DOCKERFILE='${DOCKER_REGISTRY_ROOT_DIR}/registry/registry.dockerfile'
-REGISTRY_IMAGE_REFERENCE='${REGISTRY_IMAGE}'
+REGISTRY_IMAGE_REFERENCE='${LOCAL_REGISTRY_HOST_a8a1ce1e}/registry'
 REVERSE_PROXY_CONTEXT='${DOCKER_REGISTRY_ROOT_DIR}/reverse_proxy/context'
 REVERSE_PROXY_DOCKERFILE='${DOCKER_REGISTRY_ROOT_DIR}/reverse_proxy/reverse_proxy.dockerfile'
 REVERSE_PROXY_IMAGE_REFERENCE='${NGINX_IMAGE}'
@@ -402,14 +403,10 @@ function select_mirror_registry_config
 
 function start_registries
 {
-  local stack_name="local_registry_stack"
-
   start_docker_stack \
     generate_registries_env \
     "${THIS_SCRIPT_DIR}/local_docker_registry.json" \
-    "${stack_name}"
-
-  REGISTRY_STACK_REV_PROXY_SRV_NAME="${stack_name}_reverse_proxy_ab0e9c4c"
+    "${DOCKER_REGISTRY_STACK_NAME}"
 }
 
 function start_main_reverse_proxy
@@ -417,7 +414,7 @@ function start_main_reverse_proxy
   start_docker_stack \
     generate_main_reverse_proxy_env \
     "${THIS_SCRIPT_DIR}/local_reverse_proxy.json" \
-    "local_reverse_proxy_stack"
+    "${REVERSE_PROXY_STACK_NAME}"
 }
 
 function main
