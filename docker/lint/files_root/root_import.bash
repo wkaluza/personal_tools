@@ -29,6 +29,7 @@ EOF
   curl -fsSL --output "./${go_archive}" "${download_url}"
 
   untar_gzip_to "./${go_archive}" "${target_dir}"
+  rm -rf "./${go_archive}"
 }
 
 function install_shellcheck

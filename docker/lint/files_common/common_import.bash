@@ -23,10 +23,9 @@ function untar_gzip_to
 
   mkdir --parents "${target_dir}"
 
-  mv "${archive}" "${target_dir}"
-
-  pushd "${target_dir}" >/dev/null
-  tar -xzf "${target_dir}/${archive}"
-  rm "${target_dir}/${archive}"
-  popd >/dev/null
+  tar \
+    --directory "${target_dir}" \
+    --extract \
+    --file "${archive}" \
+    --gzip
 }
