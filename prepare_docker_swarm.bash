@@ -341,15 +341,6 @@ function ping_registry
     grep "repositories"
 }
 
-function rm_volume
-{
-  local volume_name="$1"
-
-  docker volume rm \
-    --force \
-    "${volume_name}"
-}
-
 function ensure_services_are_running
 {
   retry_until_success \
