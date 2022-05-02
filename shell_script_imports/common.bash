@@ -139,6 +139,13 @@ function sha256
     awk '{ print $1 }'
 }
 
+function md5
+{
+  cat - |
+    md5sum - |
+    awk '{ print $1 }'
+}
+
 function encrypt_deterministically
 {
   local key

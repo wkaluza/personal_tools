@@ -4,13 +4,15 @@ shopt -s inherit_errexit
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
+source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.bash"
+
 DIGESTS=""
 
 function compute_digest
 {
   local input_string="$1"
 
-  echo -n "${input_string}" | md5sum - | awk '{ print $1 }'
+  echo -n "${input_string}" | md5
 }
 
 function append_digest
