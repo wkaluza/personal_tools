@@ -214,10 +214,7 @@ function ensure_docker_swarm_init
     docker swarm init --autolock |
       grep "${swarm_key_magic_prefix}" |
       sed -E "s/^.*(${swarm_key_magic_prefix}.*)$/\1/" |
-      pass insert \
-        --force \
-        --multiline \
-        "${swarm_key_pass_id}" >/dev/null
+      store_in_pass "${swarm_key_pass_id}"
 
     log_info "Swarm is now active"
   elif [[ "${swarm_state}" == "active" ]]; then

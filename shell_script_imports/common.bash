@@ -146,6 +146,17 @@ function md5
     awk '{ print $1 }'
 }
 
+function store_in_pass
+{
+  local id="$1"
+
+  cat - |
+    pass insert \
+      --force \
+      --multiline \
+      "${id}" >/dev/null
+}
+
 function encrypt_deterministically
 {
   local key
@@ -158,10 +169,7 @@ function encrypt_deterministically
   if ! pass show "${secret_id}" >/dev/null 2>&1; then
     random_bytes 80 |
       hex |
-      pass insert \
-        --force \
-        --multiline \
-        "${secret_id}" >/dev/null
+      store_in_pass "${secret_id}"
   fi
 
   local bytes
