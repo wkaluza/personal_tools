@@ -121,12 +121,6 @@
         {
           "mode": "ingress",
           "protocol": "tcp",
-          "published": 80,
-          "target": 80
-        },
-        {
-          "mode": "ingress",
-          "protocol": "tcp",
           "published": 443,
           "target": 443
         }
