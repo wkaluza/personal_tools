@@ -187,3 +187,19 @@ function web_connection_working
 
   ping -c 1 "${host}" >/dev/null 2>&1
 }
+
+function untar_gzip_to
+{
+  local archive
+  archive="$(realpath "$1")"
+  local target_dir
+  target_dir="$(realpath "$2")"
+
+  mkdir --parents "${target_dir}"
+
+  tar \
+    --directory "${target_dir}" \
+    --extract \
+    --file "${archive}" \
+    --gzip
+}
