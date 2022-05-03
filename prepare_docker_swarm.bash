@@ -17,6 +17,8 @@ source <(cat "${THIS_SCRIPT_DIR}/local_domains.json" |
 DOCKER_REGISTRY_STACK_NAME="local_registry_stack"
 REGISTRY_STACK_REV_PROXY_SRV_NAME="${DOCKER_REGISTRY_STACK_NAME}_reverse_proxy_ab0e9c4c"
 REVERSE_PROXY_STACK_NAME="local_reverse_proxy_stack"
+GIT_FRONTEND_STACK_NAME="local_git_frontend_stack"
+GIT_FRONTEND_SRV_NAME="${GIT_FRONTEND_STACK_NAME}_git_frontend_c3a3afb4"
 
 EXTERNAL_NETWORK_NAME="<___not_a_real_network___>"
 
@@ -71,6 +73,11 @@ NGINX_CONFIG_SHA256="$(cat "${NGINX_CONFIG_PATH}" |
   take_first 8)"
 NGINX_IMAGE="${LOCAL_REGISTRY_HOST_a8a1ce1e}/nginx"
 
+GOGS_CONFIG="${DOCKER_REGISTRY_ROOT_DIR}/git_frontend/app.ini"
+GOGS_CONFIG_DIGEST="$(cat "${GOGS_CONFIG}" |
+  sha256 |
+  take_first 8)"
+
 REGISTRY_CONFIG_PATH="${DOCKER_REGISTRY_ROOT_DIR}/registry/config.yml"
 REGISTRY_CONFIG_SHA256="$(cat "${REGISTRY_CONFIG_PATH}" |
   sha256 |
@@ -113,7 +120,33 @@ MAIN_LOCALHOST_KEY_SECURE_DIGEST="$(cat "${MAIN_LOCALHOST_KEY_PATH}" |
   sha256 |
   take_first 8)"
 
+GIT_FRONTEND_LOCALHOST_CERT_PATH="${CERTS_DIR}/${GIT_FRONTEND_HOST_df29c969}.pem"
+GIT_FRONTEND_LOCALHOST_CERT_DIGEST="$(cat "${GIT_FRONTEND_LOCALHOST_CERT_PATH}" |
+  sha256 |
+  take_first 8)"
+GIT_FRONTEND_LOCALHOST_KEY_PATH="${CERTS_DIR}/${GIT_FRONTEND_HOST_df29c969}.secret"
+GIT_FRONTEND_LOCALHOST_KEY_SECURE_DIGEST="$(cat "${GIT_FRONTEND_LOCALHOST_KEY_PATH}" |
+  encrypt_deterministically "${GIT_FRONTEND_LOCALHOST_KEY_PATH}" |
+  sha256 |
+  take_first 8)"
+
 MIRROR_REGISTRY_CONFIG_SELECT=""
+GOGS_SECRET_KEY_e6403800="$(pass_show_or_generate "local_gogs_config_secret_key")"
+
+function generate_git_frontend_env
+{
+  cat <<EOF
+EXTERNAL_NETWORK_NAME='${EXTERNAL_NETWORK_NAME}'
+GIT_FRONTEND_CONTEXT='${DOCKER_REGISTRY_ROOT_DIR}/git_frontend/context'
+GIT_FRONTEND_DOCKERFILE='${DOCKER_REGISTRY_ROOT_DIR}/git_frontend/git_frontend.dockerfile'
+GIT_FRONTEND_HOST_df29c969='${GIT_FRONTEND_HOST_df29c969}'
+GIT_FRONTEND_IMAGE_REFERENCE='${LOCAL_REGISTRY_HOST_a8a1ce1e}/gogs'
+GOGS_CONFIG='${GOGS_CONFIG}'
+GOGS_CONFIG_DIGEST='${GOGS_CONFIG_DIGEST}'
+GOGS_SECRET_KEY_e6403800='${GOGS_SECRET_KEY_e6403800}'
+LOCAL_NODE_ID='${LOCAL_SWARM_NODE_ID}'
+EOF
+}
 
 function generate_registries_env
 {
@@ -150,6 +183,12 @@ DOCKER_REGISTRY_MIRROR_CERT_DIGEST='${DOCKER_REGISTRY_MIRROR_CERT_DIGEST}'
 DOCKER_REGISTRY_MIRROR_KEY='${DOCKER_REGISTRY_MIRROR_KEY_PATH}'
 DOCKER_REGISTRY_MIRROR_KEY_DIGEST='${DOCKER_REGISTRY_MIRROR_KEY_SECURE_DIGEST}'
 EXTERNAL_NETWORK_NAME='${EXTERNAL_NETWORK_NAME}'
+GIT_FRONTEND_HOST_df29c969='${GIT_FRONTEND_HOST_df29c969}'
+GIT_FRONTEND_LOCALHOST_CERT='${GIT_FRONTEND_LOCALHOST_CERT_PATH}'
+GIT_FRONTEND_LOCALHOST_CERT_DIGEST='${GIT_FRONTEND_LOCALHOST_CERT_DIGEST}'
+GIT_FRONTEND_LOCALHOST_KEY='${GIT_FRONTEND_LOCALHOST_KEY_PATH}'
+GIT_FRONTEND_LOCALHOST_KEY_DIGEST='${GIT_FRONTEND_LOCALHOST_KEY_SECURE_DIGEST}'
+GIT_FRONTEND_SRV_NAME='${GIT_FRONTEND_SRV_NAME}'
 LOCAL_NODE_ID='${LOCAL_SWARM_NODE_ID}'
 LOCAL_REGISTRY_HOST_a8a1ce1e='${LOCAL_REGISTRY_HOST_a8a1ce1e}'
 MAIN_LOCALHOST_CERT='${MAIN_LOCALHOST_CERT_PATH}'
@@ -326,6 +365,23 @@ function wait_for_rolling_update
   fi
 }
 
+function ping_gogs
+{
+  local host="$1"
+
+  local scheme="https"
+  local endpoint="api/v1/users/search"
+
+  local ok
+  ok="$(curl --silent \
+    "${scheme}://${host}/${endpoint}?q=arbitrarysearchphrase" |
+    jq '.ok' -)"
+
+  if [[ "${ok}" != "true" ]]; then
+    false
+  fi
+}
+
 function ping_registry
 {
   local registry_host="$1"
@@ -336,6 +392,197 @@ function ping_registry
   curl --silent \
     "${scheme}://${registry_host}/${endpoint}" |
     grep "repositories"
+}
+
+function gogs_public_keys
+{
+  local auth_header="$1"
+  local content_type_app_json_header="$2"
+  local v1_api="$3"
+  local username="$4"
+
+  curl \
+    --header "${auth_header}" \
+    --header "${content_type_app_json_header}" \
+    --request "GET" \
+    --silent \
+    "${v1_api}/users/${username}/keys"
+}
+
+function gogs_generate_token
+{
+  local token_name="$1"
+  local content_type_app_json_header="$2"
+  local username="$3"
+  local password="$4"
+  local v1_api="$5"
+
+  curl \
+    --data "{\"name\": \"${token_name}\"}" \
+    --header "${content_type_app_json_header}" \
+    --request "POST" \
+    --silent \
+    --user "${username}:${password}" \
+    "${v1_api}/users/${username}/tokens" |
+    jq --raw-output '.sha1' -
+}
+
+function gogs_list_token_names
+{
+  local content_type_app_json_header="$1"
+  local username="$2"
+  local password="$3"
+
+  curl \
+    --header "${content_type_app_json_header}" \
+    --request "GET" \
+    --silent \
+    --user "${username}:${password}" \
+    "${v1_api}/users/${username}/tokens" |
+    jq --raw-output '.[].name' -
+}
+
+function gogs_get_single_user
+{
+  local content_type_app_json_header="$1"
+  local v1_api="$2"
+  local username="$3"
+
+  curl \
+    --fail \
+    --header "${content_type_app_json_header}" \
+    --silent \
+    "${v1_api}/users/${username}"
+}
+
+function gogs_docker_cli_create_admin_user
+{
+  local cli_path="$1"
+  local email="$2"
+  local username="$3"
+  local password="$4"
+
+  local container
+  container="$(docker service ps \
+    --format '{{ .Name }}.{{ .ID }}' \
+    --no-trunc \
+    "${GIT_FRONTEND_SRV_NAME}" |
+    head -n1)"
+
+  docker exec \
+    --user "git" \
+    "${container}" \
+    "${cli_path}" admin create-user \
+    --admin \
+    --email "${email}" \
+    --name "${username}" \
+    --password "${password}"
+}
+
+function gogs_add_public_key
+{
+  local ssh_key_name="$1"
+  local primary_key_fingerprint="$2"
+  local auth_header="$3"
+  local content_type_app_json_header="$4"
+  local v1_api="$5"
+
+  local data
+  data="$(echo '{}' |
+    jq ". + {title: \"${ssh_key_name}\"}" - |
+    jq ". + {key: \"$(gpg --export-ssh-key "${primary_key_fingerprint}")\"}" - |
+    jq --compact-output --sort-keys '.' -)"
+
+  curl \
+    --data "${data}" \
+    --header "${auth_header}" \
+    --header "${content_type_app_json_header}" \
+    --request "POST" \
+    --silent \
+    "${v1_api}/user/keys" >/dev/null
+}
+
+function remove_stale_gogs_ssh_key
+{
+  ssh-keygen \
+    -f "${HOME}/.ssh/known_hosts" \
+    -R "${GIT_FRONTEND_HOST_df29c969}" >/dev/null 2>&1 ||
+    true
+}
+
+function ensure_gogs_user_configured
+{
+  local username="wkaluza"
+  local pass_gogs_password_id="local_gogs_password_${username}"
+  local token_name="local_gogs_token_${username}"
+  local pass_gogs_token_id="${token_name}"
+  local ssh_key_name="ssh_key_${username}"
+
+  local password
+  password="$(pass_show_or_generate "${pass_gogs_password_id}")"
+
+  local primary_key_fingerprint="174C9368811039C87F0C806A896572D1E78ED6A7"
+
+  local v1_api="https://${GIT_FRONTEND_HOST_df29c969}/api/v1"
+  local content_type_app_json_header="Content-Type: application/json"
+
+  if gogs_get_single_user \
+    "${content_type_app_json_header}" \
+    "${v1_api}" \
+    "${username}" >/dev/null 2>&1; then
+    log_info "Gogs user ${username} exists"
+  else
+    log_info "Creating gogs user ${username}..."
+
+    gogs_docker_cli_create_admin_user \
+      "/app/gogs/gogs" \
+      "wkaluza@protonmail.com" \
+      "${username}" \
+      "${password}" >/dev/null 2>&1
+
+    # Fresh gogs install
+    remove_stale_gogs_ssh_key
+  fi
+
+  if gogs_list_token_names \
+    "${content_type_app_json_header}" \
+    "${username}" \
+    "${password}" |
+    grep -E "^${token_name}$" >/dev/null; then
+    log_info "Gogs token exists"
+  else
+    log_info "Creating gogs token..."
+
+    gogs_generate_token \
+      "${token_name}" \
+      "${content_type_app_json_header}" \
+      "${username}" \
+      "${password}" \
+      "${v1_api}" |
+      store_in_pass "${pass_gogs_token_id}"
+  fi
+
+  local token_value
+  token_value="$(pass show "${pass_gogs_token_id}")"
+  local auth_header="Authorization: token ${token_value}"
+
+  if [[ "$(gogs_public_keys \
+    "${auth_header}" \
+    "${content_type_app_json_header}" \
+    "${v1_api}" \
+    "${username}" |
+    jq '. | length' -)" == "0" ]]; then
+    log_info "Uploading SSH key to gogs..."
+
+    gogs_add_public_key \
+      "${ssh_key_name}" \
+      "${primary_key_fingerprint}" \
+      "${auth_header}" \
+      "${content_type_app_json_header}" \
+      "${v1_api}"
+  else
+    log_info "Gogs SSH key already uploaded"
+  fi
 }
 
 function ensure_services_are_running
@@ -351,6 +598,10 @@ function ensure_services_are_running
   retry_until_success \
     "ping_registry ${MIRROR_REGISTRY_HOST_f334ec4f}" \
     ping_registry "${MIRROR_REGISTRY_HOST_f334ec4f}"
+
+  retry_until_success \
+    "ping_gogs ${GIT_FRONTEND_HOST_df29c969}" \
+    ping_gogs "${GIT_FRONTEND_HOST_df29c969}"
 }
 
 function get_configured_registry_mirrors
@@ -413,6 +664,14 @@ function start_registries
     "${DOCKER_REGISTRY_STACK_NAME}"
 }
 
+function start_git_frontend
+{
+  start_docker_stack \
+    generate_git_frontend_env \
+    "${THIS_SCRIPT_DIR}/local_git_frontend.json" \
+    "${GIT_FRONTEND_STACK_NAME}"
+}
+
 function start_main_reverse_proxy
 {
   start_docker_stack \
@@ -432,9 +691,12 @@ function main
   LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 
   start_registries
+  start_git_frontend
   start_main_reverse_proxy
 
   ensure_services_are_running
+
+  ensure_gogs_user_configured
 
   log_info "Success $(basename "$0")"
 }

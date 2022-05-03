@@ -28,6 +28,14 @@
       "file": "${DOCKER_REGISTRY_MIRROR_KEY:?}",
       "name": "docker_registry_mirror_key_${DOCKER_REGISTRY_MIRROR_KEY_DIGEST:?}"
     },
+    "git_frontend_localhost_cert": {
+      "file": "${GIT_FRONTEND_LOCALHOST_CERT:?}",
+      "name": "main_localhost_cert_${GIT_FRONTEND_LOCALHOST_CERT_DIGEST:?}"
+    },
+    "git_frontend_localhost_key": {
+      "file": "${GIT_FRONTEND_LOCALHOST_KEY:?}",
+      "name": "main_localhost_key_${GIT_FRONTEND_LOCALHOST_KEY_DIGEST:?}"
+    },
     "main_localhost_cert": {
       "file": "${MAIN_LOCALHOST_CERT:?}",
       "name": "main_localhost_cert_${MAIN_LOCALHOST_CERT_DIGEST:?}"
@@ -92,6 +100,8 @@
         }
       },
       "environment": {
+        "GIT_FRONTEND_HOST_df29c969": "${GIT_FRONTEND_HOST_df29c969:?}",
+        "GIT_FRONTEND_SRV_NAME": "${GIT_FRONTEND_SRV_NAME:?}",
         "LOCAL_REGISTRY_HOST_a8a1ce1e": "${LOCAL_REGISTRY_HOST_a8a1ce1e:?}",
         "MAIN_REVERSE_PROXY_HOST_cab92795": "${MAIN_REVERSE_PROXY_HOST_cab92795:?}",
         "MIRROR_REGISTRY_HOST_f334ec4f": "${MIRROR_REGISTRY_HOST_f334ec4f:?}",
@@ -118,6 +128,12 @@
         "external_ba0a4168"
       ],
       "ports": [
+        {
+          "mode": "ingress",
+          "protocol": "tcp",
+          "published": 22,
+          "target": 22
+        },
         {
           "mode": "ingress",
           "protocol": "tcp",
@@ -149,6 +165,14 @@
         {
           "source": "main_localhost_key",
           "target": "/etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST_cab92795:?}.key"
+        },
+        {
+          "source": "git_frontend_localhost_cert",
+          "target": "/etc/nginx/certs/${GIT_FRONTEND_HOST_df29c969:?}.cert"
+        },
+        {
+          "source": "git_frontend_localhost_key",
+          "target": "/etc/nginx/certs/${GIT_FRONTEND_HOST_df29c969:?}.key"
         }
       ]
     }

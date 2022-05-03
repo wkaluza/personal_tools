@@ -1,0 +1,114 @@
+{
+  "configs": {
+    "gogs_config": {
+      "file": "${GOGS_CONFIG:?}",
+      "name": "gogs_config_${GOGS_CONFIG_DIGEST:?}",
+      "template_driver": "golang"
+    }
+  },
+  "networks": {
+    "external_add45a30": {
+      "external": true,
+      "name": "${EXTERNAL_NETWORK_NAME:?}"
+    }
+  },
+  "services": {
+    "git_frontend_c3a3afb4": {
+      "build": {
+        "context": "${GIT_FRONTEND_CONTEXT:?}",
+        "dockerfile": "${GIT_FRONTEND_DOCKERFILE:?}",
+        "network": "none"
+      },
+      "configs": [
+        {
+          "source": "gogs_config",
+          "target": "/data/gogs/conf/app.ini"
+        }
+      ],
+      "deploy": {
+        "mode": "global",
+        "placement": {
+          "constraints": [
+            "node.id==${LOCAL_NODE_ID:?}",
+            "node.role==manager"
+          ]
+        },
+        "resources": {
+          "limits": {
+            "cpus": "0.5",
+            "memory": "100MB"
+          },
+          "reservations": {
+            "cpus": "0.25",
+            "memory": "25MB"
+          }
+        },
+        "restart_policy": {
+          "condition": "on-failure",
+          "delay": "10s",
+          "max_attempts": 5,
+          "window": "120s"
+        },
+        "rollback_config": {
+          "delay": "10s",
+          "failure_action": "pause",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        },
+        "update_config": {
+          "delay": "10s",
+          "failure_action": "rollback",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        }
+      },
+      "environment": {
+        "GIT_FRONTEND_HOST_df29c969": "${GIT_FRONTEND_HOST_df29c969:?}",
+        "GOGS_SECRET_KEY_e6403800": "${GOGS_SECRET_KEY_e6403800:?}"
+      },
+      "healthcheck": {
+        "disable": false,
+        "interval": "1s",
+        "retries": 30,
+        "start_period": "60s",
+        "timeout": "1s"
+      },
+      "image": "${GIT_FRONTEND_IMAGE_REFERENCE:?}",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": 5,
+          "max-size": "200k"
+        }
+      },
+      "networks": [
+        "external_add45a30"
+      ],
+      "volumes": [
+        {
+          "source": "git_frontend_volume",
+          "target": "/data",
+          "type": "volume"
+        },
+        {
+          "source": "git_frontend_backup_volume",
+          "target": "/backup",
+          "type": "volume"
+        }
+      ]
+    }
+  },
+  "version": "3.9",
+  "volumes": {
+    "git_frontend_backup_volume": {
+      "name": "git_frontend_backup"
+    },
+    "git_frontend_volume": {
+      "name": "git_frontend_data_f75b627d"
+    }
+  }
+}
