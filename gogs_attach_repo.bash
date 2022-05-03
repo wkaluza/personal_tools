@@ -92,14 +92,11 @@ function main
     --recurse-submodules \
     --tags >/dev/null 2>&1
 
-  for branch in $(git branch -l |
-    sed -E 's/^[ *] (.+)$/\1/'); do
-    log_info "Pushing local branch ${branch}..."
-    git push \
-      "${remote_name}" \
-      --set-upstream "${branch}" >/dev/null 2>&1
-  done
-
+  log_info "Pushing branches..."
+  git push \
+    --all \
+    --repo "${remote_name}" \
+    --set-upstream >/dev/null 2>&1
   popd >/dev/null
 
   log_info "Success: $(basename "$0")"
