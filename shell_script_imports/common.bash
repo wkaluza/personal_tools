@@ -71,7 +71,9 @@ function os_version_codename
 {
   local output
 
-  output="$(source "/etc/os-release" && echo "${VERSION_CODENAME}")"
+  output="$(source <(cat "/etc/os-release" |
+    grep -E '^VERSION_CODENAME=') &&
+    echo "${VERSION_CODENAME}")"
 
   echo "${output}"
 }
