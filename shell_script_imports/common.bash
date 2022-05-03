@@ -159,6 +159,20 @@ function store_in_pass
       "${id}" >/dev/null
 }
 
+function pass_show_or_generate
+{
+  local id="$1"
+  local how_long="${2:-"32"}"
+
+  if ! pass show "${id}" >/dev/null 2>&1; then
+    random_bytes "${how_long}" |
+      hex |
+      store_in_pass "${id}"
+  fi
+
+  pass show "${id}"
+}
+
 function encrypt_deterministically
 {
   local key
@@ -168,14 +182,10 @@ function encrypt_deterministically
 
   local secret_id="disposable_secret_160_${key}"
 
-  if ! pass show "${secret_id}" >/dev/null 2>&1; then
-    random_bytes 80 |
-      hex |
-      store_in_pass "${secret_id}"
-  fi
-
   local bytes
-  bytes="$(pass show "${secret_id}")"
+  bytes="$(pass_show_or_generate \
+    "${secret_id}" \
+    80)"
 
   cat - |
     openssl enc \
