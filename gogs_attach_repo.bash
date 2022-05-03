@@ -4,6 +4,7 @@ shopt -s inherit_errexit
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
+source "${THIS_SCRIPT_DIR}/shell_script_imports/common.bash"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"
 
 source <(cat "${THIS_SCRIPT_DIR}/local_domains.json" |
@@ -55,6 +56,34 @@ function main
     --silent \
     --user "${username}:${password}" \
     "${v1_api}/admin/users/${username}/repos" >/dev/null
+
+  local webhook_config
+  webhook_config="$(echo '{}' |
+    jq ". + {url: \"https://${WEBHOOK_SINK_SERVICE_a8800f5b}\"}" - |
+    jq ". + {content_type: \"json\"}" - |
+    jq ". + {secret: \"$(pass_show_or_generate "local_gogs_webhook_secret")\"}" - |
+    jq --compact-output --sort-keys '.' -)"
+
+  # Also supported: "fork","issues","issue_comment","release"
+  local events='"create","delete","pull_request","push"'
+  local webhook_data
+  webhook_data="$(echo '{}' |
+    jq ". + {type: \"gogs\"}" - |
+    jq ". + {config: ${webhook_config}}" - |
+    jq ". + {events: [${events}]}" - |
+    jq '. + {active: true}' - |
+    jq --compact-output --sort-keys '.' -)"
+
+  log_info "Adding webhook..."
+  curl \
+    --data "${webhook_data}" \
+    --fail \
+    --header "${auth_header}" \
+    --header "${content_type_app_json}" \
+    --request "POST" \
+    --show-error \
+    --silent \
+    "${v1_api}/repos/${username}/${repo_name}/hooks" >/dev/null
 
   log_info "Fetching..."
   git fetch \

@@ -2,5 +2,6 @@
   "GIT_FRONTEND_HOST_df29c969": "git_frontend.localhost",
   "LOCAL_REGISTRY_HOST_a8a1ce1e": "docker_private_registry.localhost",
   "MAIN_REVERSE_PROXY_HOST_cab92795": "main.localhost",
-  "MIRROR_REGISTRY_HOST_f334ec4f": "docker_mirror_registry.localhost"
+  "MIRROR_REGISTRY_HOST_f334ec4f": "docker_mirror_registry.localhost",
+  "WEBHOOK_SINK_SERVICE_a8800f5b": "webhook_sink_stack_gogs_sink_service_caab94df"
 }
