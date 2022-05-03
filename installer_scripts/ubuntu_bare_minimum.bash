@@ -1,7 +1,8 @@
 set -euo pipefail
-shopt -s inherit_errexit
-
-THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+if command -v shopt &>/dev/null; then
+  shopt -s inherit_errexit
+fi
+THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
 PRIMARY_KEY_FINGERPRINT="174C9368811039C87F0C806A896572D1E78ED6A7"
