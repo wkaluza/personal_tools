@@ -161,6 +161,17 @@ function store_in_pass
       "${id}" >/dev/null
 }
 
+function current_timezone
+{
+  local output
+
+  output="$(source <(timedatectl show |
+    grep -E '^Timezone=') &&
+    echo "${Timezone}")"
+
+  echo "${output}"
+}
+
 function pass_show_or_generate
 {
   local id="$1"

@@ -5,6 +5,7 @@ SHELL ["/bin/bash", "-c"]
 ARG UID
 ARG GID
 ARG USERNAME
+ARG HOST_TIMEZONE
 
 ARG _HOME="/home/$USERNAME"
 ENV WORKSPACE="$_HOME/workspace"
@@ -21,7 +22,11 @@ BASH_ENV="$_ENV_SETUP_SCRIPT"
 ARG _DOCKER_BUILD_TEMP_ROOT_DIR="/docker_root_build_temp"
 ARG _DOCKER_BUILD_TEMP_USER_DIR="$_HOME/docker_user_build_temp"
 
-RUN apt-get update && apt-get upgrade --yes --with-new-pkgs
+ENV TZ="$HOST_TIMEZONE"
+
+COPY configure_container.bash $_DOCKER_BUILD_TEMP_ROOT_DIR/
+RUN bash \
+$_DOCKER_BUILD_TEMP_ROOT_DIR/configure_container.bash
 
 COPY configure_profile.bash $_DOCKER_BUILD_TEMP_ROOT_DIR/
 RUN bash \

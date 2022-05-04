@@ -94,6 +94,7 @@ function docker_build
     --build-arg UID="${uid}" \
     --build-arg GID="${gid}" \
     --build-arg USERNAME="${username}" \
+    --build-arg HOST_TIMEZONE="$(current_timezone)" \
     "${build_context}" >/dev/null
 }
 
