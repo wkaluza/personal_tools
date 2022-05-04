@@ -79,6 +79,12 @@ function install_python3
     python3-venv
 }
 
+function install_git
+{
+  apt-get install --yes \
+    git
+}
+
 function install_nodejs
 {
   apt-get install --yes \
