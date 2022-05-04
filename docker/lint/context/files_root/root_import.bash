@@ -13,25 +13,56 @@ function install_golang
 {
   source "${IMPORTS_DIR}/files_common/common_import.bash"
 
-  local go_archive="go.tar.gz"
-  local v="1.17.7"
+  local temp_dir="${HOME}/go___deleteme"
+  rm -rf "${temp_dir}"
+  mkdir --parents "${temp_dir}"
+
+  local go_archive="${temp_dir}/go.tar.gz"
+  local v="1.18.1"
+  local checksum="b3b815f47ababac13810fc6021eb73d65478e0b2db4b09d348eefad9581a2334"
   local download_url="https://dl.google.com/go/go${v}.linux-amd64.tar.gz"
-  local target_dir="/usr/local"
+  local go_destination="/usr/local/go"
 
   cat <<EOF >>"${DOCKER_PROFILE}"
-export GOROOT="${target_dir}/go"
+export GOROOT="${go_destination}"
 export PATH="\${GOROOT}/bin:\${PATH}"
 EOF
 
   source "${DOCKER_PROFILE}"
 
   apt-get install --yes \
-    curl
+    wget >/dev/null 2>&1
 
-  curl -fsSL --output "./${go_archive}" "${download_url}"
+  echo "Downloading ${go_archive}"
+  wget \
+    --output-document "${go_archive}" \
+    --quiet \
+    "${download_url}"
 
-  untar_gzip_to "./${go_archive}" "${target_dir}"
-  rm -rf "./${go_archive}"
+  echo "Verifying checksum (expect ${checksum})"
+  sha256sum \
+    --check <(
+      cat <<EOF
+${checksum}  ${go_archive}
+EOF
+    )
+
+  echo "Decompressing to ${temp_dir}"
+  untar_gzip_to \
+    "${go_archive}" \
+    "${temp_dir}"
+
+  rm -rf "${go_destination}"
+
+  local temp_go="${temp_dir}/go"
+  echo "Moving ${temp_go} to ${go_destination}"
+  mv \
+    "${temp_go}" \
+    "${go_destination}"
+
+  rm -rf "${go_archive}"
+  rm -rf "${temp_go}"
+  rm -rf "${temp_dir}"
 }
 
 function install_shellcheck
