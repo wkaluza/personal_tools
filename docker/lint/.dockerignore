@@ -1,8 +1,0 @@
-*
-!configure_profile.bash
-!create_user_workspace.bash
-!system_setup_root.bash
-!system_setup_user.bash
-!files_common/
-!files_root/
-!files_user/

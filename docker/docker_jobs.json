@@ -1,6 +1,6 @@
 {
   "example": {
-    "build_context": "./docker/docker_build_template/",
+    "build_context": "./docker/docker_build_template/context/",
     "command": [
       "bash",
       "./docker/docker_build_template/say_something.bash",
@@ -13,7 +13,7 @@
     "host_workspace": "./"
   },
   "lint": {
-    "build_context": "./docker/lint/",
+    "build_context": "./docker/lint/context/",
     "command": [
       "bash",
       "./scripts/lint.bash"
