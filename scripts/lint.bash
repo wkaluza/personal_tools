@@ -7,14 +7,32 @@ cd "${THIS_SCRIPT_DIR}"
 
 SHELL_PREAMBLE="set -euo pipefail ; shopt -s inherit_errexit"
 
-function format_shell_scripts
+function format_single_shell_script
 {
   local f="$1"
 
   shfmt -i 2 -fn -w "${f}" >/dev/null
 }
 
-function analyse_shell_scripts
+function find_and_format_shell_scripts
+{
+  local project_root_dir="$1"
+
+  local fn_name="format_single_shell_script"
+
+  find "${project_root_dir}" \
+    -type f \
+    -and \( \
+    -name '*.bash' -or \
+    -name '*.sh' \) \
+    -and -not \( \
+    -path "${project_root_dir}/*___*/*" -or \
+    -path "${project_root_dir}/.git/*" -or \
+    -path "${project_root_dir}/.idea/*" \) \
+    -exec bash -c "${SHELL_PREAMBLE} ; ${fn_name} \"\$1\"" -- {} \;
+}
+
+function analyse_single_shell_script
 {
   local f="$1"
 
@@ -31,7 +49,25 @@ function analyse_shell_scripts
     "${f}"
 }
 
-function format_json
+function find_and_analyse_shell_scripts
+{
+  local project_root_dir="$1"
+
+  local fn_name="analyse_single_shell_script"
+
+  find "${project_root_dir}" \
+    -type f \
+    -and \( \
+    -name '*.bash' -or \
+    -name '*.sh' \) \
+    -and -not \( \
+    -path "${project_root_dir}/*___*/*" -or \
+    -path "${project_root_dir}/.git/*" -or \
+    -path "${project_root_dir}/.idea/*" \) \
+    -exec bash -c "${SHELL_PREAMBLE} ; ${fn_name} \"\$1\"" -- {} \;
+}
+
+function format_single_json_file
 {
   local f="$1"
 
@@ -39,6 +75,22 @@ function format_json
   json_text="$(cat "${f}")"
   echo "${json_text}" |
     jq --sort-keys '.' - >"${f}"
+}
+
+function find_and_format_json_files
+{
+  local project_root_dir="$1"
+
+  local fn_name="format_single_json_file"
+
+  find "${project_root_dir}" \
+    -type f \
+    -name '*.json' \
+    -and -not \( \
+    -path "${project_root_dir}/*___*/*" -or \
+    -path "${project_root_dir}/.git/*" -or \
+    -path "${project_root_dir}/.idea/*" \) \
+    -exec bash -c "${SHELL_PREAMBLE} ; ${fn_name} \"\$1\"" -- {} \;
 }
 
 function sort_yaml
@@ -63,7 +115,7 @@ if __name__ == '__main__':
 EOF
 }
 
-function format_yaml
+function format_single_yaml_file
 {
   local f="$1"
 
@@ -74,37 +126,12 @@ function format_yaml
     --write "${f}" >/dev/null
 }
 
-function main
+function find_and_format_yaml_files
 {
-  local project_root_dir
-  project_root_dir="$(realpath "${THIS_SCRIPT_DIR}/..")"
+  local project_root_dir="$1"
 
-  echo "Formatting..."
+  local fn_name="format_single_yaml_file"
 
-  export -f format_json
-  find "${project_root_dir}" \
-    -type f \
-    -name '*.json' \
-    -and -not \( \
-    -path "${project_root_dir}/*___*/*" -or \
-    -path "${project_root_dir}/.git/*" -or \
-    -path "${project_root_dir}/.idea/*" \) \
-    -exec bash -c "${SHELL_PREAMBLE} ; format_json \"\$1\"" -- {} \;
-
-  export -f format_shell_scripts
-  find "${project_root_dir}" \
-    -type f \
-    -and \( \
-    -name '*.bash' -or \
-    -name '*.sh' \) \
-    -and -not \( \
-    -path "${project_root_dir}/*___*/*" -or \
-    -path "${project_root_dir}/.git/*" -or \
-    -path "${project_root_dir}/.idea/*" \) \
-    -exec bash -c "${SHELL_PREAMBLE} ; format_shell_scripts \"\$1\"" -- {} \;
-
-  export -f format_yaml
-  export -f sort_yaml
   find "${project_root_dir}" \
     -type f \
     -and \( \
@@ -114,23 +141,38 @@ function main
     -path "${project_root_dir}/*___*/*" -or \
     -path "${project_root_dir}/.git/*" -or \
     -path "${project_root_dir}/.idea/*" \) \
-    -exec bash -c "${SHELL_PREAMBLE} ; format_yaml \"\$1\"" -- {} \;
+    -exec bash -c "${SHELL_PREAMBLE} ; ${fn_name} \"\$1\"" -- {} \;
+}
+
+function main
+{
+  local project_root_dir
+  project_root_dir="$(realpath "${THIS_SCRIPT_DIR}/..")"
+
+  export -f analyse_single_shell_script
+  export -f format_single_json_file
+  export -f format_single_shell_script
+  export -f format_single_yaml_file
+  export -f sort_yaml
+
+  echo "Formatting..."
+
+  find_and_format_json_files \
+    "${project_root_dir}"
+
+  find_and_format_shell_scripts \
+    "${project_root_dir}"
+
+  find_and_format_yaml_files \
+    "${project_root_dir}"
 
   wait
   echo "Formatting done"
 
   echo "Performing static analysis..."
-  export -f analyse_shell_scripts
-  find "${project_root_dir}" \
-    -type f \
-    -and \( \
-    -name '*.bash' -or \
-    -name '*.sh' \) \
-    -and -not \( \
-    -path "${project_root_dir}/*___*/*" -or \
-    -path "${project_root_dir}/.git/*" -or \
-    -path "${project_root_dir}/.idea/*" \) \
-    -exec bash -c "${SHELL_PREAMBLE} ; analyse_shell_scripts \"\$1\"" -- {} \;
+
+  find_and_analyse_shell_scripts \
+    "${project_root_dir}"
 
   wait
   echo "Static analysis done"
