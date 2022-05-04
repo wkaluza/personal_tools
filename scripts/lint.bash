@@ -7,6 +7,22 @@ cd "${THIS_SCRIPT_DIR}"
 
 SHELL_PREAMBLE="set -euo pipefail ; shopt -s inherit_errexit"
 
+function invoke_find
+{
+  local project_root_dir="$1"
+  local name_selector="$2"
+  local fn_name="$3"
+
+  eval find "${project_root_dir}" \
+    -type f \
+    -and \\\( "${name_selector}" \\\) \
+    -and -not \\\( \
+    -path "'${project_root_dir}/*___*/*'" -or \
+    -path "'${project_root_dir}/.git/*'" -or \
+    -path "'${project_root_dir}/.idea/*'" \\\) \
+    -exec bash -c "'${SHELL_PREAMBLE} ; ${fn_name} \"\$1\"' -- {} \;"
+}
+
 function format_single_shell_script
 {
   local f="$1"
@@ -18,18 +34,10 @@ function find_and_format_shell_scripts
 {
   local project_root_dir="$1"
 
-  local fn_name="format_single_shell_script"
-
-  find "${project_root_dir}" \
-    -type f \
-    -and \( \
-    -name '*.bash' -or \
-    -name '*.sh' \) \
-    -and -not \( \
-    -path "${project_root_dir}/*___*/*" -or \
-    -path "${project_root_dir}/.git/*" -or \
-    -path "${project_root_dir}/.idea/*" \) \
-    -exec bash -c "${SHELL_PREAMBLE} ; ${fn_name} \"\$1\"" -- {} \;
+  invoke_find \
+    "${project_root_dir}" \
+    "-name '*.bash' -or -name '*.sh'" \
+    "format_single_shell_script"
 }
 
 function analyse_single_shell_script
@@ -53,18 +61,10 @@ function find_and_analyse_shell_scripts
 {
   local project_root_dir="$1"
 
-  local fn_name="analyse_single_shell_script"
-
-  find "${project_root_dir}" \
-    -type f \
-    -and \( \
-    -name '*.bash' -or \
-    -name '*.sh' \) \
-    -and -not \( \
-    -path "${project_root_dir}/*___*/*" -or \
-    -path "${project_root_dir}/.git/*" -or \
-    -path "${project_root_dir}/.idea/*" \) \
-    -exec bash -c "${SHELL_PREAMBLE} ; ${fn_name} \"\$1\"" -- {} \;
+  invoke_find \
+    "${project_root_dir}" \
+    "-name '*.bash' -or -name '*.sh'" \
+    "analyse_single_shell_script"
 }
 
 function format_single_json_file
@@ -81,16 +81,10 @@ function find_and_format_json_files
 {
   local project_root_dir="$1"
 
-  local fn_name="format_single_json_file"
-
-  find "${project_root_dir}" \
-    -type f \
-    -name '*.json' \
-    -and -not \( \
-    -path "${project_root_dir}/*___*/*" -or \
-    -path "${project_root_dir}/.git/*" -or \
-    -path "${project_root_dir}/.idea/*" \) \
-    -exec bash -c "${SHELL_PREAMBLE} ; ${fn_name} \"\$1\"" -- {} \;
+  invoke_find \
+    "${project_root_dir}" \
+    "-name '*.json'" \
+    "format_single_json_file"
 }
 
 function sort_yaml
@@ -130,18 +124,10 @@ function find_and_format_yaml_files
 {
   local project_root_dir="$1"
 
-  local fn_name="format_single_yaml_file"
-
-  find "${project_root_dir}" \
-    -type f \
-    -and \( \
-    -name '*.yaml' -or \
-    -name '*.yml' \) \
-    -and -not \( \
-    -path "${project_root_dir}/*___*/*" -or \
-    -path "${project_root_dir}/.git/*" -or \
-    -path "${project_root_dir}/.idea/*" \) \
-    -exec bash -c "${SHELL_PREAMBLE} ; ${fn_name} \"\$1\"" -- {} \;
+  invoke_find \
+    "${project_root_dir}" \
+    "-name '*.yaml' -or -name '*.yml'" \
+    "format_single_yaml_file"
 }
 
 function main
