@@ -5,6 +5,8 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
+SHELL_PREAMBLE="set -euo pipefail ; shopt -s inherit_errexit"
+
 function format_shell_scripts
 {
   local f="$1"
@@ -87,7 +89,7 @@ function main
     -path "${project_root_dir}/*___*/*" -or \
     -path "${project_root_dir}/.git/*" -or \
     -path "${project_root_dir}/.idea/*" \) \
-    -exec bash -c 'set -euo pipefail ; shopt -s inherit_errexit ; format_json "$1"' -- {} \;
+    -exec bash -c "${SHELL_PREAMBLE} ; format_json \"\$1\"" -- {} \;
 
   export -f format_shell_scripts
   find "${project_root_dir}" \
@@ -99,7 +101,7 @@ function main
     -path "${project_root_dir}/*___*/*" -or \
     -path "${project_root_dir}/.git/*" -or \
     -path "${project_root_dir}/.idea/*" \) \
-    -exec bash -c 'set -euo pipefail ; shopt -s inherit_errexit ; format_shell_scripts "$1"' -- {} \;
+    -exec bash -c "${SHELL_PREAMBLE} ; format_shell_scripts \"\$1\"" -- {} \;
 
   export -f format_yaml
   export -f sort_yaml
@@ -112,7 +114,7 @@ function main
     -path "${project_root_dir}/*___*/*" -or \
     -path "${project_root_dir}/.git/*" -or \
     -path "${project_root_dir}/.idea/*" \) \
-    -exec bash -c 'set -euo pipefail ; shopt -s inherit_errexit ; format_yaml "$1"' -- {} \;
+    -exec bash -c "${SHELL_PREAMBLE} ; format_yaml \"\$1\"" -- {} \;
 
   wait
   echo "Formatting done"
@@ -128,7 +130,7 @@ function main
     -path "${project_root_dir}/*___*/*" -or \
     -path "${project_root_dir}/.git/*" -or \
     -path "${project_root_dir}/.idea/*" \) \
-    -exec bash -c 'set -euo pipefail ; shopt -s inherit_errexit ; analyse_shell_scripts "$1"' -- {} \;
+    -exec bash -c "${SHELL_PREAMBLE} ; analyse_shell_scripts \"\$1\"" -- {} \;
 
   wait
   echo "Static analysis done"
