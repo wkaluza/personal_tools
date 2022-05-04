@@ -61,6 +61,8 @@ function main
   done
 
   popd >/dev/null
+
+  log_info "Success: $(basename "$0")"
 }
 
 main
