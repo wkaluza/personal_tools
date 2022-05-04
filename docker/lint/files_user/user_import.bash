@@ -1,5 +1,7 @@
 set -euo pipefail
-shopt -s inherit_errexit
+if command -v shopt &>/dev/null; then
+  shopt -s inherit_errexit
+fi
 
 function install_pyyaml
 {
