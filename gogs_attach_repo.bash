@@ -60,7 +60,7 @@ function main
 
   local webhook_config
   webhook_config="$(echo '{}' |
-    jq ". + {url: \"https://${WEBHOOK_SINK_SERVICE_a8800f5b}\"}" - |
+    jq ". + {url: \"https://${WEBHOOK_SINK_SERVICE_a8800f5b}/gogs\"}" - |
     jq ". + {content_type: \"json\"}" - |
     jq ". + {secret: \"$(pass_show_or_generate "local_gogs_webhook_secret")\"}" - |
     jq --compact-output --sort-keys '.' -)"
