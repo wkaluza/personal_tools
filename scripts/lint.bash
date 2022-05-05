@@ -7,6 +7,10 @@ cd "${THIS_SCRIPT_DIR}"
 
 SHELL_PREAMBLE="set -euo pipefail ; shopt -s inherit_errexit"
 
+FIND_SHELL_SCRIPTS="-name '*.bash' -or -name '*.sh'"
+FIND_JSON_FILES="-name '*.json'"
+FIND_YAML_FILES="-name '*.yaml' -or -name '*.yml'"
+
 function invoke_find
 {
   local project_root_dir="$1"
@@ -36,7 +40,7 @@ function find_and_format_shell_scripts
 
   invoke_find \
     "${project_root_dir}" \
-    "-name '*.bash' -or -name '*.sh'" \
+    "${FIND_SHELL_SCRIPTS}" \
     "format_single_shell_script"
 }
 
@@ -63,7 +67,7 @@ function find_and_analyse_shell_scripts
 
   invoke_find \
     "${project_root_dir}" \
-    "-name '*.bash' -or -name '*.sh'" \
+    "${FIND_SHELL_SCRIPTS}" \
     "analyse_single_shell_script"
 }
 
@@ -83,7 +87,7 @@ function find_and_format_json_files
 
   invoke_find \
     "${project_root_dir}" \
-    "-name '*.json'" \
+    "${FIND_JSON_FILES}" \
     "format_single_json_file"
 }
 
@@ -126,7 +130,7 @@ function find_and_format_yaml_files
 
   invoke_find \
     "${project_root_dir}" \
-    "-name '*.yaml' -or -name '*.yml'" \
+    "${FIND_YAML_FILES}" \
     "format_single_yaml_file"
 }
 
