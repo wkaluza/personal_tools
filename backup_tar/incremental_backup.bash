@@ -5,16 +5,7 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
-TEMP_UNPACK_DIR="${HOME}/not_a_real_directory"
-
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
-
-function on_exit
-{
-  rm -rf "${TEMP_UNPACK_DIR}"
-}
-
-trap on_exit EXIT
 
 function main
 {
@@ -56,8 +47,6 @@ function main
     --listed-incremental="${snapshot_file}.decrypted" \
     --create \
     --gzip \
-    --exclude '*/.idea*' \
-    --exclude '*/node_modules*' \
     "./$(basename "${dir_to_back_up}")" |
     gpg \
       --encrypt \
@@ -71,43 +60,6 @@ function main
       --output "${snapshot_file}"
 
   rm "${snapshot_file}.decrypted"
-
-  TEMP_UNPACK_DIR="$(dirname "${backup_dir}")/temp_unpack_$(basename "${backup_dir}")"
-  mkdir --parents "${TEMP_UNPACK_DIR}"
-
-  log_info "Performing test restoration..."
-
-  for f in $(find "${backup_dir}" -type f -name '*_backup.secret' | sort); do
-    log_info "- Extracting $(realpath "${f}")"
-
-    cat "$(realpath "${f}")" |
-      gpg \
-        --decrypt \
-        --quiet |
-      tar \
-        --directory "${TEMP_UNPACK_DIR}" \
-        --listed-incremental=/dev/null \
-        --extract \
-        --gzip
-  done
-
-  log_info "Test restoration done"
-  log_info "Performing comparison..."
-
-  if ! diff \
-    --recursive \
-    --no-dereference \
-    --exclude '.idea' \
-    --exclude 'node_modules' \
-    "${TEMP_UNPACK_DIR}/$(basename "${dir_to_back_up}")" \
-    "${dir_to_back_up}"; then
-    log_error "Test recovery failed: diff did not match with original"
-
-    rm "${backup_dir}/${now}_gpg_${encryption_subkey}_backup.secret"
-    rm "${snapshot_file}"
-
-    exit 1
-  fi
 
   log_info "Success: $(basename "$0")"
 }
