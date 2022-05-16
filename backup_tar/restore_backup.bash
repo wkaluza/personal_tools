@@ -30,7 +30,8 @@ function main
 
     cat "$(realpath "${f}")" |
       gpg \
-        --decrypt |
+        --decrypt \
+        --quiet |
       tar \
         --directory "${restore_destination}" \
         --listed-incremental=/dev/null \
