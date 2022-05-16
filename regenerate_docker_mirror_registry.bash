@@ -414,13 +414,26 @@ function prefetch_haskell
     "9.2.2-slim-buster"
 }
 
-function main
+function prefetch_infrastructure
 {
   prefetch_base_image \
     "library" \
     "registry" \
     "2.8.1"
 
+  prefetch_base_image \
+    "library" \
+    "notary" \
+    "server-0.7.0"
+  prefetch_base_image \
+    "library" \
+    "notary" \
+    "signer-0.7.0"
+}
+
+function main
+{
+  prefetch_infrastructure
   populate_operating_systems
   prefetch_servers
   prefetch_databases
