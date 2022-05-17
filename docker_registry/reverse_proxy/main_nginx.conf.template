@@ -51,6 +51,8 @@ http {
   server {
     listen 8080;
 
+    access_log off;
+
     location = /_/nginx_healthcheck {
       return 200 'HEALTHY';
     }
