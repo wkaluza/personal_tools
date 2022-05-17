@@ -9,29 +9,18 @@ events {
 }
 
 stream {
-  upstream ssh_git_frontend_upstream {
-    server ${DOMAIN_GIT_FRONTEND_df29c969}:22;
-  }
+  resolver ${DNS_RESOLVER_IP} valid=5s;
 
   server {
     listen 22;
 
-    proxy_pass ssh_git_frontend_upstream;
+    set $upstream ${DOMAIN_GIT_FRONTEND_df29c969}:22;
+    proxy_pass $upstream;
   }
 }
 
 http {
-  upstream private_docker_registry_upstream {
-    server ${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}:5000;
-  }
-
-  upstream mirror_docker_registry_upstream {
-    server ${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}:5000;
-  }
-
-  upstream git_frontend_upstream {
-    server ${DOMAIN_GIT_FRONTEND_df29c969}:3000;
-  }
+  resolver ${DNS_RESOLVER_IP} valid=5s;
 
   include /etc/nginx/mime.types;
   default_type application/octet-stream;
@@ -113,7 +102,8 @@ http {
       proxy_set_header X-Forwarded-Proto $scheme;
       proxy_set_header X-Real-IP $remote_addr;
 
-      proxy_pass http://private_docker_registry_upstream;
+      set $upstream http://${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}:5000;
+      proxy_pass $upstream;
     }
   }
 
@@ -151,7 +141,8 @@ http {
       proxy_set_header X-Forwarded-Proto $scheme;
       proxy_set_header X-Real-IP $remote_addr;
 
-      proxy_pass http://mirror_docker_registry_upstream;
+      set $upstream http://${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}:5000;
+      proxy_pass $upstream;
     }
   }
 
@@ -189,7 +180,8 @@ http {
       proxy_set_header X-Forwarded-Proto $scheme;
       proxy_set_header X-Real-IP $remote_addr;
 
-      proxy_pass http://git_frontend_upstream;
+      set $upstream http://${DOMAIN_GIT_FRONTEND_df29c969}:3000;
+      proxy_pass $upstream;
     }
   }
 }
