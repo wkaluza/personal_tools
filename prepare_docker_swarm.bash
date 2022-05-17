@@ -687,9 +687,10 @@ function main
   EXTERNAL_NETWORK_NAME="$(bash "${THIS_SCRIPT_DIR}/create_external_docker_network.bash")"
   LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 
-  start_registries
-  start_git_frontend
-  start_main_reverse_proxy
+  start_registries &
+  start_git_frontend &
+  start_main_reverse_proxy &
+  wait
 
   ensure_services_are_running
 
