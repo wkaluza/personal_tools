@@ -53,7 +53,6 @@ http {
 
     server_name ${DOMAIN_MAIN_REVERSE_PROXY_cab92795};
 
-    ssl on;
     ssl_certificate /etc/nginx/certs/${DOMAIN_MAIN_REVERSE_PROXY_cab92795}.cert;
     ssl_certificate_key /etc/nginx/certs/${DOMAIN_MAIN_REVERSE_PROXY_cab92795}.key;
 
@@ -74,7 +73,6 @@ http {
 
     server_name ${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e};
 
-    ssl on;
     ssl_certificate /etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}.cert;
     ssl_certificate_key /etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}.key;
 
@@ -113,7 +111,6 @@ http {
 
     server_name ${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f};
 
-    ssl on;
     ssl_certificate /etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}.cert;
     ssl_certificate_key /etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}.key;
 
@@ -152,7 +149,6 @@ http {
 
     server_name ${DOMAIN_GIT_FRONTEND_df29c969};
 
-    ssl on;
     ssl_certificate /etc/nginx/certs/${DOMAIN_GIT_FRONTEND_df29c969}.cert;
     ssl_certificate_key /etc/nginx/certs/${DOMAIN_GIT_FRONTEND_df29c969}.key;
 
