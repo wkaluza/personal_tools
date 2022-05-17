@@ -100,11 +100,11 @@
         }
       },
       "environment": {
-        "GIT_FRONTEND_HOST_df29c969": "${GIT_FRONTEND_HOST_df29c969:?}",
+        "DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f": "${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f:?}",
+        "DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e": "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}",
+        "DOMAIN_GIT_FRONTEND_df29c969": "${DOMAIN_GIT_FRONTEND_df29c969:?}",
+        "DOMAIN_MAIN_REVERSE_PROXY_cab92795": "${DOMAIN_MAIN_REVERSE_PROXY_cab92795:?}",
         "GIT_FRONTEND_SRV_NAME": "${GIT_FRONTEND_SRV_NAME:?}",
-        "LOCAL_REGISTRY_HOST_a8a1ce1e": "${LOCAL_REGISTRY_HOST_a8a1ce1e:?}",
-        "MAIN_REVERSE_PROXY_HOST_cab92795": "${MAIN_REVERSE_PROXY_HOST_cab92795:?}",
-        "MIRROR_REGISTRY_HOST_f334ec4f": "${MIRROR_REGISTRY_HOST_f334ec4f:?}",
         "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx",
         "REGISTRY_STACK_MIRROR_REGISTRY_SRV_NAME": "local_registry_stack_mirror_docker_registry",
         "REGISTRY_STACK_PRIVATE_REGISTRY_SRV_NAME": "local_registry_stack_private_docker_registry",
@@ -145,35 +145,35 @@
       "secrets": [
         {
           "source": "docker_registry_local_cert",
-          "target": "/etc/nginx/certs/${LOCAL_REGISTRY_HOST_a8a1ce1e:?}.cert"
+          "target": "/etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}.cert"
         },
         {
           "source": "docker_registry_local_key",
-          "target": "/etc/nginx/certs/${LOCAL_REGISTRY_HOST_a8a1ce1e:?}.key"
+          "target": "/etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}.key"
         },
         {
           "source": "docker_registry_mirror_cert",
-          "target": "/etc/nginx/certs/${MIRROR_REGISTRY_HOST_f334ec4f:?}.cert"
+          "target": "/etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f:?}.cert"
         },
         {
           "source": "docker_registry_mirror_key",
-          "target": "/etc/nginx/certs/${MIRROR_REGISTRY_HOST_f334ec4f:?}.key"
+          "target": "/etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f:?}.key"
         },
         {
           "source": "main_localhost_cert",
-          "target": "/etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST_cab92795:?}.cert"
+          "target": "/etc/nginx/certs/${DOMAIN_MAIN_REVERSE_PROXY_cab92795:?}.cert"
         },
         {
           "source": "main_localhost_key",
-          "target": "/etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST_cab92795:?}.key"
+          "target": "/etc/nginx/certs/${DOMAIN_MAIN_REVERSE_PROXY_cab92795:?}.key"
         },
         {
           "source": "git_frontend_localhost_cert",
-          "target": "/etc/nginx/certs/${GIT_FRONTEND_HOST_df29c969:?}.cert"
+          "target": "/etc/nginx/certs/${DOMAIN_GIT_FRONTEND_df29c969:?}.cert"
         },
         {
           "source": "git_frontend_localhost_key",
-          "target": "/etc/nginx/certs/${GIT_FRONTEND_HOST_df29c969:?}.key"
+          "target": "/etc/nginx/certs/${DOMAIN_GIT_FRONTEND_df29c969:?}.key"
         }
       ]
     }

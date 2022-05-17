@@ -67,7 +67,7 @@
         }
       },
       "environment": {
-        "GIT_FRONTEND_HOST_df29c969": "${GIT_FRONTEND_HOST_df29c969:?}",
+        "DOMAIN_GIT_FRONTEND_df29c969": "${DOMAIN_GIT_FRONTEND_df29c969:?}",
         "GOGS_SECRET_KEY_e6403800": "${GOGS_SECRET_KEY_e6403800:?}"
       },
       "healthcheck": {

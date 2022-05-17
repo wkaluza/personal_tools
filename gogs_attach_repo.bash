@@ -29,11 +29,11 @@ function main
   log_info "Adding remote..."
   git remote add \
     "${remote_name}" \
-    "git@${GIT_FRONTEND_HOST_df29c969}:${username}/${repo_name}.git"
+    "git@${DOMAIN_GIT_FRONTEND_df29c969}:${username}/${repo_name}.git"
 
   local description="placeholder description"
   local content_type_app_json="Content-Type: application/json"
-  local v1_api="https://${GIT_FRONTEND_HOST_df29c969}/api/v1"
+  local v1_api="https://${DOMAIN_GIT_FRONTEND_df29c969}/api/v1"
 
   local password
   password="$(pass show "local_gogs_password_${username}")"
@@ -60,7 +60,7 @@ function main
 
   local webhook_config
   webhook_config="$(echo '{}' |
-    jq ". + {url: \"https://${WEBHOOK_SINK_SERVICE_a8800f5b}/gogs\"}" - |
+    jq ". + {url: \"https://${DOMAIN_WEBHOOK_SINK_a8800f5b}/gogs\"}" - |
     jq ". + {content_type: \"json\"}" - |
     jq ". + {secret: \"$(pass_show_or_generate "local_gogs_webhook_secret")\"}" - |
     jq --compact-output --sort-keys '.' -)"

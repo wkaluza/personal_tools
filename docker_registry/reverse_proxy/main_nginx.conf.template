@@ -60,11 +60,11 @@ http {
   server {
     listen 443 http2 ssl;
 
-    server_name ${MAIN_REVERSE_PROXY_HOST_cab92795};
+    server_name ${DOMAIN_MAIN_REVERSE_PROXY_cab92795};
 
     ssl on;
-    ssl_certificate /etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST_cab92795}.cert;
-    ssl_certificate_key /etc/nginx/certs/${MAIN_REVERSE_PROXY_HOST_cab92795}.key;
+    ssl_certificate /etc/nginx/certs/${DOMAIN_MAIN_REVERSE_PROXY_cab92795}.cert;
+    ssl_certificate_key /etc/nginx/certs/${DOMAIN_MAIN_REVERSE_PROXY_cab92795}.key;
 
     # Source https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
     ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
@@ -81,11 +81,11 @@ http {
   server {
     listen 443 http2 ssl;
 
-    server_name ${LOCAL_REGISTRY_HOST_a8a1ce1e};
+    server_name ${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e};
 
     ssl on;
-    ssl_certificate /etc/nginx/certs/${LOCAL_REGISTRY_HOST_a8a1ce1e}.cert;
-    ssl_certificate_key /etc/nginx/certs/${LOCAL_REGISTRY_HOST_a8a1ce1e}.key;
+    ssl_certificate /etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}.cert;
+    ssl_certificate_key /etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}.key;
 
     # Source https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
     ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
@@ -119,11 +119,11 @@ http {
   server {
     listen 443 http2 ssl;
 
-    server_name ${MIRROR_REGISTRY_HOST_f334ec4f};
+    server_name ${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f};
 
     ssl on;
-    ssl_certificate /etc/nginx/certs/${MIRROR_REGISTRY_HOST_f334ec4f}.cert;
-    ssl_certificate_key /etc/nginx/certs/${MIRROR_REGISTRY_HOST_f334ec4f}.key;
+    ssl_certificate /etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}.cert;
+    ssl_certificate_key /etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}.key;
 
     # Source https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
     ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
@@ -157,11 +157,11 @@ http {
   server {
     listen 443 http2 ssl;
 
-    server_name ${GIT_FRONTEND_HOST_df29c969};
+    server_name ${DOMAIN_GIT_FRONTEND_df29c969};
 
     ssl on;
-    ssl_certificate /etc/nginx/certs/${GIT_FRONTEND_HOST_df29c969}.cert;
-    ssl_certificate_key /etc/nginx/certs/${GIT_FRONTEND_HOST_df29c969}.key;
+    ssl_certificate /etc/nginx/certs/${DOMAIN_GIT_FRONTEND_df29c969}.cert;
+    ssl_certificate_key /etc/nginx/certs/${DOMAIN_GIT_FRONTEND_df29c969}.key;
 
     # Source https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
     ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
