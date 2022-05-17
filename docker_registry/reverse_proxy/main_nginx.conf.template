@@ -21,8 +21,12 @@ stream {
 }
 
 http {
-  upstream docker_registries_rev_proxy_upstream {
-    server ${REGISTRY_STACK_REV_PROXY_SRV_NAME};
+  upstream private_docker_registry_upstream {
+    server ${REGISTRY_STACK_PRIVATE_REGISTRY_SRV_NAME}:5000;
+  }
+
+  upstream mirror_docker_registry_upstream {
+    server ${REGISTRY_STACK_MIRROR_REGISTRY_SRV_NAME}:5000;
   }
 
   upstream git_frontend_upstream {
@@ -73,7 +77,7 @@ http {
     }
   }
 
-  # Docker registry
+  # Docker registry (private)
   server {
     listen 443 http2 ssl;
 
@@ -107,11 +111,11 @@ http {
       proxy_set_header X-Forwarded-Proto $scheme;
       proxy_set_header X-Real-IP $remote_addr;
 
-      proxy_pass http://docker_registries_rev_proxy_upstream;
+      proxy_pass http://private_docker_registry_upstream;
     }
   }
 
-  # Docker mirror registry
+  # Docker registry (mirror)
   server {
     listen 443 http2 ssl;
 
@@ -145,7 +149,7 @@ http {
       proxy_set_header X-Forwarded-Proto $scheme;
       proxy_set_header X-Real-IP $remote_addr;
 
-      proxy_pass http://docker_registries_rev_proxy_upstream;
+      proxy_pass http://mirror_docker_registry_upstream;
     }
   }
 

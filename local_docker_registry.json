@@ -4,10 +4,6 @@
       "file": "${MIRROR_REGISTRY_CONFIG:?}",
       "name": "mirror_docker_registry_config_${MIRROR_REGISTRY_CONFIG_DIGEST:?}"
     },
-    "nginx_config": {
-      "file": "${NGINX_CONFIG:?}",
-      "name": "local_docker_registry_nginx_config_${NGINX_CONFIG_DIGEST:?}"
-    },
     "registry_config": {
       "file": "${REGISTRY_CONFIG:?}",
       "name": "local_docker_registry_config_${REGISTRY_CONFIG_DIGEST:?}"
@@ -17,9 +13,6 @@
     "external_b937b143": {
       "external": true,
       "name": "${EXTERNAL_NETWORK_NAME:?}"
-    },
-    "internal_5f665f67": {
-      "external": false
     }
   },
   "services": {
@@ -92,7 +85,7 @@
         }
       },
       "networks": [
-        "internal_5f665f67"
+        "external_b937b143"
       ],
       "volumes": [
         {
@@ -171,7 +164,7 @@
         }
       },
       "networks": [
-        "internal_5f665f67"
+        "external_b937b143"
       ],
       "volumes": [
         {
@@ -179,88 +172,6 @@
           "target": "/var/lib/registry",
           "type": "volume"
         }
-      ]
-    },
-    "reverse_proxy_ab0e9c4c": {
-      "build": {
-        "context": "${REVERSE_PROXY_CONTEXT:?}",
-        "dockerfile": "${REVERSE_PROXY_DOCKERFILE:?}",
-        "network": "none"
-      },
-      "configs": [
-        {
-          "source": "nginx_config",
-          "target": "/etc/nginx/templates/nginx.conf.template"
-        }
-      ],
-      "depends_on": [
-        "docker_registry",
-        "mirror_docker_registry"
-      ],
-      "deploy": {
-        "mode": "global",
-        "placement": {
-          "constraints": [
-            "node.id==${LOCAL_NODE_ID:?}",
-            "node.role==manager"
-          ]
-        },
-        "resources": {
-          "limits": {
-            "cpus": "0.5",
-            "memory": "50MB"
-          },
-          "reservations": {
-            "cpus": "0.25",
-            "memory": "25MB"
-          }
-        },
-        "restart_policy": {
-          "condition": "on-failure",
-          "delay": "10s",
-          "max_attempts": 5,
-          "window": "120s"
-        },
-        "rollback_config": {
-          "delay": "10s",
-          "failure_action": "pause",
-          "max_failure_ratio": 0,
-          "monitor": "10s",
-          "order": "start-first",
-          "parallelism": 1
-        },
-        "update_config": {
-          "delay": "10s",
-          "failure_action": "rollback",
-          "max_failure_ratio": 0,
-          "monitor": "10s",
-          "order": "start-first",
-          "parallelism": 1
-        }
-      },
-      "environment": {
-        "LOCAL_REGISTRY_HOST_a8a1ce1e": "${LOCAL_REGISTRY_HOST_a8a1ce1e:?}",
-        "MIRROR_REGISTRY_HOST_f334ec4f": "${MIRROR_REGISTRY_HOST_f334ec4f:?}",
-        "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx"
-      },
-      "healthcheck": {
-        "disable": false,
-        "interval": "1s",
-        "retries": 30,
-        "start_period": "60s",
-        "timeout": "1s"
-      },
-      "image": "${REVERSE_PROXY_IMAGE_REFERENCE:?}",
-      "logging": {
-        "driver": "json-file",
-        "options": {
-          "max-file": 5,
-          "max-size": "200k"
-        }
-      },
-      "networks": [
-        "external_b937b143",
-        "internal_5f665f67"
       ]
     }
   },
