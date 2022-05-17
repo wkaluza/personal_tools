@@ -463,11 +463,18 @@ function gogs_docker_cli_create_admin_user
   local username="$3"
   local password="$4"
 
+  local gogs_service
+  gogs_service="$(docker stack services \
+    --format '{{ .Name }}' \
+    "${GIT_FRONTEND_STACK_NAME}" |
+    grep "gogs" |
+    head -n1)"
+
   local container
   container="$(docker service ps \
     --format '{{ .Name }}.{{ .ID }}' \
     --no-trunc \
-    "${GIT_FRONTEND_SRV_NAME}" |
+    "${gogs_service}" |
     head -n1)"
 
   docker exec \
