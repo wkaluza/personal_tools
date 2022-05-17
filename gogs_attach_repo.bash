@@ -14,32 +14,26 @@ source <(cat "${THIS_SCRIPT_DIR}/local_domains.json" |
   jq --raw-output '. | .[]' - |
   sort)
 
-function main
+CONTENT_TYPE_APP_JSON="Content-Type: application/json"
+REMOTE_NAME="gogs"
+USERNAME="wkaluza"
+V1_API="https://${DOMAIN_GIT_FRONTEND_df29c969}/api/v1"
+
+function add_git_remote
 {
-  local current_repo_directory
-  current_repo_directory="$(realpath "$1")"
+  local repo_name="$1"
 
-  pushd "${current_repo_directory}" >/dev/null
-
-  local remote_name="gogs"
-  local username="wkaluza"
-  local repo_name
-  repo_name="$(basename "${current_repo_directory}")"
-
-  log_info "Adding remote..."
   git remote add \
-    "${remote_name}" \
-    "git@${DOMAIN_GIT_FRONTEND_df29c969}:${username}/${repo_name}.git"
+    "${REMOTE_NAME}" \
+    "git@${DOMAIN_GIT_FRONTEND_df29c969}:${USERNAME}/${repo_name}.git"
 
-  local description="placeholder description"
-  local content_type_app_json="Content-Type: application/json"
-  local v1_api="https://${DOMAIN_GIT_FRONTEND_df29c969}/api/v1"
+}
 
-  local password
-  password="$(pass show "local_gogs_password_${username}")"
-  local token
-  token="$(pass show "local_gogs_token_${username}")"
-  auth_header="Authorization: token ${token}"
+function create_repo
+{
+  local repo_name="$1"
+  local description="$2"
+  local password="$3"
 
   local create_data
   create_data="$(echo '{}' |
@@ -48,15 +42,20 @@ function main
     jq ". + {description: \"${description}\"}" - |
     jq --compact-output --sort-keys '.' -)"
 
-  log_info "Creating gogs repository..."
   curl \
     --data "${create_data}" \
     --fail \
-    --header "${content_type_app_json}" \
+    --header "${CONTENT_TYPE_APP_JSON}" \
     --show-error \
     --silent \
-    --user "${username}:${password}" \
-    "${v1_api}/admin/users/${username}/repos" >/dev/null
+    --user "${USERNAME}:${password}" \
+    "${V1_API}/admin/users/${USERNAME}/repos"
+}
+
+function create_webhook
+{
+  local auth_header="$1"
+  local repo_name="$2"
 
   local webhook_config
   webhook_config="$(echo '{}' |
@@ -75,29 +74,73 @@ function main
     jq '. + {active: true}' - |
     jq --compact-output --sort-keys '.' -)"
 
-  log_info "Adding webhook..."
   curl \
     --data "${webhook_data}" \
     --fail \
     --header "${auth_header}" \
-    --header "${content_type_app_json}" \
+    --header "${CONTENT_TYPE_APP_JSON}" \
     --request "POST" \
     --show-error \
     --silent \
-    "${v1_api}/repos/${username}/${repo_name}/hooks" >/dev/null
+    "${V1_API}/repos/${USERNAME}/${repo_name}/hooks"
+}
 
-  log_info "Fetching..."
+function perform_fetch
+{
   git fetch \
     --all \
     --force \
     --recurse-submodules \
-    --tags >/dev/null 2>&1
+    --tags
+}
 
-  log_info "Pushing branches..."
+function perform_push
+{
   git push \
     --all \
-    --repo "${remote_name}" \
-    --set-upstream >/dev/null 2>&1
+    --repo "${REMOTE_NAME}" \
+    --set-upstream
+}
+
+function main
+{
+  local current_repo_directory
+  current_repo_directory="$(realpath "$1")"
+
+  pushd "${current_repo_directory}" >/dev/null
+
+  local repo_name
+  repo_name="$(basename "${current_repo_directory}")"
+
+  log_info "Adding remote..."
+  add_git_remote \
+    "${repo_name}"
+
+  local description="placeholder description"
+
+  local password
+  password="$(pass show "local_gogs_password_${USERNAME}")"
+  local token
+  token="$(pass show "local_gogs_token_${USERNAME}")"
+  auth_header="Authorization: token ${token}"
+
+  log_info "Creating gogs repository..."
+  create_repo \
+    "${repo_name}" \
+    "${description}" \
+    "${password}" >/dev/null
+
+  log_info "Adding webhook..."
+  create_webhook \
+    "${auth_header}" \
+    "${repo_name}" >/dev/null
+
+  log_info "Fetching..."
+  perform_fetch >/dev/null 2>&1
+
+  log_info "Pushing branches..."
+  perform_push >/dev/null 2>&1
+
   popd >/dev/null
 
   log_info "Success: $(basename "$0")"
