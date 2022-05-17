@@ -13,7 +13,7 @@
     }
   },
   "services": {
-    "git_frontend_c3a3afb4": {
+    "gogs_c3a3afb4": {
       "build": {
         "context": "${GIT_FRONTEND_CONTEXT:?}",
         "dockerfile": "${GIT_FRONTEND_DOCKERFILE:?}",
