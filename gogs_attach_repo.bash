@@ -98,8 +98,14 @@ function perform_push
 {
   git push \
     --all \
+    --force \
     --repo "${REMOTE_NAME}" \
     --set-upstream
+
+  git push \
+    --force \
+    --repo "${REMOTE_NAME}" \
+    --tags
 }
 
 function main
@@ -138,7 +144,7 @@ function main
   log_info "Fetching..."
   perform_fetch >/dev/null 2>&1
 
-  log_info "Pushing branches..."
+  log_info "Pushing branches and tags..."
   perform_push >/dev/null 2>&1
 
   popd >/dev/null
