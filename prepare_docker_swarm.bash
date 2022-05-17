@@ -472,6 +472,7 @@ function gogs_docker_cli_create_admin_user
 
   local container
   container="$(docker service ps \
+    --filter 'desired-state=running' \
     --format '{{ .Name }}.{{ .ID }}' \
     --no-trunc \
     "${gogs_service}" |
