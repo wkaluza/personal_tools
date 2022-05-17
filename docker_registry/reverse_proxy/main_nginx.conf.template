@@ -10,7 +10,7 @@ events {
 
 stream {
   upstream ssh_git_frontend_upstream {
-    server ${GIT_FRONTEND_SRV_NAME}:22;
+    server ${DOMAIN_GIT_FRONTEND_df29c969}:22;
   }
 
   server {
@@ -22,15 +22,15 @@ stream {
 
 http {
   upstream private_docker_registry_upstream {
-    server ${REGISTRY_STACK_PRIVATE_REGISTRY_SRV_NAME}:5000;
+    server ${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}:5000;
   }
 
   upstream mirror_docker_registry_upstream {
-    server ${REGISTRY_STACK_MIRROR_REGISTRY_SRV_NAME}:5000;
+    server ${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}:5000;
   }
 
   upstream git_frontend_upstream {
-    server ${GIT_FRONTEND_SRV_NAME}:3000;
+    server ${DOMAIN_GIT_FRONTEND_df29c969}:3000;
   }
 
   include /etc/nginx/mime.types;

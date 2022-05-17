@@ -76,6 +76,7 @@
         "start_period": "60s",
         "timeout": "1s"
       },
+      "hostname": "${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f:?}",
       "image": "${REGISTRY_IMAGE_REFERENCE:?}",
       "logging": {
         "driver": "json-file",
@@ -155,6 +156,7 @@
         "start_period": "60s",
         "timeout": "1s"
       },
+      "hostname": "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}",
       "image": "${REGISTRY_IMAGE_REFERENCE:?}",
       "logging": {
         "driver": "json-file",
