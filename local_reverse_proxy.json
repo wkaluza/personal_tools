@@ -107,7 +107,7 @@
         "MIRROR_REGISTRY_HOST_f334ec4f": "${MIRROR_REGISTRY_HOST_f334ec4f:?}",
         "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx",
         "REGISTRY_STACK_MIRROR_REGISTRY_SRV_NAME": "local_registry_stack_mirror_docker_registry",
-        "REGISTRY_STACK_PRIVATE_REGISTRY_SRV_NAME": "local_registry_stack_docker_registry",
+        "REGISTRY_STACK_PRIVATE_REGISTRY_SRV_NAME": "local_registry_stack_private_docker_registry",
         "REVISION_DATA_JSON": "${REVISION_DATA_JSON:?}"
       },
       "healthcheck": {

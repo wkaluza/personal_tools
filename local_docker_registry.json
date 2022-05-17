@@ -4,9 +4,9 @@
       "file": "${MIRROR_REGISTRY_CONFIG:?}",
       "name": "mirror_docker_registry_config_${MIRROR_REGISTRY_CONFIG_DIGEST:?}"
     },
-    "registry_config": {
-      "file": "${REGISTRY_CONFIG:?}",
-      "name": "local_docker_registry_config_${REGISTRY_CONFIG_DIGEST:?}"
+    "private_registry_config": {
+      "file": "${PRIVATE_REGISTRY_CONFIG:?}",
+      "name": "local_docker_registry_config_${PRIVATE_REGISTRY_CONFIG_DIGEST:?}"
     }
   },
   "networks": {
@@ -16,85 +16,6 @@
     }
   },
   "services": {
-    "docker_registry": {
-      "build": {
-        "context": "${REGISTRY_CONTEXT:?}",
-        "dockerfile": "${REGISTRY_DOCKERFILE:?}",
-        "network": "none"
-      },
-      "configs": [
-        {
-          "source": "registry_config",
-          "target": "/etc/docker/registry/config.yml"
-        }
-      ],
-      "deploy": {
-        "mode": "global",
-        "placement": {
-          "constraints": [
-            "node.id==${LOCAL_NODE_ID:?}",
-            "node.role==manager"
-          ]
-        },
-        "resources": {
-          "limits": {
-            "cpus": "1",
-            "memory": "100MB"
-          },
-          "reservations": {
-            "cpus": "0.25",
-            "memory": "25MB"
-          }
-        },
-        "restart_policy": {
-          "condition": "on-failure",
-          "delay": "10s",
-          "max_attempts": 5,
-          "window": "120s"
-        },
-        "rollback_config": {
-          "delay": "10s",
-          "failure_action": "pause",
-          "max_failure_ratio": 0,
-          "monitor": "10s",
-          "order": "start-first",
-          "parallelism": 1
-        },
-        "update_config": {
-          "delay": "10s",
-          "failure_action": "rollback",
-          "max_failure_ratio": 0,
-          "monitor": "10s",
-          "order": "start-first",
-          "parallelism": 1
-        }
-      },
-      "healthcheck": {
-        "disable": false,
-        "interval": "1s",
-        "retries": 30,
-        "start_period": "60s",
-        "timeout": "1s"
-      },
-      "image": "${REGISTRY_IMAGE_REFERENCE:?}",
-      "logging": {
-        "driver": "json-file",
-        "options": {
-          "max-file": 5,
-          "max-size": "200k"
-        }
-      },
-      "networks": [
-        "external_b937b143"
-      ],
-      "volumes": [
-        {
-          "source": "local_registry_volume",
-          "target": "/var/lib/registry",
-          "type": "volume"
-        }
-      ]
-    },
     "mirror_docker_registry": {
       "build": {
         "context": "${REGISTRY_CONTEXT:?}",
@@ -173,15 +94,94 @@
           "type": "volume"
         }
       ]
+    },
+    "private_docker_registry": {
+      "build": {
+        "context": "${REGISTRY_CONTEXT:?}",
+        "dockerfile": "${REGISTRY_DOCKERFILE:?}",
+        "network": "none"
+      },
+      "configs": [
+        {
+          "source": "private_registry_config",
+          "target": "/etc/docker/registry/config.yml"
+        }
+      ],
+      "deploy": {
+        "mode": "global",
+        "placement": {
+          "constraints": [
+            "node.id==${LOCAL_NODE_ID:?}",
+            "node.role==manager"
+          ]
+        },
+        "resources": {
+          "limits": {
+            "cpus": "1",
+            "memory": "100MB"
+          },
+          "reservations": {
+            "cpus": "0.25",
+            "memory": "25MB"
+          }
+        },
+        "restart_policy": {
+          "condition": "on-failure",
+          "delay": "10s",
+          "max_attempts": 5,
+          "window": "120s"
+        },
+        "rollback_config": {
+          "delay": "10s",
+          "failure_action": "pause",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        },
+        "update_config": {
+          "delay": "10s",
+          "failure_action": "rollback",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        }
+      },
+      "healthcheck": {
+        "disable": false,
+        "interval": "1s",
+        "retries": 30,
+        "start_period": "60s",
+        "timeout": "1s"
+      },
+      "image": "${REGISTRY_IMAGE_REFERENCE:?}",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": 5,
+          "max-size": "200k"
+        }
+      },
+      "networks": [
+        "external_b937b143"
+      ],
+      "volumes": [
+        {
+          "source": "private_registry_volume",
+          "target": "/var/lib/registry",
+          "type": "volume"
+        }
+      ]
     }
   },
   "version": "3.9",
   "volumes": {
-    "local_registry_volume": {
-      "name": "local_docker_registry_data_ccb614e3"
-    },
     "mirror_registry_volume": {
       "name": "mirror_docker_registry_data_a3273b20"
+    },
+    "private_registry_volume": {
+      "name": "private_docker_registry_data_ccb614e3"
     }
   }
 }
