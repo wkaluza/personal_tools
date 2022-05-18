@@ -429,6 +429,41 @@ function prefetch_haskell
     "9.2.2-slim-buster"
 }
 
+function prefetch_build_automation
+{
+  prefetch_base_image \
+    "argoproj" \
+    "argocd" \
+    "v2.3.4"
+
+  prefetch_base_image \
+    "fluxcd" \
+    "flux" \
+    "1.25.1"
+
+  prefetch_base_image \
+    "gocd" \
+    "gocd-agent-alpine-3.15" \
+    "v22.1.0"
+  prefetch_base_image \
+    "gocd" \
+    "gocd-agent-ubuntu-20.04" \
+    "v22.1.0"
+  prefetch_base_image \
+    "gocd" \
+    "gocd-server" \
+    "v22.1.0"
+
+  prefetch_base_image \
+    "jenkins" \
+    "jenkins" \
+    "2.332.3-lts-jdk11"
+  prefetch_base_image \
+    "jenkins" \
+    "jenkins" \
+    "2.348-jdk11"
+}
+
 function prefetch_infrastructure
 {
   prefetch_base_image \
@@ -458,6 +493,7 @@ function main
   prefetch_python
   prefetch_rust
   prefetch_haskell
+  prefetch_build_automation
 
   log_info "Success $(basename "$0")"
 }
