@@ -16,7 +16,7 @@ function prefetch_base_image
   docker pull "${collection}/${image}:${tag}"
 }
 
-function populate_operating_systems
+function prefetch_operating_systems
 {
   prefetch_base_image \
     "library" \
@@ -449,7 +449,7 @@ function prefetch_infrastructure
 function main
 {
   prefetch_infrastructure
-  populate_operating_systems
+  prefetch_operating_systems
   prefetch_servers
   prefetch_databases
   prefetch_git_frontends
