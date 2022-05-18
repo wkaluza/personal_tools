@@ -5,6 +5,8 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
+source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"
+
 function prefetch_base_image
 {
   local collection="$1"
@@ -456,6 +458,8 @@ function main
   prefetch_python
   prefetch_rust
   prefetch_haskell
+
+  log_info "Success $(basename "$0")"
 }
 
 main
