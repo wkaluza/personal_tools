@@ -84,6 +84,19 @@ function prefetch_servers
     "2.5.0-builder-alpine"
 
   prefetch_base_image \
+    "envoyproxy" \
+    "envoy" \
+    "v1.21.2"
+  prefetch_base_image \
+    "envoyproxy" \
+    "envoy-alpine" \
+    "v1.21.2"
+  prefetch_base_image \
+    "envoyproxy" \
+    "envoy-distroless" \
+    "v1.21.2"
+
+  prefetch_base_image \
     "library" \
     "httpd" \
     "2.4.53"
