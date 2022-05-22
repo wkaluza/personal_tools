@@ -133,7 +133,8 @@ function main
 
   log_info "Adding remote..."
   add_git_remote \
-    "${repo_name}"
+    "${repo_name}" >/dev/null 2>&1 ||
+    true
 
   local description="placeholder description"
 
