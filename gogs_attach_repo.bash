@@ -46,7 +46,7 @@ function create_repo
 {
   local repo_name="$1"
   local description="$2"
-  local password="$3"
+  local auth_header="$3"
 
   local create_data
   create_data="$(echo '{}' |
@@ -58,10 +58,10 @@ function create_repo
   curl \
     --data "${create_data}" \
     --fail \
+    --header "${auth_header}" \
     --header "${CONTENT_TYPE_APP_JSON}" \
     --show-error \
     --silent \
-    --user "${USERNAME}:${password}" \
     "${V1_API}/admin/users/${USERNAME}/repos"
 }
 
@@ -137,8 +137,6 @@ function main
 
   local description="placeholder description"
 
-  local password
-  password="$(pass show "local_gogs_password_${USERNAME}")"
   local token
   token="$(pass show "local_gogs_token_${USERNAME}")"
   auth_header="Authorization: token ${token}"
@@ -150,7 +148,7 @@ function main
     create_repo \
       "${repo_name}" \
       "${description}" \
-      "${password}" >/dev/null 2>&1
+      "${auth_header}" >/dev/null 2>&1
   fi
 
   log_info "Adding webhook..."
