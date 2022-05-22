@@ -28,6 +28,20 @@ function add_git_remote
     "git@${DOMAIN_GIT_FRONTEND_df29c969}:${USERNAME}/${repo_name}.git"
 }
 
+function check_repo_exists
+{
+  local repo_name="$1"
+  local auth_header="$2"
+
+  curl \
+    --fail \
+    --header "${auth_header}" \
+    --header "${CONTENT_TYPE_APP_JSON}" \
+    --show-error \
+    --silent \
+    "${V1_API}/repos/${USERNAME}/${repo_name}/branches"
+}
+
 function create_repo
 {
   local repo_name="$1"
@@ -129,11 +143,15 @@ function main
   token="$(pass show "local_gogs_token_${USERNAME}")"
   auth_header="Authorization: token ${token}"
 
-  log_info "Creating gogs repository..."
-  create_repo \
+  if ! check_repo_exists \
     "${repo_name}" \
-    "${description}" \
-    "${password}" >/dev/null
+    "${auth_header}" >/dev/null 2>&1; then
+    log_info "Creating gogs repository..."
+    create_repo \
+      "${repo_name}" \
+      "${description}" \
+      "${password}" >/dev/null 2>&1
+  fi
 
   log_info "Adding webhook..."
   create_webhook \
