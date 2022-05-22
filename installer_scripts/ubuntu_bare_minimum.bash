@@ -236,6 +236,17 @@ function set_umask_and_home_permissions
   source "${BASHRC_PATH}"
 }
 
+function install_configure_ufw
+{
+  sudo apt-get install --yes \
+    ufw
+
+  sudo ufw enable
+  sudo ufw default deny incoming
+  sudo ufw default allow outgoing
+  sudo ufw default deny routed
+}
+
 function clean_tools_repo
 {
   pushd "${TOOLS_DIR}" >/dev/null
@@ -542,6 +553,8 @@ function main
   manage_sudo_password_in_pass
 
   clean_tools_repo
+
+  install_configure_ufw
 
   log_info "Success: $(basename "$0")"
 }
