@@ -26,7 +26,6 @@ function add_git_remote
   git remote add \
     "${REMOTE_NAME}" \
     "git@${DOMAIN_GIT_FRONTEND_df29c969}:${USERNAME}/${repo_name}.git"
-
 }
 
 function create_repo
