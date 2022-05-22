@@ -169,7 +169,7 @@ function main
 
   if ! check_webhook_exists \
     "${auth_header}" \
-    "${repo_name}" >/dev/null; then
+    "${repo_name}" >/dev/null 2>&1; then
     log_info "Adding webhook..."
     create_webhook \
       "${auth_header}" \
