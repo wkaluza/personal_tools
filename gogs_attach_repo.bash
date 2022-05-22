@@ -147,7 +147,6 @@ function main
   local repo_name
   repo_name="$(basename "${current_repo_directory}")"
 
-  log_info "Adding remote..."
   add_git_remote \
     "${repo_name}" >/dev/null 2>&1 ||
     true
