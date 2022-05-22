@@ -65,6 +65,22 @@ function create_repo
     "${V1_API}/admin/users/${USERNAME}/repos"
 }
 
+function check_webhook_exists
+{
+  local auth_header="$1"
+  local repo_name="$2"
+
+  curl \
+    --fail \
+    --header "${auth_header}" \
+    --header "${CONTENT_TYPE_APP_JSON}" \
+    --request "GET" \
+    --show-error \
+    --silent \
+    "${V1_API}/repos/${USERNAME}/${repo_name}/hooks" |
+    jq --sort-keys 'if . | length > 0 then . else error("No webhooks found") end' -
+}
+
 function create_webhook
 {
   local auth_header="$1"
@@ -152,10 +168,14 @@ function main
       "${auth_header}" >/dev/null 2>&1
   fi
 
-  log_info "Adding webhook..."
-  create_webhook \
+  if ! check_webhook_exists \
     "${auth_header}" \
-    "${repo_name}" >/dev/null
+    "${repo_name}" >/dev/null; then
+    log_info "Adding webhook..."
+    create_webhook \
+      "${auth_header}" \
+      "${repo_name}" >/dev/null
+  fi
 
   log_info "Fetching..."
   perform_fetch >/dev/null 2>&1
