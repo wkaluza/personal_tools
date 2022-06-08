@@ -15,9 +15,12 @@
   "services": {
     "gogs_c3a3afb4": {
       "build": {
+        "args": {
+          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
+        },
         "context": "${GIT_FRONTEND_CONTEXT:?}",
         "dockerfile": "${GIT_FRONTEND_DOCKERFILE:?}",
-        "network": "none"
+        "network": "bridge"
       },
       "configs": [
         {

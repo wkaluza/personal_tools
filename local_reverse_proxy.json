@@ -48,9 +48,12 @@
   "services": {
     "main_reverse_proxy": {
       "build": {
+        "args": {
+          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
+        },
         "context": "${REVERSE_PROXY_CONTEXT:?}",
         "dockerfile": "${REVERSE_PROXY_DOCKERFILE:?}",
-        "network": "none"
+        "network": "bridge"
       },
       "configs": [
         {

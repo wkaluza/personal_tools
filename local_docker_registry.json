@@ -18,9 +18,12 @@
   "services": {
     "mirror_docker_registry": {
       "build": {
+        "args": {
+          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
+        },
         "context": "${REGISTRY_CONTEXT:?}",
         "dockerfile": "${REGISTRY_DOCKERFILE:?}",
-        "network": "none"
+        "network": "bridge"
       },
       "configs": [
         {
@@ -98,9 +101,12 @@
     },
     "private_docker_registry": {
       "build": {
+        "args": {
+          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
+        },
         "context": "${REGISTRY_CONTEXT:?}",
         "dockerfile": "${REGISTRY_DOCKERFILE:?}",
-        "network": "none"
+        "network": "bridge"
       },
       "configs": [
         {
