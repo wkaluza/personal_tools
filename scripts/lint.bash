@@ -118,7 +118,7 @@ function format_single_yaml_file
   local f="$1"
 
   # Destructive to YAML comments, use discretion
-  sort_yaml "${f}"
+  # sort_yaml "${f}"
 
   prettier \
     --write "${f}" >/dev/null
