@@ -12,6 +12,7 @@ function ensure_external_network_exists
   if ! docker network ls --format '{{ .Name }}' |
     grep -E "^${EXTERNAL_NETWORK_NAME}$" >/dev/null; then
     docker network create \
+      --attachable \
       --driver "overlay" \
       --opt "encrypted" \
       --scope "swarm" \
