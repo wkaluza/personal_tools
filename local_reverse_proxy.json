@@ -118,6 +118,7 @@
         "start_period": "60s",
         "timeout": "1s"
       },
+      "hostname": "main.localhost",
       "image": "${REVERSE_PROXY_IMAGE_REFERENCE:?}",
       "logging": {
         "driver": "json-file",
