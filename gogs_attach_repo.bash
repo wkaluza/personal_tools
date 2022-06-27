@@ -155,7 +155,7 @@ function main
 
   local token
   token="$(pass show "local_gogs_token_${USERNAME}")"
-  auth_header="Authorization: token ${token}"
+  local auth_header="Authorization: token ${token}"
 
   if ! check_repo_exists \
     "${repo_name}" \
