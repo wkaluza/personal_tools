@@ -232,7 +232,6 @@ function set_up_gitops_infrastructure
 
   wait_flux_pre_check
 
-  log_info "Cloning..."
   clone_or_fetch \
     "git@${DOMAIN_GIT_FRONTEND_df29c969}:${username}/${repo_name}.git" \
     "${infra_temp_dir}" >/dev/null 2>&1
@@ -242,7 +241,7 @@ function set_up_gitops_infrastructure
 
   log_info "Applying flux manifests..."
   kubectl apply \
-    --kustomize "${manifests_path}" >/dev/null
+    --kustomize "${manifests_path}" >/dev/null 2>&1
   popd >/dev/null
 
   wait_flux_check
@@ -267,7 +266,7 @@ function keys_exist_and_match
   k8s_key="$(kubectl get secret \
     "${flux_secret_name}" \
     --namespace "${flux_namespace}" \
-    --output "json" |
+    --output "json" 2>/dev/null |
     jq --raw-output '.data."identity.pub"' - |
     base64 -d |
     normalise_ssh_key)"
