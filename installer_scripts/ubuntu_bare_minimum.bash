@@ -461,6 +461,20 @@ EOF
     "${script_dir}/sudo"
 }
 
+function install_minikube
+{
+  print_trace
+
+  local version="v1.25.2"
+  local minikube_path="/usr/local/bin/minikube"
+
+  sudo wget \
+    -q \
+    -O "${minikube_path}" \
+    "https://storage.googleapis.com/minikube/releases/${version}/minikube-linux-amd64"
+  sudo chmod +x "${minikube_path}"
+}
+
 function install_kind
 {
   print_trace
@@ -475,6 +489,16 @@ function install_kind
     "https://kind.sigs.k8s.io/dl/${version}/kind-linux-amd64"
 
   chmod "u+x" "${output_path}"
+}
+
+function install_flux_cli
+{
+  print_trace
+
+  curl \
+    --silent \
+    "https://fluxcd.io/install.sh" |
+    sudo bash -
 }
 
 function install_kubectl
@@ -542,7 +566,9 @@ function main
   bash "${TOOLS_DIR}/installer_scripts/install_applications.bash"
 
   install_kind
+  install_minikube
   install_kubectl
+  install_flux_cli
 
   # This has to be done late in the setup process
   # or it interferes with docker testing
