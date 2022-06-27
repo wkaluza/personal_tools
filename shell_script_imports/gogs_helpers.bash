@@ -217,23 +217,6 @@ function gogs_docker_cli_create_admin_user
     --password "${password}"
 }
 
-function gogs_ssh_keys
-{
-  local gogs_host="$1"
-  local username="$2"
-  local auth_header="$3"
-
-  local content_type_app_json="Content-Type: application/json"
-  local v1_api="https://${gogs_host}/api/v1"
-
-  curl \
-    --header "${auth_header}" \
-    --header "${content_type_app_json}" \
-    --request "GET" \
-    --silent \
-    "${v1_api}/user/keys"
-}
-
 function gogs_ssh_key_exists
 {
   local gogs_host="$1"
