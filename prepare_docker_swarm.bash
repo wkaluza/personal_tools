@@ -5,9 +5,10 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
-source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/common.bash"
+source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/git_helpers.bash"
+source "${THIS_SCRIPT_DIR}/shell_script_imports/gogs_helpers.bash"
 
 source <(cat "${THIS_SCRIPT_DIR}/local_domains.json" |
   jq '. | to_entries' - |
@@ -407,122 +408,6 @@ function ping_registry
     grep "repositories"
 }
 
-function gogs_public_keys
-{
-  local auth_header="$1"
-  local content_type_app_json_header="$2"
-  local v1_api="$3"
-  local username="$4"
-
-  curl \
-    --header "${auth_header}" \
-    --header "${content_type_app_json_header}" \
-    --request "GET" \
-    --silent \
-    "${v1_api}/users/${username}/keys"
-}
-
-function gogs_generate_token
-{
-  local token_name="$1"
-  local content_type_app_json_header="$2"
-  local username="$3"
-  local password="$4"
-  local v1_api="$5"
-
-  curl \
-    --data "{\"name\": \"${token_name}\"}" \
-    --header "${content_type_app_json_header}" \
-    --request "POST" \
-    --silent \
-    --user "${username}:${password}" \
-    "${v1_api}/users/${username}/tokens" |
-    jq --raw-output '.sha1' -
-}
-
-function gogs_list_token_names
-{
-  local content_type_app_json_header="$1"
-  local username="$2"
-  local password="$3"
-
-  curl \
-    --header "${content_type_app_json_header}" \
-    --request "GET" \
-    --silent \
-    --user "${username}:${password}" \
-    "${v1_api}/users/${username}/tokens" |
-    jq --raw-output '.[].name' -
-}
-
-function gogs_get_single_user
-{
-  local content_type_app_json_header="$1"
-  local v1_api="$2"
-  local username="$3"
-
-  curl \
-    --fail \
-    --header "${content_type_app_json_header}" \
-    --silent \
-    "${v1_api}/users/${username}"
-}
-
-function gogs_docker_cli_create_admin_user
-{
-  local cli_path="$1"
-  local email="$2"
-  local username="$3"
-  local password="$4"
-
-  local gogs_service
-  gogs_service="$(docker stack services \
-    --format '{{ .Name }}' \
-    "${GIT_FRONTEND_STACK_NAME}" |
-    grep "gogs" |
-    head -n1)"
-
-  local container
-  container="$(docker service ps \
-    --filter 'desired-state=running' \
-    --format '{{ .Name }}.{{ .ID }}' \
-    --no-trunc \
-    "${gogs_service}" |
-    head -n1)"
-
-  docker exec \
-    --user "git" \
-    "${container}" \
-    "${cli_path}" admin create-user \
-    --admin \
-    --email "${email}" \
-    --name "${username}" \
-    --password "${password}"
-}
-
-function gogs_add_public_key
-{
-  local ssh_key_name="$1"
-  local primary_key_fingerprint="$2"
-  local auth_header="$3"
-  local content_type_app_json_header="$4"
-  local v1_api="$5"
-
-  local data
-  data="$(echo '{}' |
-    jq ". + {title: \"${ssh_key_name}\"}" - |
-    jq ". + {key: \"$(gpg --export-ssh-key "${primary_key_fingerprint}")\"}" - |
-    jq --compact-output --sort-keys '.' -)"
-
-  curl \
-    --data "${data}" \
-    --header "${auth_header}" \
-    --header "${content_type_app_json_header}" \
-    --request "POST" \
-    --silent \
-    "${v1_api}/user/keys" >/dev/null
-}
-
 function remove_stale_gogs_ssh_key
 {
   ssh-keygen \
@@ -544,18 +429,15 @@ function ensure_gogs_user_configured
 
   local primary_key_fingerprint="174C9368811039C87F0C806A896572D1E78ED6A7"
 
-  local v1_api="https://${DOMAIN_GIT_FRONTEND_df29c969}/api/v1"
-  local content_type_app_json_header="Content-Type: application/json"
-
   if gogs_get_single_user \
-    "${content_type_app_json_header}" \
-    "${v1_api}" \
+    "${DOMAIN_GIT_FRONTEND_df29c969}" \
     "${username}" >/dev/null 2>&1; then
     log_info "Gogs user ${username} exists"
   else
     log_info "Creating gogs user ${username}..."
 
     gogs_docker_cli_create_admin_user \
+      "${GIT_FRONTEND_STACK_NAME}" \
       "/app/gogs/gogs" \
       "wkaluza@protonmail.com" \
       "${username}" \
@@ -566,7 +448,7 @@ function ensure_gogs_user_configured
   fi
 
   if gogs_list_token_names \
-    "${content_type_app_json_header}" \
+    "${DOMAIN_GIT_FRONTEND_df29c969}" \
     "${username}" \
     "${password}" |
     grep -E "^${token_name}$" >/dev/null; then
@@ -575,11 +457,10 @@ function ensure_gogs_user_configured
     log_info "Creating gogs token..."
 
     gogs_generate_token \
-      "${token_name}" \
-      "${content_type_app_json_header}" \
+      "${DOMAIN_GIT_FRONTEND_df29c969}" \
       "${username}" \
       "${password}" \
-      "${v1_api}" |
+      "${token_name}" |
       store_in_pass "${pass_gogs_token_id}"
   fi
 
@@ -587,20 +468,17 @@ function ensure_gogs_user_configured
   token_value="$(pass show "${pass_gogs_token_id}")"
   local auth_header="Authorization: token ${token_value}"
 
-  if [[ "$(gogs_public_keys \
-    "${auth_header}" \
-    "${content_type_app_json_header}" \
-    "${v1_api}" \
-    "${username}" |
-    jq '. | length' -)" == "0" ]]; then
+  if ! gogs_ssh_key_exists \
+    "${DOMAIN_GIT_FRONTEND_df29c969}" \
+    "${username}" \
+    "${ssh_key_name}" \
+    "${auth_header}" >/dev/null; then
     log_info "Uploading SSH key to gogs..."
-
-    gogs_add_public_key \
+    gogs_create_ssh_key \
+      "${DOMAIN_GIT_FRONTEND_df29c969}" \
       "${ssh_key_name}" \
-      "${primary_key_fingerprint}" \
-      "${auth_header}" \
-      "${content_type_app_json_header}" \
-      "${v1_api}"
+      "$(gpg --export-ssh-key "${primary_key_fingerprint}")" \
+      "${auth_header}"
   else
     log_info "Gogs SSH key already uploaded"
   fi
