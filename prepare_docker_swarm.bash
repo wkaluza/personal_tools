@@ -244,7 +244,9 @@ function ensure_docker_swarm_init
   elif [[ "${swarm_state}" == "inactive" ]]; then
     log_info "Swarm is inactive, initialising..."
 
-    docker swarm init --autolock |
+    docker swarm init \
+      --advertise-addr "127.0.0.1" \
+      --autolock |
       grep "${swarm_key_magic_prefix}" |
       sed -E "s/^.*(${swarm_key_magic_prefix}.*)$/\1/" |
       store_in_pass "${swarm_key_pass_id}"
