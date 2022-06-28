@@ -12,6 +12,7 @@ function main
     "system"
   bash "${THIS_SCRIPT_DIR}/upgrade_apt_full.bash"
   bash "${THIS_SCRIPT_DIR}/prepare_docker_swarm.bash"
+  bash "${THIS_SCRIPT_DIR}/cluster_connect.bash"
 }
 
 main
