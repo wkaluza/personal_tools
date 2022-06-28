@@ -65,12 +65,17 @@ function wait_for_k8s_node_ready
   log_info "k8s node is ready"
 }
 
+function _minikube_status_raw
+{
+  minikube status --output "json" 2>/dev/null
+}
+
 function minikube_status
 {
   local status=""
 
-  if minikube status --output json >/dev/null; then
-    status="$(minikube status --output json |
+  if _minikube_status_raw >/dev/null; then
+    status="$(_minikube_status_raw |
       jq --raw-output '. | select(.Name == "minikube") | .Host' -)"
   fi
 
