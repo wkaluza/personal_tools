@@ -89,6 +89,12 @@ function populate_infrastructure_repo
     --message "Repository root" >/dev/null
   git push >/dev/null 2>&1
 
+  local gitignore_name=".gitignore"
+
+  echo "*___*" >"${gitignore_name}"
+  git add "${gitignore_name}"
+  git commit --message "Add Git ignore file"
+
   log_info "Generating flux manifests..."
   generate_flux_config \
     "${flux_git_source_url}" \
