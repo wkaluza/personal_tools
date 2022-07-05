@@ -91,37 +91,39 @@ function find_and_format_json_files
     "format_single_json_file"
 }
 
-function sort_yaml
+function single_yaml_file_deep_clean
 {
   local f="$1"
 
-  cat <<EOF | python3 - >/dev/null
-import yaml
-
-def read_data(path):
-    with open(path, 'r') as f:
-        return yaml.safe_load(f)
-
-def main(path):
-    data = read_data(path)
-    with open(path, 'w') as f:
-        text = yaml.safe_dump(data, sort_keys=True)
-        f.write(text)
-
-if __name__ == '__main__':
-    main('${f}')
-EOF
+  local output
+  output="$(cat "${f}" |
+    yq \
+      --sort-keys \
+      --yaml-output \
+      '.' \
+      - |
+    grep -Ev '^--- null$' |
+    grep -Ev '^\.\.\.$')"
+  echo "${output}" >"${f}"
 }
 
 function format_single_yaml_file
 {
   local f="$1"
 
-  # Destructive to YAML comments, use discretion
-  # sort_yaml "${f}"
+  # Good results, but mangles multiline strings
+  # single_yaml_file_deep_clean "${f}"
 
-  prettier \
-    --write "${f}" >/dev/null
+  local output
+  output="$(cat "${f}" |
+    yq \
+      --sort-keys \
+      --yaml-roundtrip \
+      '.' \
+      - |
+    grep -Ev '^--- null$' |
+    grep -Ev '^\.\.\.$')"
+  echo "${output}" >"${f}"
 }
 
 function find_and_format_yaml_files
@@ -143,7 +145,7 @@ function main
   export -f format_single_json_file
   export -f format_single_shell_script
   export -f format_single_yaml_file
-  export -f sort_yaml
+  export -f single_yaml_file_deep_clean
 
   echo "Formatting..."
 

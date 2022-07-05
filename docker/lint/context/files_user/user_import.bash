@@ -3,10 +3,10 @@ if command -v shopt &>/dev/null; then
   shopt -s inherit_errexit
 fi
 
-function install_pyyaml
+function install_yq
 {
   python3 -m pip install \
-    pyyaml==6.0
+    yq==3.0.1
 }
 
 function configure_node

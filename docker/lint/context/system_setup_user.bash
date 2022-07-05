@@ -12,7 +12,7 @@ function main
 
   install_shfmt
   install_prettier
-  install_pyyaml
+  install_yq
 }
 
 # Entry point
