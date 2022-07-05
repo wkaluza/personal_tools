@@ -43,6 +43,22 @@ function print_trace
   echo "[***TRACE***]: ${trace}"
 }
 
+function untar_gzip_to
+{
+  local archive
+  archive="$(realpath "$1")"
+  local target_dir
+  target_dir="$(realpath "$2")"
+
+  mkdir --parents "${target_dir}"
+
+  tar \
+    --directory "${target_dir}" \
+    --extract \
+    --file "${archive}" \
+    --gzip
+}
+
 function prime_sudo_password_cache
 {
   print_trace
@@ -495,10 +511,40 @@ function install_flux_cli
 {
   print_trace
 
-  curl \
-    --silent \
-    "https://fluxcd.io/install.sh" |
-    sudo bash -
+  local url="https://github.com/fluxcd/flux2/releases/download"
+  local version="0.31.3"
+  local executable_name="flux"
+
+  local output_path="${HOME}/.local/bin/${executable_name}"
+
+  mkdir --parents "$(dirname "${output_path}")"
+
+  local temp_dir_archive
+  temp_dir_archive="$(mktemp -d)"
+  local archive_path="${temp_dir_archive}/${executable_name}.tar.gz"
+
+  local temp_dir_decompressed
+  temp_dir_decompressed="$(mktemp -d)"
+  local executable_path="${temp_dir_decompressed}/${executable_name}"
+
+  wget \
+    -q \
+    -O "${archive_path}" \
+    "${url}/v${version}/${executable_name}_${version}_linux_amd64.tar.gz"
+
+  untar_gzip_to \
+    "${archive_path}" \
+    "${temp_dir_decompressed}"
+
+  if test -f "${executable_path}"; then
+    mv \
+      "${executable_path}" \
+      "${output_path}"
+    chmod u+x "${output_path}"
+  else
+    log_error "File not found: ${executable_path}"
+    exit 1
+  fi
 }
 
 function install_kubectl
