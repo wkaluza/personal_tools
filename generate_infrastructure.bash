@@ -17,13 +17,20 @@ source <(cat "${THIS_SCRIPT_DIR}/local_domains.json" |
 
 function generate_flux_config
 {
-  local flux_git_source_url="$1"
-  local manifests_path="$2"
-  local flux_git_source="$3"
-  local flux_secret="$4"
+  local repo_name="$1"
+  local username="$2"
+
+  local cluster_subdir_relpath="clusters/local_dev_pcspec"
+
+  local flux_git_source_url="ssh://git@${DOMAIN_GIT_FRONTEND_df29c969}/${username}/${repo_name}.git"
+  local manifests_path="${THIS_SCRIPT_DIR}/flux"
+  local flux_git_source="flux-system"
+  local flux_secret="flux-system"
+  local flux_kustomization="flux-system"
 
   local components_file="${manifests_path}/gotk-components.yaml"
   local sync_file="${manifests_path}/gotk-sync.yaml"
+  local kustomization_file="${manifests_path}/kustomization.yaml"
 
   mkdir --parents "${manifests_path}"
 
@@ -49,7 +56,7 @@ function generate_flux_config
     --prune="true" \
     --source="${flux_git_source}" >>"${sync_file}"
 
-  cat <<EOF >"${manifests_path}/kustomization.yaml"
+  cat <<EOF >"${kustomization_file}"
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -62,21 +69,11 @@ function populate_infrastructure_repo
 {
   local repo_name="$1"
   local username="$2"
-  local auth_header="$3"
-
-  local flux_namespace="flux-system"
-  local flux_secret="flux-system"
-  local flux_git_source="flux-system"
-  local flux_kustomization="flux-system"
 
   local infra_temp_dir
   infra_temp_dir="$(mktemp -d)"
-  local cluster_subdir_relpath="clusters/local_dev_pcspec"
-  local manifests_root="${infra_temp_dir}/${cluster_subdir_relpath}"
-  local manifests_path="${manifests_root}/${flux_namespace}"
 
   local git_clone_url="git@${DOMAIN_GIT_FRONTEND_df29c969}:${username}/${repo_name}.git"
-  local flux_git_source_url="ssh://git@${DOMAIN_GIT_FRONTEND_df29c969}/${username}/${repo_name}.git"
 
   log_info "Cloning ${repo_name}..."
   git clone \
@@ -97,10 +94,8 @@ function populate_infrastructure_repo
 
   log_info "Generating flux manifests..."
   generate_flux_config \
-    "${flux_git_source_url}" \
-    "${manifests_path}" \
-    "${flux_git_source}" \
-    "${flux_secret}"
+    "${repo_name}" \
+    "${username}"
 
   git add .
   git commit \
@@ -114,6 +109,8 @@ function populate_infrastructure_repo
 function create_fresh_infrastructure_repo
 {
   local repo_name="$1"
+  local username="$2"
+  local auth_header="$3"
 
   local description="Infrastructure repository"
 
@@ -148,8 +145,7 @@ function main
 
   populate_infrastructure_repo \
     "${repo_name}" \
-    "${username}" \
-    "${auth_header}"
+    "${username}"
 
   log_info "Success $(basename "$0")"
 }
