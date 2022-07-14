@@ -224,6 +224,37 @@ function reset_ssh_keys
     "${flux_secret_name}"
 }
 
+function wait_for_flux_crds
+{
+  local namespace="$1"
+
+  local app_part_of="app.kubernetes.io/part-of"
+  local app_instance="app.kubernetes.io/instance"
+
+  kubectl wait \
+    crd \
+    --for "condition=Established" \
+    --selector "${app_part_of}=flux,${app_instance}=${namespace}"
+}
+
+function apply_flux_manifests
+{
+  local manifests_path="$1"
+  local flux_namespace="$2"
+
+  log_info "Applying flux manifests..."
+  if ! kubectl apply \
+    --kustomize "${manifests_path}"; then
+    # CRDs may not have been established in time to instantiate them.
+    # This is a known race condition in k8s.
+    # Quick and dirty workaround: wait and retry.
+    wait_for_flux_crds \
+      "${flux_namespace}"
+    kubectl apply \
+      --kustomize "${manifests_path}"
+  fi
+}
+
 function set_up_gitops_infrastructure
 {
   local username="$1"
@@ -243,10 +274,9 @@ function set_up_gitops_infrastructure
 
   pushd "${infra_temp_dir}" >/dev/null
   git_get_latest >/dev/null 2>&1
-
-  log_info "Applying flux manifests..."
-  kubectl apply \
-    --kustomize "${manifests_path}" >/dev/null 2>&1
+  apply_flux_manifests \
+    "${manifests_path}" \
+    "${flux_namespace}" >/dev/null 2>&1
   popd >/dev/null
 
   wait_flux_check
