@@ -45,24 +45,12 @@ function minikube_docker_container_id
     jq --raw-output '. | select(.Names == "minikube") | .ID'
 }
 
-function k8s_node_ready
-{
-  kubectl get node minikube --output json |
-    jq '. | select(.metadata.name == "minikube")' - |
-    jq '. | .status.conditions[]' - |
-    jq '. | select(.type == "Ready")' - |
-    jq '. | select(.reason == "KubeletReady")' - |
-    jq -r '.status' - |
-    grep -E "^True$" >/dev/null
-}
-
 function wait_for_k8s_node_ready
 {
-  retry_until_success \
-    "k8s_node_ready" \
-    k8s_node_ready
-
-  log_info "k8s node is ready"
+  kubectl wait \
+    node \
+    --all \
+    --for="condition=Ready"
 }
 
 function _minikube_status_raw
@@ -338,7 +326,7 @@ function main
     "${external_network_name}" ||
     true
   start_minikube
-  wait_for_k8s_node_ready
+  wait_for_k8s_node_ready >/dev/null
   connect_local_docker_network \
     "${external_network_name}"
   ensure_connection_to_swarm
