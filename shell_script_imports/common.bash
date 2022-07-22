@@ -236,3 +236,13 @@ function untar_gzip_to
     --file "${archive}" \
     --gzip
 }
+
+function for_each
+{
+  local fn="$1"
+  local args=("${@:2}")
+
+  cat - | while read -r item; do
+    ${fn} "${args[@]}" "${item}"
+  done
+}
