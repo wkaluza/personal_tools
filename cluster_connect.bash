@@ -47,10 +47,12 @@ function minikube_docker_container_id
 
 function wait_for_k8s_node_ready
 {
+  log_info "Waiting for k8s node readiness..."
+
   kubectl wait \
     node \
     --all \
-    --for="condition=Ready"
+    --for="condition=Ready" >/dev/null
 }
 
 function _minikube_status_raw
@@ -139,6 +141,7 @@ function wait_flux_pre_check
 function wait_flux_check
 {
   log_info "Running flux check..."
+
   retry_until_success \
     "flux check" \
     flux check
@@ -326,7 +329,7 @@ function main
     "${external_network_name}" ||
     true
   start_minikube
-  wait_for_k8s_node_ready >/dev/null
+  wait_for_k8s_node_ready
   connect_local_docker_network \
     "${external_network_name}"
   ensure_connection_to_swarm
