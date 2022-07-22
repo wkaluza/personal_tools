@@ -85,7 +85,7 @@ function start_minikube
       --driver "docker" \
       --embed-certs \
       --memory "8G" \
-      --nodes 1 >/dev/null 2>&1
+      --nodes 2 >/dev/null 2>&1
   elif [[ "${status}" == "stopped" ]]; then
     minikube start >/dev/null 2>&1
   fi
