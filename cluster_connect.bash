@@ -249,7 +249,7 @@ function set_up_gitops_infrastructure
   local repo_name="$2"
   local flux_namespace="$3"
 
-  local infra_temp_dir="${HOME}/.infrastructure___"
+  local infra_temp_dir="${HOME}/.wk_infrastructure___"
   local cluster_subdir="clusters/local_dev_pcspec"
   local manifests_root="${infra_temp_dir}/${cluster_subdir}"
   local manifests_path="${manifests_root}/${flux_namespace}"

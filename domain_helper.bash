@@ -44,7 +44,7 @@ function list_local_domains
 
 function main
 {
-  local certs_dir="${HOME}/.certificates___"
+  local certs_dir="${HOME}/.wk_certificates___"
 
   mkcert -install >/dev/null 2>&1
 
