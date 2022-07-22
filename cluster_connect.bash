@@ -38,13 +38,6 @@ function ensure_connection_to_swarm
   log_info "Swarm connected"
 }
 
-function minikube_docker_container_id
-{
-  docker container list --all \
-    --format '{{ json . }}' |
-    jq --raw-output '. | select(.Names == "minikube") | .ID'
-}
-
 function wait_for_k8s_node_ready
 {
   log_info "Waiting for k8s node readiness..."
@@ -105,28 +98,6 @@ function install_root_ca_minikube
   cp \
     "$(mkcert -CAROOT)/rootCA.pem" \
     "${HOME}/.minikube/certs"
-}
-
-function connect_local_docker_network
-{
-  local external_network_name="$1"
-
-  log_info "Connecting docker network..."
-
-  docker network connect \
-    "${external_network_name}" \
-    "$(minikube_docker_container_id)" >/dev/null 2>&1
-}
-
-function disconnect_local_docker_network
-{
-  local external_network_name="$1"
-
-  log_info "Disconnecting docker network..."
-
-  docker network disconnect \
-    "${external_network_name}" \
-    "$(minikube_docker_container_id)" >/dev/null 2>&1
 }
 
 function wait_flux_pre_check
@@ -310,6 +281,61 @@ function keys_exist_and_match
     <(echo "${gogs_key}") >/dev/null 2>&1
 }
 
+function list_all_stacks
+{
+  docker stack ls --format '{{ .Name }}'
+}
+
+function list_stack_services
+{
+  local stack="$1"
+
+  docker stack services \
+    --format '{{ .ID }}' \
+    "${stack}"
+}
+
+function list_service_tasks
+{
+  local service="$1"
+
+  docker service ps \
+    --no-trunc \
+    --format '{{ .ID }}' \
+    "${service}"
+}
+
+function list_task_containers
+{
+  local task="$1"
+
+  docker inspect \
+    --format '{{ .Status.ContainerStatus.ContainerID }}' \
+    "${task}"
+}
+
+function connect_container_to_network
+{
+  local network="$1"
+  local container="$2"
+
+  docker network connect \
+    "${network}" \
+    "${container}"
+}
+
+function connect_stacks_to_minikube
+{
+  log_info "Connecting stack containers to minikube network..."
+
+  list_all_stacks |
+    for_each list_stack_services |
+    for_each list_service_tasks |
+    for_each list_task_containers |
+    for_each connect_container_to_network \
+      "minikube"
+}
+
 function main
 {
   local username="wkaluza"
@@ -321,17 +347,10 @@ function main
   local flux_namespace="flux-system"
   local flux_secret_name="flux-system"
 
-  local external_network_name
-  external_network_name="$(bash "${THIS_SCRIPT_DIR}/create_external_docker_network.bash")"
-
   install_root_ca_minikube
-  disconnect_local_docker_network \
-    "${external_network_name}" ||
-    true
   start_minikube
   wait_for_k8s_node_ready
-  connect_local_docker_network \
-    "${external_network_name}"
+  connect_stacks_to_minikube
   ensure_connection_to_swarm
 
   if ! keys_exist_and_match \
