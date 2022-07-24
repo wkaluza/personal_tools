@@ -79,6 +79,11 @@ function start_minikube
   local status
   status="$(minikube_status)"
 
+  local host_path="${HOME}/.wk_k8s_storage___/minikube"
+  local node_path="/wk_data"
+
+  mkdir --parents "${host_path}"
+
   if [[ "${status}" == "deleted" ]]; then
     minikube start \
       --cpus 8 \
@@ -86,6 +91,8 @@ function start_minikube
       --driver "docker" \
       --embed-certs \
       --memory "8G" \
+      --mount "true" \
+      --mount-string "${host_path}:${node_path}" \
       --nodes 2 >/dev/null 2>&1
   elif [[ "${status}" == "stopped" ]]; then
     minikube start >/dev/null 2>&1
