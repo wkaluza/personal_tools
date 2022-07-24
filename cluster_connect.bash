@@ -45,7 +45,8 @@ function wait_for_k8s_node_ready
   kubectl wait \
     node \
     --all \
-    --for="condition=Ready" >/dev/null
+    --for="condition=Ready" \
+    --timeout="60s" >/dev/null
 }
 
 function _minikube_status_raw
