@@ -60,6 +60,7 @@ function minikube_status
 
   if _minikube_status_raw >/dev/null; then
     status="$(_minikube_status_raw |
+      jq --sort-keys 'if . | type == "array" then .[] else . end' - |
       jq --raw-output '. | select(.Name == "minikube") | .Host' -)"
   fi
 
