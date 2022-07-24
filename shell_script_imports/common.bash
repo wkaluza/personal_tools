@@ -246,3 +246,12 @@ function for_each
     ${fn} "${args[@]}" "${item}"
   done
 }
+
+function no_fail
+{
+  local fn="$1"
+  local args=("${@:2}")
+
+  ${fn} "${args[@]}" ||
+    true
+}

@@ -341,8 +341,8 @@ function connect_stacks_to_minikube
     for_each list_stack_services |
     for_each list_service_tasks |
     for_each list_task_containers |
-    for_each connect_container_to_network \
-      "minikube"
+    for_each no_fail connect_container_to_network \
+      "minikube" >/dev/null 2>&1
 }
 
 function enable_load_balancer_support
