@@ -337,6 +337,12 @@ function connect_stacks_to_minikube
       "minikube"
 }
 
+function enable_load_balancer_support
+{
+  minikube tunnel >/dev/null 2>&1 &
+  disown
+}
+
 function main
 {
   local username="wkaluza"
@@ -353,6 +359,8 @@ function main
   wait_for_k8s_node_ready
   connect_stacks_to_minikube
   ensure_connection_to_swarm
+
+  enable_load_balancer_support
 
   if ! keys_exist_and_match \
     "${username}" \
