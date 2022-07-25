@@ -351,6 +351,16 @@ function enable_load_balancer_support
   disown
 }
 
+function taint_control_plane
+{
+  local role="node-role.kubernetes.io/control-plane"
+
+  kubectl taint node \
+    --selector "${role}" \
+    "${role}:NoSchedule" >/dev/null ||
+    true
+}
+
 function main
 {
   local username="wkaluza"
@@ -367,6 +377,7 @@ function main
   wait_for_k8s_node_ready
   connect_stacks_to_minikube
   ensure_connection_to_swarm
+  taint_control_plane
 
   enable_load_balancer_support
 
