@@ -361,6 +361,16 @@ function taint_control_plane
     true
 }
 
+function disable_default_storage_class
+{
+  # standard is minikube's name for the built-in storage class
+  kubectl annotate \
+    --overwrite \
+    storageclass \
+    "standard" \
+    "storageclass.kubernetes.io/is-default-class=false"
+}
+
 function main
 {
   local username="wkaluza"
@@ -378,6 +388,7 @@ function main
   connect_stacks_to_minikube
   ensure_connection_to_swarm
   taint_control_plane
+  disable_default_storage_class
 
   enable_load_balancer_support
 
