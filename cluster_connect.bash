@@ -368,7 +368,7 @@ function disable_default_storage_class
     --overwrite \
     storageclass \
     "standard" \
-    "storageclass.kubernetes.io/is-default-class=false"
+    "storageclass.kubernetes.io/is-default-class=false" >/dev/null
 }
 
 function main
