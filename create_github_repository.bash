@@ -7,10 +7,12 @@ cd "${THIS_SCRIPT_DIR}"
 
 function main
 {
-  local repo_name="$1"
-  local repo_description="$2"
+  local repo_dir
+  repo_dir="$(realpath "$1")"
+  local repo_name="$2"
+  local repo_description="$3"
 
-  local repo_url="git@github.com:wkaluza/${repo_name}"
+  local repo_url="git@github.com:wkaluza/${repo_name}.git"
 
   gh api user/repos \
     --method POST \
@@ -26,10 +28,9 @@ function main
     --field name="${repo_name}" \
     --field description="${repo_description}"
 
-  git init "${repo_name}"
-  cd "${repo_name}"
-  git remote add origin "${repo_url}"
-  git fetch --all --recurse-submodules --tags
+  mkdir --parents "${repo_dir}"
+  git clone "${repo_url}" "${repo_dir}"
+  cd "${repo_dir}"
 
   git commit --allow-empty --message "Repository root"
 
@@ -39,8 +40,10 @@ function main
   git add "${gitignore_name}"
   git commit --message "Add Git ignore file"
 
-  git push --set-upstream origin main
+  git push
+
+  echo "Success $(basename "$0")"
 }
 
 # Entry point
-main "$1" "$2"
+main "$1" "$2" "$3"
