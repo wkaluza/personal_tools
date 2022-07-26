@@ -4,19 +4,53 @@
       "file": "${MIRROR_REGISTRY_CONFIG:?}",
       "name": "mirror_docker_registry_config_${MIRROR_REGISTRY_CONFIG_DIGEST:?}"
     },
+    "mirror_registry_nginx_config": {
+      "file": "${MIRROR_REGISTRY_NGINX_CONFIG:?}",
+      "name": "mirror_registry_nginx_config_${MIRROR_REGISTRY_NGINX_CONFIG_DIGEST:?}"
+    },
     "private_registry_config": {
       "file": "${PRIVATE_REGISTRY_CONFIG:?}",
       "name": "local_docker_registry_config_${PRIVATE_REGISTRY_CONFIG_DIGEST:?}"
+    },
+    "private_registry_nginx_config": {
+      "file": "${PRIVATE_REGISTRY_NGINX_CONFIG:?}",
+      "name": "private_registry_nginx_config_${PRIVATE_REGISTRY_NGINX_CONFIG_DIGEST:?}"
     }
   },
   "networks": {
     "external_b937b143": {
       "external": true,
       "name": "${EXTERNAL_NETWORK_NAME:?}"
+    },
+    "internal_mirror_registry_d5b8aae6": {
+      "external": false,
+      "name": "mirror_registry_internal"
+    },
+    "internal_private_registry_d1a698b3": {
+      "external": false,
+      "name": "private_registry_internal"
+    }
+  },
+  "secrets": {
+    "docker_registry_local_cert": {
+      "file": "${DOCKER_REGISTRY_LOCAL_CERT:?}",
+      "name": "docker_registry_local_cert_${DOCKER_REGISTRY_LOCAL_CERT_DIGEST:?}"
+    },
+    "docker_registry_local_key": {
+      "file": "${DOCKER_REGISTRY_LOCAL_KEY:?}",
+      "name": "docker_registry_local_key_${DOCKER_REGISTRY_LOCAL_KEY_DIGEST:?}"
+    },
+    "docker_registry_mirror_cert": {
+      "file": "${DOCKER_REGISTRY_MIRROR_CERT:?}",
+      "name": "docker_registry_mirror_cert_${DOCKER_REGISTRY_MIRROR_CERT_DIGEST:?}"
+    },
+    "docker_registry_mirror_key": {
+      "file": "${DOCKER_REGISTRY_MIRROR_KEY:?}",
+      "name": "docker_registry_mirror_key_${DOCKER_REGISTRY_MIRROR_KEY_DIGEST:?}"
     }
   },
   "services": {
-    "mirror_docker_registry": {
+    "mirror_docker_registry_1990993c": {
       "build": {
         "args": {
           "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
@@ -79,7 +113,6 @@
         "start_period": "60s",
         "timeout": "1s"
       },
-      "hostname": "${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f:?}",
       "image": "${REGISTRY_IMAGE_REFERENCE:?}",
       "logging": {
         "driver": "json-file",
@@ -89,7 +122,7 @@
         }
       },
       "networks": [
-        "external_b937b143"
+        "internal_mirror_registry_d5b8aae6"
       ],
       "volumes": [
         {
@@ -99,7 +132,99 @@
         }
       ]
     },
-    "private_docker_registry": {
+    "mirror_registry_reverse_proxy": {
+      "build": {
+        "args": {
+          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
+        },
+        "context": "${REVERSE_PROXY_CONTEXT:?}",
+        "dockerfile": "${REVERSE_PROXY_DOCKERFILE:?}",
+        "network": "bridge"
+      },
+      "configs": [
+        {
+          "source": "mirror_registry_nginx_config",
+          "target": "/etc/nginx/templates/nginx.conf.template"
+        }
+      ],
+      "deploy": {
+        "mode": "global",
+        "placement": {
+          "constraints": [
+            "node.id==${LOCAL_NODE_ID:?}",
+            "node.role==manager"
+          ]
+        },
+        "resources": {
+          "limits": {
+            "cpus": "0.5",
+            "memory": "50MB"
+          },
+          "reservations": {
+            "cpus": "0.25",
+            "memory": "25MB"
+          }
+        },
+        "restart_policy": {
+          "condition": "on-failure",
+          "delay": "10s",
+          "max_attempts": 5,
+          "window": "120s"
+        },
+        "rollback_config": {
+          "delay": "10s",
+          "failure_action": "pause",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        },
+        "update_config": {
+          "delay": "10s",
+          "failure_action": "rollback",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        }
+      },
+      "environment": {
+        "DNS_RESOLVER_IP": "${DNS_RESOLVER_IP:?}",
+        "DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f": "${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f:?}",
+        "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx"
+      },
+      "healthcheck": {
+        "disable": false,
+        "interval": "1s",
+        "retries": 30,
+        "start_period": "60s",
+        "timeout": "1s"
+      },
+      "hostname": "${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f:?}",
+      "image": "${REVERSE_PROXY_IMAGE_REFERENCE:?}",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": 5,
+          "max-size": "200k"
+        }
+      },
+      "networks": [
+        "external_b937b143",
+        "internal_mirror_registry_d5b8aae6"
+      ],
+      "secrets": [
+        {
+          "source": "docker_registry_mirror_cert",
+          "target": "/etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f:?}.cert"
+        },
+        {
+          "source": "docker_registry_mirror_key",
+          "target": "/etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f:?}.key"
+        }
+      ]
+    },
+    "private_docker_registry_71f5c389": {
       "build": {
         "args": {
           "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
@@ -162,7 +287,6 @@
         "start_period": "60s",
         "timeout": "1s"
       },
-      "hostname": "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}",
       "image": "${REGISTRY_IMAGE_REFERENCE:?}",
       "logging": {
         "driver": "json-file",
@@ -172,13 +296,105 @@
         }
       },
       "networks": [
-        "external_b937b143"
+        "internal_private_registry_d1a698b3"
       ],
       "volumes": [
         {
           "source": "private_registry_volume",
           "target": "/var/lib/registry",
           "type": "volume"
+        }
+      ]
+    },
+    "private_registry_reverse_proxy": {
+      "build": {
+        "args": {
+          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
+        },
+        "context": "${REVERSE_PROXY_CONTEXT:?}",
+        "dockerfile": "${REVERSE_PROXY_DOCKERFILE:?}",
+        "network": "bridge"
+      },
+      "configs": [
+        {
+          "source": "private_registry_nginx_config",
+          "target": "/etc/nginx/templates/nginx.conf.template"
+        }
+      ],
+      "deploy": {
+        "mode": "global",
+        "placement": {
+          "constraints": [
+            "node.id==${LOCAL_NODE_ID:?}",
+            "node.role==manager"
+          ]
+        },
+        "resources": {
+          "limits": {
+            "cpus": "0.5",
+            "memory": "50MB"
+          },
+          "reservations": {
+            "cpus": "0.25",
+            "memory": "25MB"
+          }
+        },
+        "restart_policy": {
+          "condition": "on-failure",
+          "delay": "10s",
+          "max_attempts": 5,
+          "window": "120s"
+        },
+        "rollback_config": {
+          "delay": "10s",
+          "failure_action": "pause",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        },
+        "update_config": {
+          "delay": "10s",
+          "failure_action": "rollback",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        }
+      },
+      "environment": {
+        "DNS_RESOLVER_IP": "${DNS_RESOLVER_IP:?}",
+        "DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e": "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}",
+        "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx"
+      },
+      "healthcheck": {
+        "disable": false,
+        "interval": "1s",
+        "retries": 30,
+        "start_period": "60s",
+        "timeout": "1s"
+      },
+      "hostname": "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}",
+      "image": "${REVERSE_PROXY_IMAGE_REFERENCE:?}",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": 5,
+          "max-size": "200k"
+        }
+      },
+      "networks": [
+        "external_b937b143",
+        "internal_private_registry_d1a698b3"
+      ],
+      "secrets": [
+        {
+          "source": "docker_registry_local_cert",
+          "target": "/etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}.cert"
+        },
+        {
+          "source": "docker_registry_local_key",
+          "target": "/etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}.key"
         }
       ]
     }
