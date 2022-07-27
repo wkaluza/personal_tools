@@ -445,6 +445,7 @@ function remove_stale_gogs_ssh_key
 function ensure_gogs_user_configured
 {
   local username="$1"
+
   local pass_gogs_password_id="local_gogs_password_${username}"
   local token_name="local_gogs_token_${username}"
   local pass_gogs_token_id="${token_name}"
@@ -632,10 +633,6 @@ function push_stack_images_main_reverse_proxy
 function main
 {
   local username="wkaluza"
-  local repo_name="infrastructure"
-  local token
-  token="$(pass show "local_gogs_token_${username}")"
-  local auth_header="Authorization: token ${token}"
 
   select_mirror_registry_config
 
@@ -659,15 +656,6 @@ function main
   ensure_gogs_user_configured \
     "${username}" &
   wait
-
-  if ! gogs_check_repo_exists \
-    "${DOMAIN_GIT_FRONTEND_df29c969}" \
-    "${username}" \
-    "${repo_name}" \
-    "${auth_header}"; then
-    log_info "Creating repository ${repo_name}..."
-    bash "${THIS_SCRIPT_DIR}/generate_infrastructure.bash"
-  fi
 
   log_info "Success $(basename "$0")"
 }
