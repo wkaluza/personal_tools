@@ -73,12 +73,12 @@ function prepare_local_infrastructure_clone
 
   git_get_latest \
     "${github_remote}" \
-    "${branch}"
+    "${branch}" >/dev/null 2>&1
 
   git push \
     --force \
     "${gogs_remote}" \
-    "${branch}"
+    "${branch}" >/dev/null 2>&1
 
   popd >/dev/null
 }
@@ -90,6 +90,7 @@ function bootstrap_infrastructure
   local bootstrap_script="${infra_dir}/scripts/bootstrap_infrastructure.bash"
 
   if test -f "${bootstrap_script}"; then
+    log_info "Bootstrapping..."
     bash "${bootstrap_script}"
   fi
 }
