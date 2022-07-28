@@ -178,9 +178,9 @@ function taint_control_plane
   local role="node-role.kubernetes.io/control-plane"
 
   kubectl taint node \
+    --overwrite \
     --selector "${role}" \
-    "${role}:NoSchedule" >/dev/null ||
-    true
+    "${role}:NoSchedule" >/dev/null
 }
 
 function disable_default_storage_class
