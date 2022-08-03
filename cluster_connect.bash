@@ -93,6 +93,7 @@ function start_minikube
       --disk-size "100G" \
       --driver "docker" \
       --embed-certs \
+      --extra-config "apiserver.service-node-port-range=1-32767" \
       --memory "8G" \
       --mount "true" \
       --mount-string "${host_path}:${node_path}" \
