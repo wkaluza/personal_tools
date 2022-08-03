@@ -18,6 +18,47 @@ function on_exit
 
 trap on_exit EXIT
 
+function list_all_files_in
+{
+  local dir_to_search
+  dir_to_search="$(realpath "$1")"
+
+  find \
+    "${dir_to_search}" \
+    -type f \
+    -exec realpath \
+    --relative-to="$(dirname "${dir_to_search}")" \
+    -- {} \; |
+    sort |
+    uniq
+}
+
+function names_diff
+{
+  local dir_source
+  dir_source="$(realpath --canonicalize-missing "$1")"
+  local dir_destination
+  dir_destination="$(realpath --canonicalize-missing "$2")"
+
+  diff \
+    <(list_all_files_in "${dir_source}") \
+    <(list_all_files_in "${dir_destination}")
+}
+
+function exact_diff
+{
+  local dir_source
+  dir_source="$(realpath --canonicalize-missing "$1")"
+  local dir_destination
+  dir_destination="$(realpath --canonicalize-missing "$2")"
+
+  diff \
+    --recursive \
+    --no-dereference \
+    "${dir_source}" \
+    "${dir_destination}"
+}
+
 function sync_with_deletion
 {
   local dir_source
@@ -86,9 +127,7 @@ function validate_backup
 
   log_info "Comparing ${dir_reference} to ${dir_restored_wk}..."
 
-  if ! diff \
-    --recursive \
-    --no-dereference \
+  if ! exact_diff \
     "${dir_reference}" \
     "${dir_restored_wk}"; then
     log_error "Comparison failed: ${dir_reference} and ${dir_restored_wk} are different"
@@ -106,6 +145,7 @@ function perform_sync
   local dir_destination
   dir_destination="$(realpath --canonicalize-missing "$2")"
   local sync_strategy="$3"
+  local diff_strategy="$4"
 
   if test -d "${dir_source}" &&
     test -d "${dir_destination}"; then
@@ -113,15 +153,13 @@ function perform_sync
 
     ${sync_strategy} \
       "${dir_source}" \
-      "${dir_destination}"
+      "${dir_destination}" >/dev/null 2>&1
 
     log_info "Comparing ${dir_source} to ${dir_destination}"
 
-    # diff \
-    #   --recursive \
-    #   --no-dereference \
-    #   "${dir_source}" \
-    #   "${dir_destination}"
+    ${diff_strategy} \
+      "${dir_source}" \
+      "${dir_destination}" >/dev/null 2>&1
   fi
 }
 
@@ -133,7 +171,8 @@ function sync_archive
   perform_sync \
     "${dir_source}" \
     "${dir_destination}" \
-    sync_without_deletion
+    sync_with_deletion \
+    names_diff
 }
 
 function sync_backup
@@ -144,7 +183,8 @@ function sync_backup
   perform_sync \
     "${dir_source}" \
     "${dir_destination}" \
-    sync_with_deletion
+    sync_with_deletion \
+    names_diff
 }
 
 function perform_and_validate_backup
