@@ -86,6 +86,10 @@ function prepare_local_infrastructure_clone
     git push \
       "${gogs_remote}" \
       "${branch}" >/dev/null 2>&1
+  else
+    git_get_latest \
+      "${gogs_remote}" \
+      "${branch}" >/dev/null 2>&1
   fi
 
   popd >/dev/null
