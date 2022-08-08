@@ -75,10 +75,18 @@ function prepare_local_infrastructure_clone
     "${github_remote}" \
     "${branch}" >/dev/null 2>&1
 
-  git push \
-    --force \
-    "${gogs_remote}" \
-    "${branch}" >/dev/null 2>&1
+  local github_main
+  github_main="$(git rev-parse "${github_remote}/${branch}")"
+  local gogs_main
+  gogs_main="$(git rev-parse "${gogs_remote}/${branch}")"
+
+  if git merge-base \
+    --is-ancestor "${gogs_main}" \
+    "${github_main}"; then
+    git push \
+      "${gogs_remote}" \
+      "${branch}" >/dev/null 2>&1
+  fi
 
   popd >/dev/null
 }
