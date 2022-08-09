@@ -88,7 +88,10 @@ function git_get_latest
   if repo_is_clean; then
     git checkout \
       --force \
-      "${branch_name}" >/dev/null 2>&1
+      "${branch_name}" >/dev/null 2>&1 ||
+      git checkout \
+        --force \
+        --track "${remote_name}/${branch_name}" >/dev/null 2>&1
     git fetch \
       --all \
       --force \
