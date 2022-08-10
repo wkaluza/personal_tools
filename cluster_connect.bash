@@ -184,14 +184,42 @@ function taint_control_plane
     "${role}:NoSchedule" >/dev/null
 }
 
-function disable_default_storage_class
+function annotate_k8s_object
 {
-  # standard is minikube's name for the built-in storage class
+  local kind="$1"
+  local annotation="$2"
+  local name="$3"
+
   kubectl annotate \
     --overwrite \
+    "${kind}" \
+    "${name}" \
+    "${annotation}" >/dev/null
+}
+
+function get_object_by_annotation
+{
+  local kind="$1"
+  local annotation_key="$2"
+  local annotation_value="$3"
+
+  kubectl get storageclass --output json |
+    jq '.items[]' - |
+    jq "select(.metadata.annotations.\"${annotation_key}\" == \"${annotation_value}\")" - |
+    jq --raw-output '.metadata.name' -
+}
+
+function disable_default_storage_class
+{
+  local default_sc_annotation="storageclass.kubernetes.io/is-default-class"
+
+  get_object_by_annotation \
     storageclass \
-    "standard" \
-    "storageclass.kubernetes.io/is-default-class=false" >/dev/null
+    "${default_sc_annotation}" \
+    "true" |
+    for_each annotate_k8s_object \
+      storageclass \
+      "${default_sc_annotation}=false"
 }
 
 function main
