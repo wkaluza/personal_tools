@@ -108,7 +108,7 @@
       },
       "healthcheck": {
         "disable": false,
-        "interval": "1s",
+        "interval": "5s",
         "retries": 30,
         "start_period": "60s",
         "timeout": "1s"
@@ -195,7 +195,7 @@
       },
       "healthcheck": {
         "disable": false,
-        "interval": "1s",
+        "interval": "5s",
         "retries": 30,
         "start_period": "60s",
         "timeout": "1s"
@@ -282,7 +282,7 @@
       },
       "healthcheck": {
         "disable": false,
-        "interval": "1s",
+        "interval": "5s",
         "retries": 30,
         "start_period": "60s",
         "timeout": "1s"
@@ -369,7 +369,7 @@
       },
       "healthcheck": {
         "disable": false,
-        "interval": "1s",
+        "interval": "5s",
         "retries": 30,
         "start_period": "60s",
         "timeout": "1s"
