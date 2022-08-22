@@ -84,11 +84,12 @@ function main
       "${auth_header}" >/dev/null 2>&1
   fi
 
-  if ! gogs_check_webhook_exists \
+  if ! gogs_list_webhooks \
     "${DOMAIN_GIT_FRONTEND_df29c969}" \
     "${USERNAME}" \
     "${auth_header}" \
-    "${repo_name}"; then
+    "${repo_name}" |
+    jq 'if . | length > 0 then . else error("No webhooks found") end' - >/dev/null 2>&1; then
     log_info "Adding webhook..."
     gogs_create_webhook \
       "${DOMAIN_GIT_FRONTEND_df29c969}" \

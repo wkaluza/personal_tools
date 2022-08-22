@@ -3,7 +3,7 @@ if command -v shopt &>/dev/null; then
   shopt -s inherit_errexit
 fi
 
-function gogs_check_webhook_exists
+function gogs_list_webhooks
 {
   local gogs_host="$1"
   local username="$2"
@@ -20,8 +20,7 @@ function gogs_check_webhook_exists
     --request "GET" \
     --show-error \
     --silent \
-    "${v1_api}/repos/${username}/${repo_name}/hooks" |
-    jq --sort-keys 'if . | length > 0 then . else error("No webhooks found") end' - >/dev/null 2>&1
+    "${v1_api}/repos/${username}/${repo_name}/hooks"
 }
 
 function gogs_create_webhook
