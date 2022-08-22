@@ -27,7 +27,7 @@ function gogs_check_webhook_exists
 function gogs_create_webhook
 {
   local gogs_host="$1"
-  local sink_host="$2"
+  local webhook_url="$2"
   local username="$3"
   local gogs_webhook_secret="$4"
   local auth_header="$5"
@@ -38,7 +38,7 @@ function gogs_create_webhook
 
   local webhook_config
   webhook_config="$(echo '{}' |
-    jq ". + {url: \"https://${sink_host}/gogs\"}" - |
+    jq ". + {url: \"${webhook_url}\"}" - |
     jq ". + {content_type: \"json\"}" - |
     jq ". + {secret: \"${gogs_webhook_secret}\"}" - |
     jq --compact-output --sort-keys '.' -)"

@@ -92,7 +92,7 @@ function main
     log_info "Adding webhook..."
     gogs_create_webhook \
       "${DOMAIN_GIT_FRONTEND_df29c969}" \
-      "${DOMAIN_WEBHOOK_SINK_a8800f5b}" \
+      "https://${DOMAIN_WEBHOOK_SINK_a8800f5b}/gogs" \
       "${USERNAME}" \
       "$(pass_show_or_generate "local_gogs_webhook_secret")" \
       "${auth_header}" \
