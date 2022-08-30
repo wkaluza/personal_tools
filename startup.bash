@@ -7,6 +7,7 @@ cd "${THIS_SCRIPT_DIR}"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/common.bash"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/git_helpers.bash"
+source "${THIS_SCRIPT_DIR}/shell_script_imports/logging.bash"
 
 function main
 {
