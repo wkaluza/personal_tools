@@ -7,6 +7,7 @@ cd "${THIS_SCRIPT_DIR}"
 
 function main
 {
+  bash "${THIS_SCRIPT_DIR}/reset_infrastructure.bash"
   bash "${THIS_SCRIPT_DIR}/luks/mount.bash" \
     "sda" \
     "system"
