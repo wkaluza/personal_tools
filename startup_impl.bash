@@ -15,6 +15,8 @@ function main
   bash "${THIS_SCRIPT_DIR}/cluster_connect.bash"
   bash "${THIS_SCRIPT_DIR}/bootstrap_infrastructure.bash"
   bash "${THIS_SCRIPT_DIR}/set_up_webhooks.bash"
+
+  log_info "Success: $(basename "$0")"
 }
 
 main

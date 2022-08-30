@@ -17,6 +17,8 @@ function main
   fi
 
   bash "${THIS_SCRIPT_DIR}/startup_impl.bash"
+
+  log_info "Success: $(basename "$0")"
 }
 
 main
