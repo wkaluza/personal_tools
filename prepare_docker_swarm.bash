@@ -374,23 +374,6 @@ function start_docker_stack
   log_info "Stack ${stack_name} deployed successfully"
 }
 
-function push_stack_images
-{
-  local env_factory="$1"
-  local compose_file="$2"
-  local stack_name="$3"
-
-  log_info "Pushing ${stack_name} images..."
-
-  run_with_env \
-    "${env_factory}" \
-    docker compose \
-    --file "${compose_file}" \
-    push
-
-  log_info "Stack ${stack_name} pushed successfully"
-}
-
 function wait_for_rolling_update
 {
   local registry_host="$1"
@@ -606,30 +589,6 @@ function start_main_reverse_proxy
     "${REVERSE_PROXY_STACK_NAME}"
 }
 
-function push_stack_images_registries
-{
-  push_stack_images \
-    generate_registries_env \
-    "${THIS_SCRIPT_DIR}/local_docker_registry.json" \
-    "${DOCKER_REGISTRY_STACK_NAME}"
-}
-
-function push_stack_images_git_frontend
-{
-  push_stack_images \
-    generate_git_frontend_env \
-    "${THIS_SCRIPT_DIR}/local_git_frontend.json" \
-    "${GIT_FRONTEND_STACK_NAME}"
-}
-
-function push_stack_images_main_reverse_proxy
-{
-  push_stack_images \
-    generate_main_reverse_proxy_env \
-    "${THIS_SCRIPT_DIR}/local_reverse_proxy.json" \
-    "${REVERSE_PROXY_STACK_NAME}"
-}
-
 function main
 {
   local username="wkaluza"
@@ -648,10 +607,6 @@ function main
   wait
 
   ensure_services_are_running
-
-  push_stack_images_registries &
-  push_stack_images_git_frontend &
-  push_stack_images_main_reverse_proxy &
 
   ensure_gogs_user_configured \
     "${username}" &
