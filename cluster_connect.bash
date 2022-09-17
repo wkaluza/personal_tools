@@ -211,15 +211,16 @@ function get_object_by_annotation
 
 function disable_default_storage_class
 {
-  local default_sc_annotation="storageclass.kubernetes.io/is-default-class"
+  local kind="StorageClass"
+  local default_annotation="storageclass.kubernetes.io/is-default-class"
 
   get_object_by_annotation \
-    storageclass \
-    "${default_sc_annotation}" \
+    "${kind}" \
+    "${default_annotation}" \
     "true" |
     for_each annotate_k8s_object \
-      storageclass \
-      "${default_sc_annotation}=false"
+      "${kind}" \
+      "${default_annotation}=false"
 }
 
 function main
