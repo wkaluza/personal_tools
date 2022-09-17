@@ -41,6 +41,7 @@ function webhook_service_url
 {
   local svc_name="wk-notification-controller-lb"
   local svc_namespace="flux-system"
+  local protocol="http"
 
   local port
   port=$(kubectl get service \
@@ -50,7 +51,7 @@ function webhook_service_url
     jq 'if .spec.ports | length == 1 then . else error("Unexpected port count") end' - |
     jq --raw-output '.spec.ports[0].nodePort' -)
 
-  echo -n "http://$(minikube ip):${port}"
+  echo "${protocol}://$(minikube ip):${port}"
 }
 
 function webhook_exists
