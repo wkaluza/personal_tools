@@ -223,6 +223,20 @@ function disable_default_storage_class
       "${default_annotation}=false"
 }
 
+function disable_default_ingress_class
+{
+  local kind="IngressClass"
+  local default_annotation="ingressclass.kubernetes.io/is-default-class"
+
+  get_object_by_annotation \
+    "${kind}" \
+    "${default_annotation}" \
+    "true" |
+    for_each annotate_k8s_object \
+      "${kind}" \
+      "${default_annotation}=false"
+}
+
 function main
 {
   install_root_ca_minikube
@@ -232,6 +246,7 @@ function main
   ensure_connection_to_swarm
   taint_control_plane
   disable_default_storage_class
+  disable_default_ingress_class
   enable_load_balancer_support
 
   log_info "Success $(basename "$0")"
