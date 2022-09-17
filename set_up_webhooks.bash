@@ -79,12 +79,9 @@ function escape_dots
 
 function create_webhook_for_receiver
 {
-  local receiver_json="$1"
-
-  local username="wkaluza"
-  local token
-  token="$(pass show "local_gogs_token_${username}")"
-  local auth_header="Authorization: token ${token}"
+  local auth_header="$1"
+  local username="$2"
+  local receiver_json="$3"
 
   local source_name
   source_name="$(echo "${receiver_json}" |
@@ -130,8 +127,13 @@ function create_webhook_for_receiver
 
 function create_webhooks_for_all_receivers
 {
+  local auth_header="$1"
+  local username="$2"
+
   get_receivers |
-    for_each create_webhook_for_receiver
+    for_each create_webhook_for_receiver \
+      "${auth_header}" \
+      "${username}"
 }
 
 function wait_for_receivers_ready
@@ -146,8 +148,15 @@ function wait_for_receivers_ready
 
 function main
 {
+  local username="wkaluza"
+  local token
+  token="$(pass show "local_gogs_token_${username}")"
+  local auth_header="Authorization: token ${token}"
+
   wait_for_receivers_ready
-  create_webhooks_for_all_receivers
+  create_webhooks_for_all_receivers \
+    "${auth_header}" \
+    "${username}"
 
   log_info "Success $(basename "$0")"
 }
