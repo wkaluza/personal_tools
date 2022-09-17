@@ -39,7 +39,7 @@ function get_receivers
 
 function webhook_service_url
 {
-  local svc_name="wk-notification-controller-lb"
+  local svc_name="webhook-sink-3vqooxfl"
   local svc_namespace="flux-system"
   local protocol="http"
 
