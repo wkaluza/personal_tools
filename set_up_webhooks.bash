@@ -69,6 +69,13 @@ function webhook_exists
     jq "if . | length == 0 then error(\"Webhook not found: ${webhook_url}\") else . end" - >/dev/null 2>&1
 }
 
+function escape_dots
+{
+  local input="$1"
+
+  echo "${input}" | sed -E 's|\.|\\.|g'
+}
+
 function create_webhook_for_receiver
 {
   local receiver_json="$1"
@@ -88,14 +95,17 @@ function create_webhook_for_receiver
   webhook_path="$(echo "${receiver_json}" |
     jq --raw-output '.path' -)"
 
+  local escaped_git_host
+  escaped_git_host="$(escape_dots "${DOMAIN_GIT_FRONTEND_df29c969}")"
+
   local repo_name
   repo_name="$(kubectl get GitRepository \
     --output json \
     --namespace "${source_namespace}" \
     "${source_name}" |
     jq --raw-output '.spec.url' - |
-    grep -E "^ssh://git@git\.localhost/.+/.+\.git$" |
-    sed -E "s|^ssh://git@git\.localhost/.+/(.+)\.git$|\1|")"
+    grep -E "^ssh://git@${escaped_git_host}/.+/.+\.git$" |
+    sed -E "s|^ssh://git@${escaped_git_host}/.+/(.+)\.git$|\1|")"
 
   local webhook_url
   webhook_url="$(webhook_service_url)${webhook_path}"
