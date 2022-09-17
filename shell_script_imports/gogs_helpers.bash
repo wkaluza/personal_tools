@@ -63,6 +63,27 @@ function gogs_create_webhook
     "${v1_api}/repos/${username}/${repo_name}/hooks"
 }
 
+function gogs_delete_webhook
+{
+  local gogs_host="$1"
+  local username="$2"
+  local auth_header="$3"
+  local repo_name="$4"
+  local hook_id="$5"
+
+  local content_type_app_json="Content-Type: application/json"
+  local v1_api="https://${gogs_host}/api/v1"
+
+  curl \
+    --fail \
+    --header "${auth_header}" \
+    --header "${content_type_app_json}" \
+    --request "DELETE" \
+    --show-error \
+    --silent \
+    "${v1_api}/repos/${username}/${repo_name}/hooks/${hook_id}"
+}
+
 function gogs_check_repo_exists
 {
   local gogs_host="$1"
