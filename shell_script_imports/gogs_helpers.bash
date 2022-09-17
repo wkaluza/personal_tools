@@ -82,6 +82,27 @@ function gogs_check_repo_exists
     "${v1_api}/repos/${username}/${repo_name}" >/dev/null 2>&1
 }
 
+function gogs_list_own_repos
+{
+  local gogs_host="$1"
+  local auth_header="$2"
+  local username="$3"
+
+  local content_type_app_json="Content-Type: application/json"
+  local v1_api="https://${gogs_host}/api/v1"
+
+  curl \
+    --fail \
+    --header "${auth_header}" \
+    --header "${content_type_app_json}" \
+    --show-error \
+    --silent \
+    "${v1_api}/user/repos" 2>&1 |
+    jq ".[] | select( .owner.username == \"${username}\" )" - |
+    jq --raw-output '.full_name' - |
+    sed -E "s|^.+/(.+)$|\1|"
+}
+
 function gogs_delete_repo
 {
   local gogs_host="$1"
