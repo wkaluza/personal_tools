@@ -146,6 +146,55 @@ function wait_for_receivers_ready
     --timeout="60s" >/dev/null
 }
 
+function delete_webhook
+{
+  local username="$1"
+  local auth_header="$2"
+  local repo_name="$3"
+  local hook_id="$4"
+
+  log_info "Deleting webhook ${hook_id} from ${username}/${repo_name}"
+
+  gogs_delete_webhook \
+    "${DOMAIN_GIT_FRONTEND_df29c969}" \
+    "${username}" \
+    "${auth_header}" \
+    "${repo_name}" \
+    "${hook_id}"
+}
+
+function delete_webhooks_for_repo
+{
+  local username="$1"
+  local auth_header="$2"
+  local repo_name="$3"
+
+  gogs_list_webhooks \
+    "${DOMAIN_GIT_FRONTEND_df29c969}" \
+    "${username}" \
+    "${auth_header}" \
+    "${repo_name}" |
+    jq --raw-output '.[] | .id' - |
+    for_each delete_webhook \
+      "${username}" \
+      "${auth_header}" \
+      "${repo_name}"
+}
+
+function delete_webhooks_for_all_repos
+{
+  local auth_header="$1"
+  local username="$2"
+
+  gogs_list_own_repos \
+    "${DOMAIN_GIT_FRONTEND_df29c969}" \
+    "${auth_header}" \
+    "${username}" |
+    for_each delete_webhooks_for_repo \
+      "${username}" \
+      "${auth_header}"
+}
+
 function main
 {
   local username="wkaluza"
@@ -154,6 +203,9 @@ function main
   local auth_header="Authorization: token ${token}"
 
   wait_for_receivers_ready
+  delete_webhooks_for_all_repos \
+    "${auth_header}" \
+    "${username}"
   create_webhooks_for_all_receivers \
     "${auth_header}" \
     "${username}"
