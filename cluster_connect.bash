@@ -203,7 +203,7 @@ function get_object_by_annotation
   local annotation_key="$2"
   local annotation_value="$3"
 
-  kubectl get storageclass --output json |
+  kubectl get "${kind}" --output json |
     jq '.items[]' - |
     jq "select(.metadata.annotations.\"${annotation_key}\" == \"${annotation_value}\")" - |
     jq --raw-output '.metadata.name' -
