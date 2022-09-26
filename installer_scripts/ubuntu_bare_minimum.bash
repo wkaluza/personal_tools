@@ -8,7 +8,6 @@ cd "${THIS_SCRIPT_DIR}"
 PRIMARY_KEY_FINGERPRINT="174C9368811039C87F0C806A896572D1E78ED6A7"
 SIGNING_KEY_FINGERPRINT="143EE89AAC97053810D13E378A7E8CA85A62CF20"
 BASHRC_PATH="${HOME}/.bashrc"
-TOOLS_DIR="___not_a_real_path___"
 ERR_JETBRAINS_PATH_NOT_SET="___ERR_JETBRAINS_PATH_NOT_SET___"
 
 function log_info
@@ -265,7 +264,11 @@ function install_configure_ufw
 
 function clean_tools_repo
 {
-  pushd "${TOOLS_DIR}" >/dev/null
+  print_trace
+
+  local tools_dir="$1"
+
+  pushd "${tools_dir}" >/dev/null
   git clean -dffxn
   git reset --hard 'HEAD'
   popd >/dev/null
@@ -275,18 +278,19 @@ function clone_personal_tools
 {
   print_trace
 
+  local tools_dir="$1"
+
   sudo apt-get install --yes \
     git
 
-  TOOLS_DIR="$(realpath "${HOME}/.wk_tools")"
   local url="https://github.com/wkaluza/personal_tools.git"
 
-  if ! test -d "${TOOLS_DIR}"; then
+  if ! test -d "${tools_dir}"; then
     git clone \
       --recurse-submodules \
       --tags \
       "${url}" \
-      "${TOOLS_DIR}"
+      "${tools_dir}"
   fi
 }
 
@@ -569,6 +573,9 @@ function main
   local jetbrains_toolbox_tar_gz
   jetbrains_toolbox_tar_gz="$(realpath "$1")"
 
+  local tools_dir
+  tools_dir="$(realpath "${HOME}/.wk_tools")"
+
   if [[ "$(basename "${jetbrains_toolbox_tar_gz}")" == "${ERR_JETBRAINS_PATH_NOT_SET}" ]]; then
     log_error "Path to jetbrains toolbox tar.gz archive required as argument"
     exit 1
@@ -598,18 +605,19 @@ function main
   install_latest_git
   configure_git
 
-  clone_personal_tools
+  clone_personal_tools \
+    "${tools_dir}"
 
   set_up_pass
 
   disable_swap
 
-  bash "${TOOLS_DIR}/installer_scripts/install_docker.bash"
-  bash "${TOOLS_DIR}/installer_scripts/configure_docker.bash"
+  bash "${tools_dir}/installer_scripts/install_docker.bash"
+  bash "${tools_dir}/installer_scripts/configure_docker.bash"
 
-  bash "${TOOLS_DIR}/installer_scripts/install_jetbrains.bash" \
+  bash "${tools_dir}/installer_scripts/install_jetbrains.bash" \
     "${jetbrains_toolbox_tar_gz}"
-  bash "${TOOLS_DIR}/installer_scripts/install_applications.bash"
+  bash "${tools_dir}/installer_scripts/install_applications.bash"
 
   install_kind
   install_minikube
@@ -624,7 +632,8 @@ function main
 
   manage_sudo_password_in_pass
 
-  clean_tools_repo
+  clean_tools_repo \
+    "${tools_dir}"
 
   install_configure_ufw
 
