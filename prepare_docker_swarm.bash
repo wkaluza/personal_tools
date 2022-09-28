@@ -327,68 +327,6 @@ function start_docker_stack
   log_info "Stack ${stack_name} deployed successfully"
 }
 
-function wait_for_rolling_update
-{
-  local registry_host="$1"
-
-  local scheme="https"
-  local endpoint="_/revision"
-
-  if is_git_repo; then
-    curl --silent \
-      "${scheme}://${registry_host}/${endpoint}" |
-      grep "$(git rev-parse HEAD)"
-  fi
-}
-
-function ping_gogs
-{
-  local host="$1"
-
-  local scheme="https"
-  local endpoint="api/v1/users/search"
-
-  local ok
-  ok="$(curl --silent \
-    "${scheme}://${host}/${endpoint}?q=arbitrarysearchphrase" |
-    jq '.ok' -)"
-
-  if [[ "${ok}" != "true" ]]; then
-    false
-  fi
-}
-
-function ping_registry
-{
-  local registry_host="$1"
-
-  local scheme="https"
-  local endpoint="v2/_catalog"
-
-  curl --silent \
-    "${scheme}://${registry_host}/${endpoint}" |
-    grep "repositories"
-}
-
-function ensure_services_are_running
-{
-  retry_until_success \
-    "wait_for_rolling_update ${DOMAIN_MAIN_REVERSE_PROXY_cab92795}" \
-    wait_for_rolling_update "${DOMAIN_MAIN_REVERSE_PROXY_cab92795}"
-
-  retry_until_success \
-    "ping_registry ${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}" \
-    ping_registry "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}"
-
-  retry_until_success \
-    "ping_registry ${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}" \
-    ping_registry "${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}"
-
-  retry_until_success \
-    "ping_gogs ${DOMAIN_GIT_FRONTEND_df29c969}" \
-    ping_gogs "${DOMAIN_GIT_FRONTEND_df29c969}"
-}
-
 function get_configured_registry_mirrors
 {
   docker system info --format '{{ json . }}' |
@@ -478,8 +416,6 @@ function main
   start_git_frontend &
   start_main_reverse_proxy &
   wait
-
-  ensure_services_are_running
 
   log_info "Success $(basename "$0")"
 }

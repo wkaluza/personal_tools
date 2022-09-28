@@ -16,28 +16,6 @@ source <(cat "${THIS_SCRIPT_DIR}/local_domains.json" |
   jq --raw-output '. | .[]' - |
   sort)
 
-function ping_hub_from_cluster
-{
-  local scheme="https"
-  local endpoint="_/revision"
-
-  minikube ssh -- \
-    curl --silent \
-    "${scheme}://${DOMAIN_MAIN_REVERSE_PROXY_cab92795}/${endpoint}" |
-    grep "vcs_in_use"
-}
-
-function ensure_connection_to_swarm
-{
-  log_info "Testing connection to swarm..."
-
-  retry_until_success \
-    "ping_hub_from_cluster" \
-    ping_hub_from_cluster
-
-  log_info "Swarm connected"
-}
-
 function list_all_stacks
 {
   docker stack ls --format '{{ .Name }}'
@@ -96,7 +74,6 @@ function connect_stacks_to_minikube
 function main
 {
   connect_stacks_to_minikube
-  ensure_connection_to_swarm
 
   log_info "Success $(basename "$0")"
 }
