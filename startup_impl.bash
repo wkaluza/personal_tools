@@ -18,6 +18,7 @@ function main
   bash "${THIS_SCRIPT_DIR}/prepare_docker_swarm.bash"
   bash "${THIS_SCRIPT_DIR}/start_k8s.bash"
   bash "${THIS_SCRIPT_DIR}/cluster_connect.bash"
+  bash "${THIS_SCRIPT_DIR}/configure_gogs.bash"
   bash "${THIS_SCRIPT_DIR}/bootstrap_infrastructure.bash"
   bash "${THIS_SCRIPT_DIR}/set_up_webhooks.bash"
 

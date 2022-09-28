@@ -370,83 +370,6 @@ function ping_registry
     grep "repositories"
 }
 
-function remove_stale_gogs_ssh_key
-{
-  ssh-keygen \
-    -f "${HOME}/.ssh/known_hosts" \
-    -R "${DOMAIN_GIT_FRONTEND_df29c969}" >/dev/null 2>&1 ||
-    true
-}
-
-function ensure_gogs_user_configured
-{
-  local username="$1"
-
-  local pass_gogs_password_id="local_gogs_password_${username}"
-  local token_name="local_gogs_token_${username}"
-  local pass_gogs_token_id="${token_name}"
-  local ssh_key_name="ssh_key_${username}"
-
-  local password
-  password="$(pass_show_or_generate "${pass_gogs_password_id}")"
-
-  local primary_key_fingerprint="174C9368811039C87F0C806A896572D1E78ED6A7"
-
-  if gogs_get_single_user \
-    "${DOMAIN_GIT_FRONTEND_df29c969}" \
-    "${username}" >/dev/null 2>&1; then
-    log_info "Gogs user ${username} exists"
-  else
-    log_info "Creating gogs user ${username}..."
-
-    gogs_docker_cli_create_admin_user \
-      "${GIT_FRONTEND_STACK_NAME}" \
-      "/app/gogs/gogs" \
-      "wkaluza@protonmail.com" \
-      "${username}" \
-      "${password}" >/dev/null 2>&1
-
-    # Fresh gogs install
-    remove_stale_gogs_ssh_key
-  fi
-
-  if gogs_list_token_names \
-    "${DOMAIN_GIT_FRONTEND_df29c969}" \
-    "${username}" \
-    "${password}" |
-    grep -E "^${token_name}$" >/dev/null; then
-    log_info "Gogs token exists"
-  else
-    log_info "Creating gogs token..."
-
-    gogs_generate_token \
-      "${DOMAIN_GIT_FRONTEND_df29c969}" \
-      "${username}" \
-      "${password}" \
-      "${token_name}" |
-      store_in_pass "${pass_gogs_token_id}"
-  fi
-
-  local token_value
-  token_value="$(pass show "${pass_gogs_token_id}")"
-  local auth_header="Authorization: token ${token_value}"
-
-  if ! gogs_ssh_key_exists \
-    "${DOMAIN_GIT_FRONTEND_df29c969}" \
-    "${username}" \
-    "${ssh_key_name}" \
-    "${auth_header}" >/dev/null; then
-    log_info "Uploading SSH key to gogs..."
-    gogs_create_ssh_key \
-      "${DOMAIN_GIT_FRONTEND_df29c969}" \
-      "${ssh_key_name}" \
-      "$(gpg --export-ssh-key "${primary_key_fingerprint}")" \
-      "${auth_header}"
-  else
-    log_info "Gogs SSH key already uploaded"
-  fi
-}
-
 function ensure_services_are_running
 {
   retry_until_success \
@@ -544,8 +467,6 @@ function start_main_reverse_proxy
 
 function main
 {
-  local username="wkaluza"
-
   select_mirror_registry_config
 
   ensure_docker_mirror_config
@@ -559,10 +480,6 @@ function main
   wait
 
   ensure_services_are_running
-
-  ensure_gogs_user_configured \
-    "${username}" &
-  wait
 
   log_info "Success $(basename "$0")"
 }
