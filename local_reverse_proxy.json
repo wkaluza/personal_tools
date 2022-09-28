@@ -109,7 +109,7 @@
         "start_period": "60s",
         "timeout": "1s"
       },
-      "hostname": "main.localhost",
+      "hostname": "${DOMAIN_MAIN_REVERSE_PROXY_cab92795:?}",
       "image": "${REVERSE_PROXY_IMAGE_REFERENCE:?}",
       "logging": {
         "driver": "json-file",
