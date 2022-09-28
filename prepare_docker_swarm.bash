@@ -79,18 +79,8 @@ REGISTRY_CONFIG_SHA256="$(cat "${REGISTRY_CONFIG_PATH}" |
   sha256 |
   take_first 8)"
 
-MIRROR_CONFIG_PATH="${DOCKER_REGISTRY_ROOT_DIR}/registry/config_mirror.yml"
-MIRROR_CONFIG_SHA256="$(cat "${MIRROR_CONFIG_PATH}" |
-  sha256 |
-  take_first 8)"
-
 PRIVATE_REGISTRY_NGINX_CONFIG="${DOCKER_REGISTRY_ROOT_DIR}/reverse_proxy/private_registry_nginx.conf.template"
 PRIVATE_REGISTRY_NGINX_CONFIG_DIGEST="$(cat "${PRIVATE_REGISTRY_NGINX_CONFIG}" |
-  sha256 |
-  take_first 8)"
-
-MIRROR_REGISTRY_NGINX_CONFIG="${DOCKER_REGISTRY_ROOT_DIR}/reverse_proxy/mirror_registry_nginx.conf.template"
-MIRROR_REGISTRY_NGINX_CONFIG_DIGEST="$(cat "${MIRROR_REGISTRY_NGINX_CONFIG}" |
   sha256 |
   take_first 8)"
 
@@ -103,16 +93,6 @@ DOCKER_REGISTRY_LOCAL_CERT_DIGEST="$(cat "${DOCKER_REGISTRY_LOCAL_CERT_PATH}" |
 DOCKER_REGISTRY_LOCAL_KEY_PATH="${CERTS_DIR}/${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}.secret"
 DOCKER_REGISTRY_LOCAL_KEY_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_LOCAL_KEY_PATH}" |
   encrypt_deterministically "${DOCKER_REGISTRY_LOCAL_KEY_PATH}" |
-  sha256 |
-  take_first 8)"
-
-DOCKER_REGISTRY_MIRROR_CERT_PATH="${CERTS_DIR}/${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}.pem"
-DOCKER_REGISTRY_MIRROR_CERT_DIGEST="$(cat "${DOCKER_REGISTRY_MIRROR_CERT_PATH}" |
-  sha256 |
-  take_first 8)"
-DOCKER_REGISTRY_MIRROR_KEY_PATH="${CERTS_DIR}/${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}.secret"
-DOCKER_REGISTRY_MIRROR_KEY_SECURE_DIGEST="$(cat "${DOCKER_REGISTRY_MIRROR_KEY_PATH}" |
-  encrypt_deterministically "${DOCKER_REGISTRY_MIRROR_KEY_PATH}" |
   sha256 |
   take_first 8)"
 
@@ -136,7 +116,6 @@ GIT_FRONTEND_LOCALHOST_KEY_SECURE_DIGEST="$(cat "${GIT_FRONTEND_LOCALHOST_KEY_PA
   sha256 |
   take_first 8)"
 
-MIRROR_REGISTRY_CONFIG_SELECT=""
 GOGS_SECRET_KEY_e6403800="$(pass_show_or_generate "local_gogs_config_secret_key")"
 
 HOST_TIMEZONE="$(current_timezone)"
@@ -165,20 +144,10 @@ DOCKER_REGISTRY_LOCAL_CERT='${DOCKER_REGISTRY_LOCAL_CERT_PATH}'
 DOCKER_REGISTRY_LOCAL_CERT_DIGEST='${DOCKER_REGISTRY_LOCAL_CERT_DIGEST}'
 DOCKER_REGISTRY_LOCAL_KEY='${DOCKER_REGISTRY_LOCAL_KEY_PATH}'
 DOCKER_REGISTRY_LOCAL_KEY_DIGEST='${DOCKER_REGISTRY_LOCAL_KEY_SECURE_DIGEST}'
-DOCKER_REGISTRY_MIRROR_CERT='${DOCKER_REGISTRY_MIRROR_CERT_PATH}'
-DOCKER_REGISTRY_MIRROR_CERT_DIGEST='${DOCKER_REGISTRY_MIRROR_CERT_DIGEST}'
-DOCKER_REGISTRY_MIRROR_KEY='${DOCKER_REGISTRY_MIRROR_KEY_PATH}'
-DOCKER_REGISTRY_MIRROR_KEY_DIGEST='${DOCKER_REGISTRY_MIRROR_KEY_SECURE_DIGEST}'
-DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f='${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}'
 DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e='${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}'
 EXTERNAL_NETWORK_NAME='${EXTERNAL_NETWORK_NAME}'
 HOST_TIMEZONE='${HOST_TIMEZONE}'
 LOCAL_NODE_ID='${LOCAL_SWARM_NODE_ID}'
-MIRROR_REGISTRY_CONFIG='${MIRROR_CONFIG_PATH}'
-MIRROR_REGISTRY_CONFIG_DIGEST='${MIRROR_CONFIG_SHA256}'
-MIRROR_REGISTRY_CONFIG_SELECT='${MIRROR_REGISTRY_CONFIG_SELECT}'
-MIRROR_REGISTRY_NGINX_CONFIG='${MIRROR_REGISTRY_NGINX_CONFIG}'
-MIRROR_REGISTRY_NGINX_CONFIG_DIGEST='${MIRROR_REGISTRY_NGINX_CONFIG_DIGEST}'
 PRIVATE_REGISTRY_CONFIG='${REGISTRY_CONFIG_PATH}'
 PRIVATE_REGISTRY_CONFIG_DIGEST='${REGISTRY_CONFIG_SHA256}'
 PRIVATE_REGISTRY_NGINX_CONFIG='${PRIVATE_REGISTRY_NGINX_CONFIG}'
@@ -200,11 +169,6 @@ DOCKER_REGISTRY_LOCAL_CERT='${DOCKER_REGISTRY_LOCAL_CERT_PATH}'
 DOCKER_REGISTRY_LOCAL_CERT_DIGEST='${DOCKER_REGISTRY_LOCAL_CERT_DIGEST}'
 DOCKER_REGISTRY_LOCAL_KEY='${DOCKER_REGISTRY_LOCAL_KEY_PATH}'
 DOCKER_REGISTRY_LOCAL_KEY_DIGEST='${DOCKER_REGISTRY_LOCAL_KEY_SECURE_DIGEST}'
-DOCKER_REGISTRY_MIRROR_CERT='${DOCKER_REGISTRY_MIRROR_CERT_PATH}'
-DOCKER_REGISTRY_MIRROR_CERT_DIGEST='${DOCKER_REGISTRY_MIRROR_CERT_DIGEST}'
-DOCKER_REGISTRY_MIRROR_KEY='${DOCKER_REGISTRY_MIRROR_KEY_PATH}'
-DOCKER_REGISTRY_MIRROR_KEY_DIGEST='${DOCKER_REGISTRY_MIRROR_KEY_SECURE_DIGEST}'
-DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f='${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}'
 DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e='${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}'
 DOMAIN_GIT_FRONTEND_df29c969='${DOMAIN_GIT_FRONTEND_df29c969}'
 DOMAIN_MAIN_REVERSE_PROXY_cab92795='${DOMAIN_MAIN_REVERSE_PROXY_cab92795}'
@@ -327,58 +291,6 @@ function start_docker_stack
   log_info "Stack ${stack_name} deployed successfully"
 }
 
-function get_configured_registry_mirrors
-{
-  docker system info --format '{{ json . }}' |
-    jq --raw-output '.RegistryConfig.Mirrors[]' -
-}
-
-function ensure_docker_mirror_config
-{
-  local config_file="/etc/docker/daemon.json"
-  local reg_mirrors="registry-mirrors"
-  local url="https://${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}"
-  local output=""
-
-  if ! get_configured_registry_mirrors | grep "${url}" >/dev/null; then
-    if test -f "${config_file}"; then
-      output="$(cat "${config_file}")"
-    else
-      output='{}'
-    fi
-
-    if ! echo "${output}" | grep "${url}" >/dev/null; then
-      if test -f "${config_file}"; then
-        local now
-        now="$(date --utc +'%Y%m%d%H%M%S%N')"
-        cp \
-          "${config_file}" \
-          "${THIS_SCRIPT_DIR}/$(basename "${config_file}")___${now}.bak"
-      fi
-
-      echo "${output}" |
-        jq \
-          --sort-keys \
-          ". + { \"${reg_mirrors}\": [ \"${url}\" ] }" \
-          - |
-        sudo tee "${config_file}" >/dev/null
-
-      sudo systemctl restart docker
-    fi
-  fi
-}
-
-function select_mirror_registry_config
-{
-  if web_connection_working; then
-    log_info "Mirror configuration: enabled"
-    MIRROR_REGISTRY_CONFIG_SELECT="mirror_registry_config"
-  else
-    log_info "Mirror configuration: disabled"
-    MIRROR_REGISTRY_CONFIG_SELECT="registry_config"
-  fi
-}
-
 function start_registries
 {
   start_docker_stack \
@@ -405,10 +317,6 @@ function start_main_reverse_proxy
 
 function main
 {
-  select_mirror_registry_config
-
-  ensure_docker_mirror_config
-
   EXTERNAL_NETWORK_NAME="$(bash "${THIS_SCRIPT_DIR}/create_external_docker_network.bash")"
   LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 

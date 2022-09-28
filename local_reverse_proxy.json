@@ -20,14 +20,6 @@
       "file": "${DOCKER_REGISTRY_LOCAL_KEY:?}",
       "name": "docker_registry_local_key_${DOCKER_REGISTRY_LOCAL_KEY_DIGEST:?}"
     },
-    "docker_registry_mirror_cert": {
-      "file": "${DOCKER_REGISTRY_MIRROR_CERT:?}",
-      "name": "docker_registry_mirror_cert_${DOCKER_REGISTRY_MIRROR_CERT_DIGEST:?}"
-    },
-    "docker_registry_mirror_key": {
-      "file": "${DOCKER_REGISTRY_MIRROR_KEY:?}",
-      "name": "docker_registry_mirror_key_${DOCKER_REGISTRY_MIRROR_KEY_DIGEST:?}"
-    },
     "git_frontend_localhost_cert": {
       "file": "${GIT_FRONTEND_LOCALHOST_CERT:?}",
       "name": "main_localhost_cert_${GIT_FRONTEND_LOCALHOST_CERT_DIGEST:?}"
@@ -104,7 +96,6 @@
       },
       "environment": {
         "DNS_RESOLVER_IP": "${DNS_RESOLVER_IP:?}",
-        "DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f": "${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f:?}",
         "DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e": "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}",
         "DOMAIN_GIT_FRONTEND_df29c969": "${DOMAIN_GIT_FRONTEND_df29c969:?}",
         "DOMAIN_MAIN_REVERSE_PROXY_cab92795": "${DOMAIN_MAIN_REVERSE_PROXY_cab92795:?}",
@@ -152,14 +143,6 @@
         {
           "source": "docker_registry_local_key",
           "target": "/etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}.key"
-        },
-        {
-          "source": "docker_registry_mirror_cert",
-          "target": "/etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f:?}.cert"
-        },
-        {
-          "source": "docker_registry_mirror_key",
-          "target": "/etc/nginx/certs/${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f:?}.key"
         },
         {
           "source": "main_localhost_cert",

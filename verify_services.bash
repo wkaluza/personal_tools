@@ -70,10 +70,6 @@ function ensure_services_are_running
     ping_registry "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}"
 
   retry_until_success \
-    "ping_registry ${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}" \
-    ping_registry "${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}"
-
-  retry_until_success \
     "ping_gogs ${DOMAIN_GIT_FRONTEND_df29c969}" \
     ping_gogs "${DOMAIN_GIT_FRONTEND_df29c969}"
 }

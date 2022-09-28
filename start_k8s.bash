@@ -58,8 +58,6 @@ function start_minikube
   local status
   status="$(minikube_status)"
 
-  local mirror_url="https://${DOMAIN_DOCKER_REGISTRY_MIRROR_f334ec4f}"
-
   local host_path="${HOME}/.wk_k8s_storage___/minikube"
   local node_path="/wk_data"
 
@@ -75,8 +73,7 @@ function start_minikube
       --memory "8G" \
       --mount "true" \
       --mount-string "${host_path}:${node_path}" \
-      --nodes 2 \
-      --registry-mirror="${mirror_url}" >/dev/null 2>&1
+      --nodes 2 >/dev/null 2>&1
   elif [[ "${status}" == "stopped" ]]; then
     minikube start >/dev/null 2>&1
   fi
