@@ -96,10 +96,81 @@ function ensure_connection_to_swarm
   log_info "Swarm connected"
 }
 
+function test_dns_from_docker
+{
+  local name="$1"
+  local host="$2"
+  local ip="$3"
+
+  docker exec -it "${name}" \
+    host "${host}" |
+    grep "${ip}"
+}
+
+function test_dns_from_k8s
+{
+  local name="$1"
+  local namespace="$2"
+  local host="$3"
+  local ip="$4"
+
+  kubectl exec \
+    --namespace "${namespace}" \
+    "${name}" -- \
+    host "${host}" |
+    grep "${ip}"
+}
+
+function test_dns_docker
+{
+  local test_ip="$1"
+
+  local test_name="startup-test-8k4zscuq"
+
+  log_info "Testing DNS from docker..."
+  retry_until_success \
+    "test_dns_from_docker" \
+    test_dns_from_docker \
+    "${test_name}" \
+    "${DOMAIN_STARTUP_TEST_dmzrfohk}" \
+    "${test_ip}"
+
+  docker rm --force "${test_name}" >/dev/null
+}
+
+function test_dns_k8s
+{
+  local test_ip="$1"
+
+  local test_name="startup-test-c2kjkrm5"
+  local namespace="default"
+
+  log_info "Testing DNS from cluster..."
+  retry_until_success \
+    "test_dns_from_k8s" \
+    test_dns_from_k8s \
+    "${test_name}" \
+    "${namespace}" \
+    "${DOMAIN_STARTUP_TEST_dmzrfohk}" \
+    "${test_ip}"
+
+  kubectl delete \
+    pod \
+    --namespace "${namespace}" \
+    "${test_name}" >/dev/null
+}
+
 function main
 {
+  local test_ip="123.132.213.231"
+
   ensure_services_are_running
   ensure_connection_to_swarm
+
+  test_dns_docker \
+    "${test_ip}"
+  test_dns_k8s \
+    "${test_ip}"
 
   log_info "Success $(basename "$0")"
 }

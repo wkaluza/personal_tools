@@ -15,6 +15,12 @@ function main
   log_info "Deleting k8s cluster..."
   minikube delete >/dev/null 2>&1
 
+  log_info "Removing DNS container..."
+  docker rm --force "dns-container-wld1bdxc" >/dev/null 2>&1 || true
+
+  log_info "Removing test container..."
+  docker rm --force "startup-test-8k4zscuq" >/dev/null 2>&1 || true
+
   log_info "Pruning docker system..."
   docker system prune --force >/dev/null 2>&1
 

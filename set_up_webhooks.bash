@@ -39,19 +39,9 @@ function get_receivers
 
 function webhook_service_url
 {
-  local svc_name="webhook-sink-3vqooxfl"
-  local svc_namespace="flux-system"
   local protocol="http"
 
-  local port
-  port=$(kubectl get service \
-    --namespace "${svc_namespace}" \
-    --output json \
-    "${svc_name}" |
-    jq 'if .spec.ports | length == 1 then . else error("Unexpected port count") end' - |
-    jq --raw-output '.spec.ports[0].nodePort' -)
-
-  echo "${protocol}://$(minikube ip):${port}"
+  echo "${protocol}://${DOMAIN_WEBHOOK_SINK_a8800f5b}"
 }
 
 function webhook_exists

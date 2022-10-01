@@ -1,0 +1,8 @@
+$ORIGIN localhost.
+@ IN SOA dns.wkaluza.localhost. mail.wkaluza.localhost. (
+  2022100101     ; serial
+  7200           ; refresh (seconds)
+  3600           ; retry (seconds)
+  1209600        ; expire (seconds)
+  3600           ; minimum (seconds)
+)

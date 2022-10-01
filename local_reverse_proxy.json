@@ -94,6 +94,9 @@
           "parallelism": 1
         }
       },
+      "dns": [
+        "${DNS_IP_48zyazy8:?}"
+      ],
       "environment": {
         "DNS_RESOLVER_IP": "${DNS_RESOLVER_IP:?}",
         "DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e": "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}",

@@ -1,0 +1,10 @@
+localhost:53 {
+    file /docker/localhost___.dns
+    log
+    errors
+}
+.:53 {
+    forward . 8.8.8.8 9.9.9.9
+    log
+    errors
+}

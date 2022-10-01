@@ -2,5 +2,6 @@
   "DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e": "private.docker.localhost",
   "DOMAIN_GIT_FRONTEND_df29c969": "git.localhost",
   "DOMAIN_MAIN_REVERSE_PROXY_cab92795": "main.localhost",
+  "DOMAIN_STARTUP_TEST_dmzrfohk": "startup.test.localhost",
   "DOMAIN_WEBHOOK_SINK_a8800f5b": "webhooks.localhost"
 }
