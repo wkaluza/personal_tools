@@ -65,7 +65,7 @@ function build_and_push_dns
 {
   local dns_tag="$1"
 
-  bash "${THIS_SCRIPT_DIR}/docker_registry/dns/prepare_zone_file.bash"
+  bash "${THIS_SCRIPT_DIR}/docker_registry/dns/prepare_build_context.bash"
 
   docker build \
     --file "${THIS_SCRIPT_DIR}/docker_registry/dns/dns.dockerfile" \
