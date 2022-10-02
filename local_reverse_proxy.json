@@ -22,11 +22,11 @@
     },
     "git_frontend_localhost_cert": {
       "file": "${GIT_FRONTEND_LOCALHOST_CERT:?}",
-      "name": "main_localhost_cert_${GIT_FRONTEND_LOCALHOST_CERT_DIGEST:?}"
+      "name": "git_frontend_localhost_cert_${GIT_FRONTEND_LOCALHOST_CERT_DIGEST:?}"
     },
     "git_frontend_localhost_key": {
       "file": "${GIT_FRONTEND_LOCALHOST_KEY:?}",
-      "name": "main_localhost_key_${GIT_FRONTEND_LOCALHOST_KEY_DIGEST:?}"
+      "name": "git_frontend_localhost_key_${GIT_FRONTEND_LOCALHOST_KEY_DIGEST:?}"
     },
     "main_localhost_cert": {
       "file": "${MAIN_LOCALHOST_CERT:?}",
