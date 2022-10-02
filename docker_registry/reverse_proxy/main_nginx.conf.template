@@ -138,7 +138,7 @@ http {
       proxy_set_header X-Forwarded-Proto $scheme;
       proxy_set_header X-Real-IP $remote_addr;
 
-      set $upstream http://${DOMAIN_GIT_FRONTEND_df29c969}:3000;
+      set $upstream https://${DOMAIN_GIT_FRONTEND_df29c969};
       proxy_pass $upstream;
     }
   }

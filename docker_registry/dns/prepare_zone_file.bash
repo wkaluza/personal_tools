@@ -16,6 +16,8 @@ source <(cat "${THIS_SCRIPT_DIR}/../../local_domains.json" |
   jq --raw-output '. | .[]' - |
   sort)
 
+GIT_FRONTEND_STACK_NAME="local_git_frontend_stack"
+
 function append_A_record
 {
   local domain="$1"
@@ -44,7 +46,9 @@ function main
   local git_frontend_container_name
   git_frontend_container_name="$(docker network inspect minikube |
     jq --raw-output '.[0].Containers | to_entries[].value.Name' - |
-    grep "local_git_frontend_stack")"
+    grep "${GIT_FRONTEND_STACK_NAME}" |
+    grep "reverse_proxy")"
+
   local git_frontend_ip
   git_frontend_ip="$(docker network inspect minikube |
     jq ".[0].Containers | to_entries[]" - |

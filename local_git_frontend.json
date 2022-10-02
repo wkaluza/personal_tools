@@ -1,5 +1,9 @@
 {
   "configs": {
+    "git_frontend_nginx_config": {
+      "file": "${GIT_FRONTEND_NGINX_CONFIG:?}",
+      "name": "git_frontend_nginx_config_${GIT_FRONTEND_NGINX_CONFIG_DIGEST:?}"
+    },
     "gogs_config": {
       "file": "${GOGS_CONFIG:?}",
       "name": "gogs_config_${GOGS_CONFIG_DIGEST:?}",
@@ -10,9 +14,115 @@
     "external_add45a30": {
       "external": true,
       "name": "${EXTERNAL_NETWORK_NAME:?}"
+    },
+    "internal_git_frontend_3zmkeoim": {
+      "external": false,
+      "name": "git_frontend_internal"
+    }
+  },
+  "secrets": {
+    "git_frontend_localhost_cert": {
+      "file": "${GIT_FRONTEND_LOCALHOST_CERT:?}",
+      "name": "git_frontend_localhost_cert_${GIT_FRONTEND_LOCALHOST_CERT_DIGEST:?}"
+    },
+    "git_frontend_localhost_key": {
+      "file": "${GIT_FRONTEND_LOCALHOST_KEY:?}",
+      "name": "git_frontend_localhost_key_${GIT_FRONTEND_LOCALHOST_KEY_DIGEST:?}"
     }
   },
   "services": {
+    "git_frontend_reverse_proxy": {
+      "build": {
+        "args": {
+          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
+        },
+        "context": "${REVERSE_PROXY_CONTEXT:?}",
+        "dockerfile": "${REVERSE_PROXY_DOCKERFILE:?}",
+        "network": "bridge"
+      },
+      "configs": [
+        {
+          "source": "git_frontend_nginx_config",
+          "target": "/etc/nginx/templates/nginx.conf.template"
+        }
+      ],
+      "deploy": {
+        "mode": "global",
+        "placement": {
+          "constraints": [
+            "node.id==${LOCAL_NODE_ID:?}",
+            "node.role==manager"
+          ]
+        },
+        "resources": {
+          "limits": {
+            "cpus": "0.5",
+            "memory": "50MB"
+          },
+          "reservations": {
+            "cpus": "0.25",
+            "memory": "25MB"
+          }
+        },
+        "restart_policy": {
+          "condition": "on-failure",
+          "delay": "10s",
+          "max_attempts": 5,
+          "window": "120s"
+        },
+        "rollback_config": {
+          "delay": "10s",
+          "failure_action": "pause",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        },
+        "update_config": {
+          "delay": "10s",
+          "failure_action": "rollback",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        }
+      },
+      "environment": {
+        "DNS_RESOLVER_IP": "${DNS_RESOLVER_IP:?}",
+        "DOMAIN_GIT_FRONTEND_df29c969": "${DOMAIN_GIT_FRONTEND_df29c969:?}",
+        "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx",
+        "SERVICE_NAME_GOGS_zxrurrym": "gogs_c3a3afb4"
+      },
+      "healthcheck": {
+        "disable": false,
+        "interval": "5s",
+        "retries": 30,
+        "start_period": "60s",
+        "timeout": "1s"
+      },
+      "image": "${REVERSE_PROXY_IMAGE_REFERENCE:?}",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": 5,
+          "max-size": "200k"
+        }
+      },
+      "networks": [
+        "external_add45a30",
+        "internal_git_frontend_3zmkeoim"
+      ],
+      "secrets": [
+        {
+          "source": "git_frontend_localhost_cert",
+          "target": "/etc/nginx/certs/${DOMAIN_GIT_FRONTEND_df29c969:?}.cert"
+        },
+        {
+          "source": "git_frontend_localhost_key",
+          "target": "/etc/nginx/certs/${DOMAIN_GIT_FRONTEND_df29c969:?}.key"
+        }
+      ]
+    },
     "gogs_c3a3afb4": {
       "build": {
         "args": {
@@ -92,7 +202,7 @@
         }
       },
       "networks": [
-        "external_add45a30"
+        "internal_git_frontend_3zmkeoim"
       ],
       "volumes": [
         {
