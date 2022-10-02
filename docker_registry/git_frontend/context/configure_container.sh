@@ -60,10 +60,29 @@ function set_timezone
     set_timezone_alpine
 }
 
+function install_trusted_ca_certs_alpine
+{
+  apk --no-cache add \
+    ca-certificates
+
+  cp \
+    /docker/ca___/*.crt \
+    "/usr/local/share/ca-certificates/"
+
+  update-ca-certificates
+}
+
+function install_trusted_ca_certs
+{
+  run_based_on_os \
+    install_trusted_ca_certs_alpine
+}
+
 function main
 {
   prep_package_manager
   set_timezone
+  install_trusted_ca_certs
 }
 
 main

@@ -319,6 +319,8 @@ function start_registries
 
 function start_git_frontend
 {
+  bash "${THIS_SCRIPT_DIR}/docker_registry/git_frontend/prepare_build_context.bash"
+
   start_docker_stack \
     generate_git_frontend_env \
     "${THIS_SCRIPT_DIR}/local_git_frontend.json" \

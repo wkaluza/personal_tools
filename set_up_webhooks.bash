@@ -39,7 +39,7 @@ function get_receivers
 
 function webhook_service_url
 {
-  local protocol="http"
+  local protocol="https"
 
   echo "${protocol}://${DOMAIN_WEBHOOK_SINK_a8800f5b}"
 }
