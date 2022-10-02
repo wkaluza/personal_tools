@@ -51,14 +51,20 @@ function start_k8s_dns_test
   local dnstools_tag="$1"
 
   local test_name="startup-test-c2kjkrm5"
+  local namespace="default"
 
   kubectl run \
     --image "${dnstools_tag}" \
     --restart=Always \
-    --namespace "default" \
+    --namespace "${namespace}" \
     "${test_name}" \
     -- \
     sleep infinity
+
+  kubectl wait pod \
+    --namespace "${namespace}" \
+    "${test_name}" \
+    --for="condition=Ready" >/dev/null
 }
 
 function build_and_push_dns
