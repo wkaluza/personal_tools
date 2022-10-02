@@ -100,7 +100,7 @@ http {
       proxy_set_header X-Forwarded-Proto $scheme;
       proxy_set_header X-Real-IP $remote_addr;
 
-      set $upstream https://${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}:443;
+      set $upstream https://${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e};
       proxy_pass $upstream;
     }
   }
