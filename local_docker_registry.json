@@ -171,7 +171,8 @@
       "environment": {
         "DNS_RESOLVER_IP": "${DNS_RESOLVER_IP:?}",
         "DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e": "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}",
-        "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx"
+        "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx",
+        "SERVICE_NAME_PRIVATE_DOCKER_REGISTRY_yzmymuvh": "private_docker_registry_71f5c389"
       },
       "healthcheck": {
         "disable": false,

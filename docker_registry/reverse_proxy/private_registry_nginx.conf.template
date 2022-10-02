@@ -69,7 +69,7 @@ http {
       proxy_set_header X-Forwarded-Proto $scheme;
       proxy_set_header X-Real-IP $remote_addr;
 
-      set $upstream http://private_docker_registry_71f5c389:5000;
+      set $upstream http://${SERVICE_NAME_PRIVATE_DOCKER_REGISTRY_yzmymuvh}:5000;
       proxy_pass $upstream;
     }
   }
