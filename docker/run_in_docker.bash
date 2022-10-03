@@ -40,6 +40,7 @@ function docker_run
 
   local list_exited
   list_exited="$(docker container list \
+    --no-trunc \
     --quiet \
     --filter="status=exited" \
     --filter="name=^${container_name}$")"
