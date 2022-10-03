@@ -237,6 +237,19 @@ function untar_gzip_to
     --gzip
 }
 
+function filter
+{
+  local command="$1"
+  local args=("${@:2}")
+
+  local output
+  output="$(mktemp)"
+
+  if ${command} "${args[@]}" >"${output}" 2>/dev/null; then
+    cat "${output}"
+  fi
+}
+
 function for_each
 {
   local fn="$1"
