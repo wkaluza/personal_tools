@@ -16,14 +16,18 @@ source <(cat "${THIS_SCRIPT_DIR}/local_domains.json" |
   jq --raw-output '. | .[]' - |
   sort)
 
+LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/local_services"
+
 function build_and_push_dns_test
 {
   local dnstools_tag="$1"
 
+  local dnstools_service_dir="${LOCAL_SERVICES_ROOT_DIR}/dns_tools"
+
   docker build \
-    --file "${THIS_SCRIPT_DIR}/docker_registry/dns_tools/dns_tools.dockerfile" \
+    --file "${dnstools_service_dir}/dns_tools.dockerfile" \
     --tag "${dnstools_tag}" \
-    "${THIS_SCRIPT_DIR}/docker_registry/dns_tools/context"
+    "${dnstools_service_dir}/context"
 
   docker push \
     "${dnstools_tag}"
@@ -71,12 +75,14 @@ function build_and_push_dns
 {
   local dns_tag="$1"
 
-  bash "${THIS_SCRIPT_DIR}/docker_registry/dns/prepare_build_context.bash"
+  local dns_service_dir="${LOCAL_SERVICES_ROOT_DIR}/dns"
+
+  bash "${dns_service_dir}/prepare_build_context.bash"
 
   docker build \
-    --file "${THIS_SCRIPT_DIR}/docker_registry/dns/dns.dockerfile" \
+    --file "${dns_service_dir}/dns.dockerfile" \
     --tag "${dns_tag}" \
-    "${THIS_SCRIPT_DIR}/docker_registry/dns/context"
+    "${dns_service_dir}/context"
 
   docker push \
     "${dns_tag}"
