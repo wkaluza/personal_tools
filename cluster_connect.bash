@@ -59,6 +59,20 @@ function connect_container_to_network
     "${container}"
 }
 
+function container_has_label
+{
+  local label_name="$1"
+  local label_value="$2"
+  local container_id="$3"
+
+  docker container list \
+    --no-trunc \
+    --filter label="${label_name}=${label_value}" \
+    --format '{{ json . }}' |
+    jq --raw-output '.ID' - |
+    grep -E "^${container_id}$"
+}
+
 function connect_stacks_to_minikube
 {
   log_info "Connecting stack containers to minikube network..."
@@ -67,6 +81,9 @@ function connect_stacks_to_minikube
     for_each list_stack_services |
     for_each list_service_tasks |
     for_each list_task_containers |
+    for_each filter container_has_label \
+      "wk.connect.cluster-cnr8lm0i" \
+      "true" |
     for_each no_fail connect_container_to_network \
       "minikube" >/dev/null 2>&1
 }

@@ -183,6 +183,9 @@
       },
       "hostname": "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}",
       "image": "${REVERSE_PROXY_IMAGE_REFERENCE:?}",
+      "labels": {
+        "wk.connect.cluster-cnr8lm0i": "true"
+      },
       "logging": {
         "driver": "json-file",
         "options": {

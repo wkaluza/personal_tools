@@ -114,6 +114,9 @@
       },
       "hostname": "${DOMAIN_MAIN_REVERSE_PROXY_cab92795:?}",
       "image": "${REVERSE_PROXY_IMAGE_REFERENCE:?}",
+      "labels": {
+        "wk.connect.cluster-cnr8lm0i": "true"
+      },
       "logging": {
         "driver": "json-file",
         "options": {
