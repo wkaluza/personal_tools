@@ -1,4 +1,5 @@
 {
+  "DOMAIN_BUILD_DASHBOARD_f8othl9m": "build.dashboard.localhost",
   "DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e": "private.docker.localhost",
   "DOMAIN_GIT_FRONTEND_df29c969": "git.localhost",
   "DOMAIN_MAIN_REVERSE_PROXY_cab92795": "main.localhost",
