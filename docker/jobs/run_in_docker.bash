@@ -5,7 +5,7 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
-source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.bash"
+source "${THIS_SCRIPT_DIR}/../../shell_script_imports/common.bash"
 
 DIGESTS=""
 
