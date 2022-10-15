@@ -47,6 +47,8 @@ function clone_or_fetch
     --force \
     --recurse-submodules \
     --tags
+
+  git verify-commit HEAD
   popd >/dev/null
 }
 
@@ -86,12 +88,17 @@ function git_get_latest
   local branch_name="${2:-"main"}"
 
   if repo_is_clean; then
+    git verify-commit HEAD
+
     git checkout \
       --force \
       "${branch_name}" >/dev/null 2>&1 ||
       git checkout \
         --force \
         --track "${remote_name}/${branch_name}" >/dev/null 2>&1
+
+    git verify-commit HEAD
+
     git fetch \
       --all \
       --force \
@@ -102,6 +109,8 @@ function git_get_latest
     git reset \
       --hard \
       "${remote_name}/${branch_name}" >/dev/null
+
+    git verify-commit HEAD
 
     clean_repo
   else
