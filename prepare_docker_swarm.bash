@@ -61,7 +61,7 @@ function generate_revision_data
 
 REVISION_DATA_JSON="$(generate_revision_data)"
 
-LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/local_services"
+LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/docker/swarm"
 LOCAL_SWARM_NODE_ID="<___not_a_valid_id___>"
 
 MAIN_NGINX_CONFIG_PATH="${LOCAL_SERVICES_ROOT_DIR}/reverse_proxy/main_nginx.conf.template"

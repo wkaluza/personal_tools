@@ -16,7 +16,7 @@ source <(cat "${THIS_SCRIPT_DIR}/local_domains.json" |
   jq --raw-output '. | .[]' - |
   sort)
 
-LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/local_services"
+LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/docker/swarm"
 
 function build_and_push_dns_test
 {
