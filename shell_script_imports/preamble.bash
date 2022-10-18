@@ -8,7 +8,7 @@ _THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE}")" >/dev/null 2>&1 && pwd)"
 source <(cat "${_THIS_SCRIPT_DIR}/../local_domains.json" |
   jq '. | to_entries' - |
   jq '. | map( "\(.key)=\"\(.value)\"" )' - |
-  jq --raw-output '. | .[]' - |
+  jq --raw-output '.[]' - |
   sort)
 
 source "${_THIS_SCRIPT_DIR}/internal/common.bash"
