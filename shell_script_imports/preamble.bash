@@ -12,6 +12,7 @@ source <(cat "${_THIS_FILE_DIR}/local_domains.json" |
   sort)
 
 source "${_THIS_FILE_DIR}/internal/common.bash"
+source "${_THIS_FILE_DIR}/internal/docker.bash"
 source "${_THIS_FILE_DIR}/internal/git_helpers.bash"
 source "${_THIS_FILE_DIR}/internal/gogs_helpers.bash"
 source "${_THIS_FILE_DIR}/internal/logging.bash"
