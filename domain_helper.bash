@@ -35,7 +35,7 @@ function generate_cert
 
 function list_local_domains
 {
-  cat "${THIS_SCRIPT_DIR}/local_domains.json" |
+  cat "${THIS_SCRIPT_DIR}/shell_script_imports/local_domains.json" |
     jq '. | to_entries' - |
     jq '. | map( .value )' - |
     jq --raw-output '.[]' - |
