@@ -5,13 +5,7 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
-source <(cat "${THIS_SCRIPT_DIR}/local_domains.json" |
-  jq '. | to_entries' - |
-  jq '. | map( "\(.key)=\"\(.value)\"" )' - |
-  jq --raw-output '. | .[]' - |
-  sort)
-
-source "${THIS_SCRIPT_DIR}/shell_script_imports/gogs_helpers.bash"
+source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
 function main
 {

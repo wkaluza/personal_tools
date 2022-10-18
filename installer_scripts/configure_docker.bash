@@ -7,8 +7,7 @@ cd "${THIS_SCRIPT_DIR}"
 
 BASHRC="${HOME}/.bashrc"
 
-source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
-source "${THIS_SCRIPT_DIR}/../shell_script_imports/common.bash"
+source "${THIS_SCRIPT_DIR}/../shell_script_imports/preamble.bash"
 
 CREDENTIAL_HELPERS_DIR="${THIS_SCRIPT_DIR}/docker_credential_helpers___deleteme"
 

@@ -17,7 +17,7 @@ function on_exit
 
 trap on_exit EXIT
 
-source "${THIS_SCRIPT_DIR}/../shell_script_imports/logging.bash"
+source "${THIS_SCRIPT_DIR}/../shell_script_imports/preamble.bash"
 
 function main
 {
