@@ -268,3 +268,23 @@ function no_fail
   ${fn} "${args[@]}" ||
     true
 }
+
+function run_with_env
+{
+  # function example_env_factory
+  # {
+  #   cat <<EOF
+  # ENV_VAR1='some constant'
+  # ENV_VAR2='${SOME_SCRIPT_VARIABLE}'
+  # EOF
+  # }
+
+  local env_factory="$1"
+  local command="$2"
+  local args=("${@:3}")
+
+  env \
+    --split-string "$(${env_factory} | tr '\n' ' ')" \
+    "${command}" \
+    "${args[@]}" >/dev/null 2>&1
+}

@@ -201,18 +201,6 @@ REVISION_DATA_JSON='${REVISION_DATA_JSON}'
 EOF
 }
 
-function run_with_env
-{
-  local env_factory="$1"
-  local command="$2"
-  local args=("${@:3}")
-
-  env \
-    --split-string "$(${env_factory} | tr '\n' ' ')" \
-    "${command}" \
-    "${args[@]}" >/dev/null 2>&1
-}
-
 function get_local_node_id
 {
   docker node ls --format='{{ json . }}' |
