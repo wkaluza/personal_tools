@@ -114,7 +114,7 @@ function main
   aggregate_digest="$(compute_digest "${DIGESTS}" | cut -c1-8)"
 
   local image_name="${job_name}_${aggregate_digest}"
-  local container_name="${job_name}"
+  local container_name="${job_name}_${aggregate_digest}"
   local uid
   uid="$(id -u)"
   local gid
