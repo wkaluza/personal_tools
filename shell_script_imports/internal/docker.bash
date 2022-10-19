@@ -88,6 +88,16 @@ function start_docker_stack
     "${stack_name}"
 
   log_info "Stack ${stack_name} deployed successfully"
+
+  log_info "Pushing ${stack_name} images..."
+
+  run_with_env \
+    "${env_factory}" \
+    docker compose \
+    --file "${compose_file}" \
+    push
+
+  log_info "Stack ${stack_name} pushed successfully"
 }
 
 function list_all_stacks
