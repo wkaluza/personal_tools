@@ -89,3 +89,78 @@ function start_docker_stack
 
   log_info "Stack ${stack_name} deployed successfully"
 }
+
+function list_all_stacks
+{
+  docker stack ls --format '{{ .Name }}'
+}
+
+function list_stack_services
+{
+  local stack="$1"
+
+  docker stack services \
+    --format '{{ .ID }}' \
+    "${stack}"
+}
+
+function list_service_tasks
+{
+  local service="$1"
+
+  docker service ps \
+    --no-trunc \
+    --format '{{ .ID }}' \
+    "${service}"
+}
+
+function list_task_containers
+{
+  local task="$1"
+
+  docker inspect \
+    --format '{{ .Status.ContainerStatus.ContainerID }}' \
+    "${task}"
+}
+
+function connect_container_to_network
+{
+  local network="$1"
+  local container="$2"
+
+  docker network connect \
+    "${network}" \
+    "${container}"
+}
+
+function container_has_label
+{
+  local label_name="$1"
+  local label_value="$2"
+  local container_id="$3"
+
+  docker container list \
+    --no-trunc \
+    --filter label="${label_name}=${label_value}" \
+    --format '{{ json . }}' |
+    jq --raw-output '.ID' - |
+    grep -E "^${container_id}$"
+}
+
+function connect_stack_containers_to_network
+{
+  local network="$1"
+  local label_name="$2"
+  local label_value="$3"
+  local stack="$4"
+
+  list_stack_services \
+    "${stack}" |
+    for_each list_service_tasks |
+    for_each list_task_containers |
+    for_each filter container_has_label \
+      "${label_name}" \
+      "${label_value}" |
+    for_each no_fail connect_container_to_network \
+      "${network}" >/dev/null 2>&1
+}
