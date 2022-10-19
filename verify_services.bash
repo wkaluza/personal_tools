@@ -151,12 +151,25 @@ function test_dns_k8s
     "${test_name}" >/dev/null
 }
 
+function ensure_all_k8s_pods_are_running
+{
+  log_info "Waiting for full k8s pod readiness..."
+
+  kubectl wait pod \
+    --all \
+    --all-namespaces \
+    --for="condition=Ready" \
+    --timeout="60s"
+}
+
 function main
 {
   local test_ip="123.132.213.231"
 
   ensure_services_are_running
   ensure_connection_to_swarm
+
+  ensure_all_k8s_pods_are_running
 
   test_dns_docker \
     "${test_ip}"
