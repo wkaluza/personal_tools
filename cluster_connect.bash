@@ -14,6 +14,7 @@ function main
   list_all_stacks |
     for_each connect_stack_containers_to_network \
       "minikube" \
+      "auto" \
       "wk.connect.cluster-cnr8lm0i" \
       "true"
 

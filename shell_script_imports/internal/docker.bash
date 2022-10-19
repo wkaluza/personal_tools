@@ -126,11 +126,19 @@ function list_task_containers
 function connect_container_to_network
 {
   local network="$1"
-  local container="$2"
+  local ip="$2"
+  local container="$3"
 
-  docker network connect \
-    "${network}" \
-    "${container}"
+  if [[ "${ip}" == "auto" ]]; then
+    docker network connect \
+      "${network}" \
+      "${container}"
+  else
+    docker network connect \
+      --ip "${ip}" \
+      "${network}" \
+      "${container}"
+  fi
 }
 
 function container_has_label
@@ -150,9 +158,10 @@ function container_has_label
 function connect_stack_containers_to_network
 {
   local network="$1"
-  local label_name="$2"
-  local label_value="$3"
-  local stack="$4"
+  local ip="$2"
+  local label_name="$3"
+  local label_value="$4"
+  local stack="$5"
 
   list_stack_services \
     "${stack}" |
@@ -162,5 +171,6 @@ function connect_stack_containers_to_network
       "${label_name}" \
       "${label_value}" |
     for_each no_fail connect_container_to_network \
-      "${network}" >/dev/null 2>&1
+      "${network}" \
+      "${ip}" >/dev/null 2>&1
 }
