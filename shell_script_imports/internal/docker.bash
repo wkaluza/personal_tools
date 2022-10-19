@@ -54,6 +54,16 @@ function wait_for_networks_deletion
   done
 }
 
+function wait_for_stack_readiness
+{
+  local stack_name="$1"
+
+  list_stack_services "${stack_name}" |
+    for_each list_service_tasks |
+    for_each get_task_containers_state |
+    for_each strings_are_equal "running"
+}
+
 function start_docker_stack
 {
   local env_factory="$1"
@@ -98,6 +108,11 @@ function start_docker_stack
     push
 
   log_info "Stack ${stack_name} pushed successfully"
+
+  retry_until_success \
+    "wait_for_stack_readiness" \
+    wait_for_stack_readiness \
+    "${stack_name}"
 }
 
 function list_all_stacks
@@ -130,6 +145,15 @@ function list_task_containers
 
   docker inspect \
     --format '{{ .Status.ContainerStatus.ContainerID }}' \
+    "${task}"
+}
+
+function get_task_containers_state
+{
+  local task="$1"
+
+  docker inspect \
+    --format '{{ .Status.State }}' \
     "${task}"
 }
 

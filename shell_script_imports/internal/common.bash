@@ -288,3 +288,13 @@ function run_with_env
     "${command}" \
     "${args[@]}" >/dev/null 2>&1
 }
+
+function strings_are_equal
+{
+  local one="$1"
+  local two="$2"
+
+  if [[ "${one}" != "${two}" ]]; then
+    return 1
+  fi
+}
