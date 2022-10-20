@@ -12,7 +12,7 @@ DNS_TEST_STACK_NAME="local_dns_test_stack"
 DNS_TEST_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/dns_tools:1"
 HOST_TIMEZONE="$(current_timezone)"
 LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/docker/swarm"
-LOCAL_SWARM_NODE_ID="<___not_a_valid_id___>"
+LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 
 function wait_for_rolling_update
 {
@@ -224,8 +224,6 @@ function main
   local test_ip="123.132.213.231"
   local k8s_dns_test_name="startup-test-c2kjkrm5"
   local k8s_dns_test_namespace="default"
-
-  LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 
   ensure_services_are_running
   ensure_connection_to_swarm

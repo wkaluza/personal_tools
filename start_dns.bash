@@ -10,7 +10,7 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/docker/swarm"
 HOST_TIMEZONE="$(current_timezone)"
 DNS_STACK_NAME="local_dns_stack"
-LOCAL_SWARM_NODE_ID="<___not_a_valid_id___>"
+LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 DNS_IP_48zyazy8="192.168.49.200"
 
 DNS_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/dns:1"
@@ -62,8 +62,6 @@ function start_dns
 
 function main
 {
-  LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
-
   start_dns
 
   log_info "Success $(basename "$0")"

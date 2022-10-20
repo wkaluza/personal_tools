@@ -11,7 +11,7 @@ DOCKER_REGISTRY_STACK_NAME="local_registry_stack"
 REVERSE_PROXY_STACK_NAME="local_reverse_proxy_stack"
 GIT_FRONTEND_STACK_NAME="local_git_frontend_stack"
 
-EXTERNAL_NETWORK_NAME="<___not_a_real_network___>"
+EXTERNAL_NETWORK_NAME="$(bash "${THIS_SCRIPT_DIR}/create_external_docker_network.bash")"
 
 DOCKER_DNS_RESOLVER_IP="127.0.0.11"
 
@@ -55,7 +55,7 @@ function generate_revision_data
 REVISION_DATA_JSON="$(generate_revision_data)"
 
 LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/docker/swarm"
-LOCAL_SWARM_NODE_ID="<___not_a_valid_id___>"
+LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 
 MAIN_NGINX_CONFIG_PATH="${LOCAL_SERVICES_ROOT_DIR}/reverse_proxy/main_nginx.conf.template"
 MAIN_NGINX_CONFIG_SHA256="$(cat "${MAIN_NGINX_CONFIG_PATH}" |
@@ -231,9 +231,6 @@ function start_main_reverse_proxy
 
 function main
 {
-  EXTERNAL_NETWORK_NAME="$(bash "${THIS_SCRIPT_DIR}/create_external_docker_network.bash")"
-  LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
-
   start_registries &
   start_git_frontend &
   start_main_reverse_proxy &
