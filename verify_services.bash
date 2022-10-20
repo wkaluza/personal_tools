@@ -159,7 +159,7 @@ function ensure_all_k8s_pods_are_running
     --all \
     --all-namespaces \
     --for="condition=Ready" \
-    --timeout="60s"
+    --timeout="60s" >/dev/null
 }
 
 function main
