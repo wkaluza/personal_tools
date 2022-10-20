@@ -1,5 +1,5 @@
 localhost:53 {
-    file /docker/localhost___.dns
+    file /docker/localhost.dns
     log
     errors
 }

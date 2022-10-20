@@ -32,7 +32,7 @@ function reset_zone_file
 function main
 {
   local source_zone_file="${THIS_SCRIPT_DIR}/localhost.dns.base"
-  local final_zone_file="${THIS_SCRIPT_DIR}/context/localhost___.dns"
+  local final_zone_file="${THIS_SCRIPT_DIR}/localhost___.dns"
   local startup_test_ip="123.132.213.231"
   local git_frontend_container_name
   git_frontend_container_name="$(docker network inspect minikube |

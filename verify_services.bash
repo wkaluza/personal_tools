@@ -7,6 +7,13 @@ cd "${THIS_SCRIPT_DIR}"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
+DNS_IP_48zyazy8="192.168.49.200"
+DNS_TEST_STACK_NAME="local_dns_test_stack"
+DNS_TEST_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/dns_tools:1"
+HOST_TIMEZONE="$(current_timezone)"
+LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/docker/swarm"
+LOCAL_SWARM_NODE_ID="<___not_a_valid_id___>"
+
 function wait_for_rolling_update
 {
   local host="$1"
@@ -89,11 +96,11 @@ function ensure_connection_to_swarm
 
 function test_dns_from_docker
 {
-  local name="$1"
+  local id="$1"
   local host="$2"
   local ip="$3"
 
-  docker exec -it "${name}" \
+  docker exec -it "${id}" \
     host "${host}" |
     grep "${ip}"
 }
@@ -116,25 +123,28 @@ function test_dns_docker
 {
   local test_ip="$1"
 
-  local test_name="startup-test-8k4zscuq"
+  local test_id
+  test_id="$(list_stack_services "${DNS_TEST_STACK_NAME}" |
+    for_each list_service_tasks |
+    for_each list_task_containers |
+    head -n+1)"
 
   log_info "Testing DNS from docker..."
   retry_until_success \
     "test_dns_from_docker" \
     test_dns_from_docker \
-    "${test_name}" \
+    "${test_id}" \
     "${DOMAIN_STARTUP_TEST_dmzrfohk}" \
     "${test_ip}"
 
-  docker rm --force "${test_name}" >/dev/null
+  docker stack rm "${DNS_TEST_STACK_NAME}" >/dev/null
 }
 
 function test_dns_k8s
 {
-  local test_ip="$1"
-
-  local test_name="startup-test-c2kjkrm5"
-  local namespace="default"
+  local test_name="$1"
+  local namespace="$2"
+  local test_ip="$3"
 
   log_info "Testing DNS from cluster..."
   retry_until_success \
@@ -162,18 +172,76 @@ function ensure_all_k8s_pods_are_running
     --timeout="60s" >/dev/null
 }
 
+function generate_dns_test_env
+{
+  cat <<EOF
+DNS_IP_48zyazy8='${DNS_IP_48zyazy8}'
+DNS_TEST_CONTEXT='${LOCAL_SERVICES_ROOT_DIR}/dns_tools/context'
+DNS_TEST_DOCKERFILE='${LOCAL_SERVICES_ROOT_DIR}/dns_tools/dns_tools.dockerfile'
+DNS_TEST_IMAGE_REFERENCE='${DNS_TEST_IMAGE_REFERENCE}'
+HOST_TIMEZONE='${HOST_TIMEZONE}'
+LOCAL_NODE_ID='${LOCAL_SWARM_NODE_ID}'
+EOF
+}
+
+function start_docker_dns_test
+{
+  start_docker_stack \
+    generate_dns_test_env \
+    "${THIS_SCRIPT_DIR}/local_dns_test.json" \
+    "${DNS_TEST_STACK_NAME}"
+
+  connect_stack_containers_to_network \
+    "minikube" \
+    "auto" \
+    "wk.connect.cluster-cnr8lm0i" \
+    "true" \
+    "${DNS_TEST_STACK_NAME}"
+}
+
+function start_k8s_dns_test
+{
+  local test_name="$1"
+  local namespace="$2"
+
+  kubectl run \
+    --image "${DNS_TEST_IMAGE_REFERENCE}" \
+    --restart=Always \
+    --namespace "${namespace}" \
+    "${test_name}" \
+    -- \
+    sleep infinity
+
+  kubectl wait pod \
+    --namespace "${namespace}" \
+    "${test_name}" \
+    --for="condition=Ready" \
+    --timeout="60s"
+}
+
 function main
 {
   local test_ip="123.132.213.231"
+  local k8s_dns_test_name="startup-test-c2kjkrm5"
+  local k8s_dns_test_namespace="default"
+
+  LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 
   ensure_services_are_running
   ensure_connection_to_swarm
 
   ensure_all_k8s_pods_are_running
 
+  start_docker_dns_test
+  start_k8s_dns_test \
+    "${k8s_dns_test_name}" \
+    "${k8s_dns_test_namespace}" >/dev/null
+
   test_dns_docker \
     "${test_ip}"
   test_dns_k8s \
+    "${k8s_dns_test_name}" \
+    "${k8s_dns_test_namespace}" \
     "${test_ip}"
 
   log_info "Success $(basename "$0")"

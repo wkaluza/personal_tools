@@ -1,0 +1,107 @@
+{
+  "configs": {
+    "dns_config_corefile": {
+      "file": "${DNS_CONFIG_COREFILE:?}",
+      "name": "dns_config_${DNS_CONFIG_COREFILE_DIGEST:?}"
+    },
+    "dns_config_localhost_zone_file": {
+      "file": "${DNS_CONFIG_LOCALHOST_ZONE_FILE:?}",
+      "name": "dns_config_localhost_zone_file_${DNS_CONFIG_LOCALHOST_ZONE_FILE_DIGEST:?}"
+    }
+  },
+  "networks": {},
+  "secrets": {},
+  "services": {
+    "dns_service": {
+      "build": {
+        "args": {
+          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
+        },
+        "context": "${DNS_CONTEXT:?}",
+        "dockerfile": "${DNS_DOCKERFILE:?}",
+        "network": "bridge"
+      },
+      "command": [
+        "-conf",
+        "/docker/corefile"
+      ],
+      "configs": [
+        {
+          "source": "dns_config_corefile",
+          "target": "/docker/corefile"
+        },
+        {
+          "source": "dns_config_localhost_zone_file",
+          "target": "/docker/localhost.dns"
+        }
+      ],
+      "deploy": {
+        "mode": "global",
+        "placement": {
+          "constraints": [
+            "node.id==${LOCAL_NODE_ID:?}",
+            "node.role==manager"
+          ]
+        },
+        "resources": {
+          "limits": {
+            "cpus": "0.5",
+            "memory": "50MB"
+          },
+          "reservations": {
+            "cpus": "0.25",
+            "memory": "25MB"
+          }
+        },
+        "restart_policy": {
+          "condition": "on-failure",
+          "delay": "10s",
+          "max_attempts": 5,
+          "window": "120s"
+        },
+        "rollback_config": {
+          "delay": "10s",
+          "failure_action": "pause",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        },
+        "update_config": {
+          "delay": "10s",
+          "failure_action": "rollback",
+          "max_failure_ratio": 0,
+          "monitor": "10s",
+          "order": "start-first",
+          "parallelism": 1
+        }
+      },
+      "dns": [
+        "${DNS_IP_48zyazy8:?}"
+      ],
+      "environment": {},
+      "healthcheck": {
+        "disable": false,
+        "interval": "5s",
+        "retries": 30,
+        "start_period": "60s",
+        "timeout": "1s"
+      },
+      "image": "${DNS_IMAGE_REFERENCE:?}",
+      "labels": {
+        "wk.connect.cluster-cnr8lm0i": "true"
+      },
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": 5,
+          "max-size": "200k"
+        }
+      },
+      "networks": [],
+      "secrets": []
+    }
+  },
+  "version": "3.9",
+  "volumes": {}
+}
