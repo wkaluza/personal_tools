@@ -6,7 +6,7 @@ fi
 function ensure_not_sudo
 {
   if test "0" -eq "$(id -u)"; then
-    echo "Do not run this as root"
+    log_error "Do not run this as root"
     exit 1
   fi
 }
@@ -88,11 +88,11 @@ function retry_until_success
 
   local i=1
   until ${command} "${args[@]}" >/dev/null 2>&1; do
-    echo "Retrying: ${task_name}"
+    log_info "Retrying: ${task_name}"
 
     i="$((i + 1))"
     if [[ ${i} -gt 30 ]]; then
-      echo "Timed out: ${task_name}"
+      log_error "Timed out: ${task_name}"
       exit 1
     fi
 
@@ -100,7 +100,7 @@ function retry_until_success
   done
 
   if [[ ${i} -gt 1 ]]; then
-    echo "Success (attempt ${i}): ${task_name}"
+    log_info "Success (attempt ${i}): ${task_name}"
   fi
 }
 

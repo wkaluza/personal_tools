@@ -64,7 +64,7 @@ function is_git_repo
 function repo_is_clean
 {
   if ! is_git_repo; then
-    echo "Error: not a git repo (pwd ${pwd})"
+    log_error "Not a git repo (pwd ${pwd})"
     exit 1
   fi
 
@@ -114,7 +114,7 @@ function git_get_latest
 
     clean_repo
   else
-    echo "Repository is not clean, aborting"
+    log_error "Repository is not clean, aborting"
     exit 1
   fi
 }
