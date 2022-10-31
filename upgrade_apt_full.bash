@@ -5,11 +5,15 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
+source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
+
 function main
 {
-  sudo apt-get autoremove --yes
-  sudo apt-get update
-  sudo apt-get upgrade --with-new-pkgs --yes
+  log_info "Updating software packages..."
+
+  sudo apt-get autoremove --yes >/dev/null 2>&1
+  sudo apt-get update >/dev/null 2>&1
+  sudo apt-get upgrade --with-new-pkgs --yes >/dev/null 2>&1
   # sudo apt-get dist-upgrade --yes
   # sudo apt-get clean
 
