@@ -186,7 +186,17 @@ EOF
 
 function start_docker_dns_test
 {
+  build_docker_stack \
+    generate_dns_test_env \
+    "${THIS_SCRIPT_DIR}/local_dns_test.json" \
+    "${DNS_TEST_STACK_NAME}"
+
   start_docker_stack \
+    generate_dns_test_env \
+    "${THIS_SCRIPT_DIR}/local_dns_test.json" \
+    "${DNS_TEST_STACK_NAME}"
+
+  push_docker_stack \
     generate_dns_test_env \
     "${THIS_SCRIPT_DIR}/local_dns_test.json" \
     "${DNS_TEST_STACK_NAME}"

@@ -64,6 +64,20 @@ function wait_for_stack_readiness
     for_each strings_are_equal "running"
 }
 
+function build_docker_stack
+{
+  local env_factory="$1"
+  local compose_file="$2"
+  local stack_name="$3"
+
+  log_info "Building ${stack_name} images..."
+
+  run_with_env \
+    "${env_factory}" \
+    docker compose \
+    --file "${compose_file}" \
+    build
+}
 function start_docker_stack
 {
   local env_factory="$1"
@@ -80,14 +94,6 @@ function start_docker_stack
     "${stack_name}" \
     "${compose_file}"
 
-  log_info "Building ${stack_name} images..."
-
-  run_with_env \
-    "${env_factory}" \
-    docker compose \
-    --file "${compose_file}" \
-    build
-
   log_info "Deploying ${stack_name}..."
 
   run_with_env \
@@ -97,7 +103,19 @@ function start_docker_stack
     --prune \
     "${stack_name}"
 
+  retry_until_success \
+    "wait_for_stack_readiness" \
+    wait_for_stack_readiness \
+    "${stack_name}"
+
   log_info "Stack ${stack_name} deployed successfully"
+}
+
+function push_docker_stack
+{
+  local env_factory="$1"
+  local compose_file="$2"
+  local stack_name="$3"
 
   log_info "Pushing ${stack_name} images..."
 
@@ -106,13 +124,6 @@ function start_docker_stack
     docker compose \
     --file "${compose_file}" \
     push
-
-  log_info "Stack ${stack_name} pushed successfully"
-
-  retry_until_success \
-    "wait_for_stack_readiness" \
-    wait_for_stack_readiness \
-    "${stack_name}"
 }
 
 function list_all_stacks

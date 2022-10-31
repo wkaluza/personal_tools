@@ -47,7 +47,17 @@ function start_dns
 {
   bash "${LOCAL_SERVICES_ROOT_DIR}/dns/prepare_build_context.bash"
 
+  build_docker_stack \
+    generate_dns_env \
+    "${THIS_SCRIPT_DIR}/local_dns.json" \
+    "${DNS_STACK_NAME}"
+
   start_docker_stack \
+    generate_dns_env \
+    "${THIS_SCRIPT_DIR}/local_dns.json" \
+    "${DNS_STACK_NAME}"
+
+  push_docker_stack \
     generate_dns_env \
     "${THIS_SCRIPT_DIR}/local_dns.json" \
     "${DNS_STACK_NAME}"

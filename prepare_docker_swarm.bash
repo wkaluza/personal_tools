@@ -203,6 +203,32 @@ REVISION_DATA_JSON='${REVISION_DATA_JSON}'
 EOF
 }
 
+function build_registries
+{
+  build_docker_stack \
+    generate_registries_env \
+    "${THIS_SCRIPT_DIR}/local_docker_registry.json" \
+    "${DOCKER_REGISTRY_STACK_NAME}"
+}
+
+function build_git_frontend
+{
+  bash "${LOCAL_SERVICES_ROOT_DIR}/git_frontend/prepare_build_context.bash"
+
+  build_docker_stack \
+    generate_git_frontend_env \
+    "${THIS_SCRIPT_DIR}/local_git_frontend.json" \
+    "${GIT_FRONTEND_STACK_NAME}"
+}
+
+function build_main_reverse_proxy
+{
+  build_docker_stack \
+    generate_main_reverse_proxy_env \
+    "${THIS_SCRIPT_DIR}/local_reverse_proxy.json" \
+    "${REVERSE_PROXY_STACK_NAME}"
+}
+
 function start_registries
 {
   start_docker_stack \
@@ -213,8 +239,6 @@ function start_registries
 
 function start_git_frontend
 {
-  bash "${LOCAL_SERVICES_ROOT_DIR}/git_frontend/prepare_build_context.bash"
-
   start_docker_stack \
     generate_git_frontend_env \
     "${THIS_SCRIPT_DIR}/local_git_frontend.json" \
@@ -229,11 +253,45 @@ function start_main_reverse_proxy
     "${REVERSE_PROXY_STACK_NAME}"
 }
 
+function push_registries
+{
+  push_docker_stack \
+    generate_registries_env \
+    "${THIS_SCRIPT_DIR}/local_docker_registry.json" \
+    "${DOCKER_REGISTRY_STACK_NAME}"
+}
+
+function push_git_frontend
+{
+  push_docker_stack \
+    generate_git_frontend_env \
+    "${THIS_SCRIPT_DIR}/local_git_frontend.json" \
+    "${GIT_FRONTEND_STACK_NAME}"
+}
+
+function push_main_reverse_proxy
+{
+  push_docker_stack \
+    generate_main_reverse_proxy_env \
+    "${THIS_SCRIPT_DIR}/local_reverse_proxy.json" \
+    "${REVERSE_PROXY_STACK_NAME}"
+}
+
 function main
 {
+  build_registries &
+  build_git_frontend &
+  build_main_reverse_proxy &
+  wait
+
   start_registries &
   start_git_frontend &
   start_main_reverse_proxy &
+  wait
+
+  push_registries &
+  push_git_frontend &
+  push_main_reverse_proxy &
   wait
 
   log_info "Success $(basename "$0")"
