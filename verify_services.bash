@@ -9,7 +9,7 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
 DNS_IP_48zyazy8="192.168.49.200"
 DNS_TEST_STACK_NAME="local_dns_test_stack"
-DNS_TEST_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/dns_tools:1"
+DNS_TEST_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/app/dns_tools:1"
 HOST_TIMEZONE="$(current_timezone)"
 LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/docker/swarm"
 LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
@@ -186,17 +186,7 @@ EOF
 
 function start_docker_dns_test
 {
-  build_docker_stack \
-    generate_dns_test_env \
-    "${THIS_SCRIPT_DIR}/local_dns_test.json" \
-    "${DNS_TEST_STACK_NAME}"
-
   start_docker_stack \
-    generate_dns_test_env \
-    "${THIS_SCRIPT_DIR}/local_dns_test.json" \
-    "${DNS_TEST_STACK_NAME}"
-
-  push_docker_stack \
     generate_dns_test_env \
     "${THIS_SCRIPT_DIR}/local_dns_test.json" \
     "${DNS_TEST_STACK_NAME}"
