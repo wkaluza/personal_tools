@@ -485,7 +485,7 @@ function install_minikube
 {
   print_trace
 
-  local version="v1.25.2"
+  local version="v1.27.1"
   local minikube_path="/usr/local/bin/minikube"
 
   sudo wget \
@@ -500,7 +500,7 @@ function install_kind
   print_trace
 
   local output_path="${HOME}/.local/bin/kind"
-  local version="v0.12.0"
+  local version="v0.17.0"
 
   curl \
     --location \
@@ -516,7 +516,7 @@ function install_flux_cli
   print_trace
 
   local url="https://github.com/fluxcd/flux2/releases/download"
-  local version="0.31.3"
+  local version="0.36.0"
   local executable_name="flux"
 
   local output_path="${HOME}/.local/bin/${executable_name}"
@@ -556,7 +556,7 @@ function install_kubectl
   print_trace
 
   local output_path="${HOME}/.local/bin/kubectl"
-  local version="v1.23.6"
+  local version="v1.25.2"
   # version="$(curl -L -s https://dl.k8s.io/release/stable.txt)"
 
   curl \
