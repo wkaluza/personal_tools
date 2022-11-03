@@ -17,9 +17,11 @@ function main
   # sudo apt-get dist-upgrade --yes
   # sudo apt-get clean
 
-  test -f /var/run/reboot-required &&
-    echo reboot required ||
-    echo reboot not required
+  if test -f /var/run/reboot-required; then
+    log_warning "Reboot required"
+  else
+    log_info "Reboot not required"
+  fi
 }
 
 # Entry point
