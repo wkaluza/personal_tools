@@ -22,6 +22,8 @@ function main
   else
     log_info "Reboot not required"
   fi
+
+  log_info "Success $(basename "$0")"
 }
 
 # Entry point

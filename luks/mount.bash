@@ -5,6 +5,8 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
+source "${THIS_SCRIPT_DIR}/../shell_script_imports/preamble.bash"
+
 KEY_TYPE_NOT_DEFINED="___KEY_TYPE_NOT_DEFINED___"
 
 function main
@@ -41,7 +43,7 @@ function main
 
   sudo mount "${mapped_device}" "${mount_point}"
 
-  echo "Success $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
 # Entry point
