@@ -50,7 +50,7 @@ function start_minikube
   status="$(minikube_status)"
 
   local host_path="${HOME}/.wk_k8s_storage___/minikube"
-  local node_path="/wk_data"
+  local node_path="/var/hostpath-provisioner"
 
   mkdir --parents "${host_path}"
 
