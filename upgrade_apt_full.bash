@@ -17,6 +17,8 @@ function main
   # sudo apt-get dist-upgrade --yes
   # sudo apt-get clean
 
+  sudo snap refresh >/dev/null 2>&1
+
   if test -f /var/run/reboot-required; then
     log_warning "Reboot required"
   else
