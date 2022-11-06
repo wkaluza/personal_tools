@@ -21,6 +21,9 @@ function main
   log_info "Restarting docker..."
   sudo systemctl restart docker >/dev/null 2>&1
 
+  log_info "Deleting local k8s storage..."
+  sudo rm -rf "${HOME}/.wk_k8s_storage___/minikube/" >/dev/null 2>&1
+
   log_info "Success: $(basename "$0")"
 }
 
