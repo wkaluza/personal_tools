@@ -29,39 +29,38 @@ function pull_retag_external
     "${new}" >/dev/null 2>&1
 }
 
-function squash_image
+function process_image
 {
   local input_image="$1"
   local output_image="$2"
+  local dockerfile="$3"
+  local target_image="$4"
+  local context="$5"
 
-  log_info "Squashing image ${output_image}..."
-
-  local squash_dir="${THIS_SCRIPT_DIR}/docker/images/squash"
-
-  docker build \
-    --file "${squash_dir}/squash.dockerfile" \
-    --tag "${output_image}" \
-    --target "flat-lu5k0qbb" \
-    --build-arg IMAGE="${input_image}" \
-    "${squash_dir}/context/" >/dev/null 2>&1
-}
-
-function squash_image_with_user
-{
-  local input_image="$1"
-  local output_image="$2"
-
-  log_info "Squashing image ${output_image}..."
-
-  local squash_dir="${THIS_SCRIPT_DIR}/docker/images/squash"
+  log_info "Processing image ${input_image} to ${output_image}..."
 
   docker build \
-    --file "${squash_dir}/squash.dockerfile" \
+    --file "${dockerfile}" \
     --tag "${output_image}" \
-    --target "flat-bash-user-wo3sglfw" \
+    --target "${target_image}" \
     --build-arg IMAGE="${input_image}" \
     --build-arg USERNAME="${USERNAME}" \
-    "${squash_dir}/context/" >/dev/null 2>&1
+    "${context}"
+}
+
+function add_image_epilogue
+{
+  local input_image="$1"
+  local output_image="$2"
+
+  local meta_dir="${THIS_SCRIPT_DIR}/docker/images/meta"
+
+  process_image \
+    "${input_image}" \
+    "${output_image}" \
+    "${meta_dir}/epilogue.dockerfile" \
+    "epilogue-bash-user-wo3sglfw" \
+    "${meta_dir}/context/" >/dev/null 2>&1
 }
 
 function build_base_image
@@ -73,8 +72,6 @@ function build_base_image
   local context="$5"
 
   local final_tag="${BASE_IMAGE_PREFIX}/${source_name}/${source_tag}:${destination_tag}"
-  local temp_tag
-  temp_tag="$(openssl rand -hex 8)"
 
   local uid="54321"
   local gid="43210"
@@ -83,22 +80,13 @@ function build_base_image
 
   docker build \
     --file "${dockerfile}" \
-    --tag "${temp_tag}" \
+    --tag "${final_tag}" \
     --build-arg HOST_TIMEZONE="$(cat /etc/timezone)" \
     --build-arg IMAGE="${EXTERNAL_IMAGE_PREFIX}/${source_name}/${source_tag}:${destination_tag}" \
     --build-arg USERNAME="${USERNAME}" \
     --build-arg UID="${uid}" \
     --build-arg GID="${gid}" \
     "${context}" >/dev/null 2>&1
-
-  squash_image \
-    "${temp_tag}" \
-    "${final_tag}"
-
-  docker rmi \
-    --force \
-    --no-prune \
-    "${temp_tag}" >/dev/null 2>&1
 }
 
 function build_app_image
@@ -122,7 +110,7 @@ function build_app_image
     --build-arg IMAGE="${source_image}:${source_tag}" \
     "${context}" >/dev/null 2>&1
 
-  squash_image_with_user \
+  add_image_epilogue \
     "${temp_tag}" \
     "${final_tag}"
 
