@@ -31,14 +31,6 @@
   },
   "services": {
     "private_docker_registry_71f5c389": {
-      "build": {
-        "args": {
-          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
-        },
-        "context": "${REGISTRY_CONTEXT:?}",
-        "dockerfile": "${REGISTRY_DOCKERFILE:?}",
-        "network": "bridge"
-      },
       "configs": [
         {
           "source": "private_registry_config",
@@ -93,7 +85,7 @@
         "start_period": "60s",
         "timeout": "1s"
       },
-      "image": "${REGISTRY_IMAGE_REFERENCE:?}",
+      "image": "${DOCKER_REGISTRY_IMAGE_REFERENCE:?}",
       "logging": {
         "driver": "json-file",
         "options": {
@@ -113,14 +105,6 @@
       ]
     },
     "private_registry_reverse_proxy": {
-      "build": {
-        "args": {
-          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
-        },
-        "context": "${REVERSE_PROXY_CONTEXT:?}",
-        "dockerfile": "${REVERSE_PROXY_DOCKERFILE:?}",
-        "network": "bridge"
-      },
       "configs": [
         {
           "source": "private_registry_nginx_config",

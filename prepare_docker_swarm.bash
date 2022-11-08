@@ -15,6 +15,8 @@ EXTERNAL_NETWORK_NAME="$(bash "${THIS_SCRIPT_DIR}/create_external_docker_network
 
 DOCKER_DNS_RESOLVER_IP="127.0.0.11"
 
+DOCKER_REGISTRY_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/registry:1"
+GIT_FRONTEND_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/gogs:1"
 REVERSE_PROXY_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/nginx:1"
 
 function generate_git_commit
@@ -126,9 +128,7 @@ DNS_IP_48zyazy8='${DNS_IP_48zyazy8}'
 DNS_RESOLVER_IP='${DOCKER_DNS_RESOLVER_IP}'
 DOMAIN_GIT_FRONTEND_df29c969='${DOMAIN_GIT_FRONTEND_df29c969}'
 EXTERNAL_NETWORK_NAME='${EXTERNAL_NETWORK_NAME}'
-GIT_FRONTEND_CONTEXT='${LOCAL_SERVICES_ROOT_DIR}/git_frontend/context'
-GIT_FRONTEND_DOCKERFILE='${LOCAL_SERVICES_ROOT_DIR}/git_frontend/git_frontend.dockerfile'
-GIT_FRONTEND_IMAGE_REFERENCE='${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/gogs:1'
+GIT_FRONTEND_IMAGE_REFERENCE='${GIT_FRONTEND_IMAGE_REFERENCE}'
 GIT_FRONTEND_LOCALHOST_CERT='${GIT_FRONTEND_LOCALHOST_CERT_PATH}'
 GIT_FRONTEND_LOCALHOST_CERT_DIGEST='${GIT_FRONTEND_LOCALHOST_CERT_DIGEST}'
 GIT_FRONTEND_LOCALHOST_KEY='${GIT_FRONTEND_LOCALHOST_KEY_PATH}'
@@ -138,10 +138,7 @@ GIT_FRONTEND_NGINX_CONFIG_DIGEST='${GIT_FRONTEND_NGINX_CONFIG_DIGEST}'
 GOGS_CONFIG='${GOGS_CONFIG}'
 GOGS_CONFIG_DIGEST='${GOGS_CONFIG_DIGEST}'
 GOGS_SECRET_KEY_e6403800='${GOGS_SECRET_KEY_e6403800}'
-HOST_TIMEZONE='${HOST_TIMEZONE}'
 LOCAL_NODE_ID='${LOCAL_SWARM_NODE_ID}'
-REVERSE_PROXY_CONTEXT='${LOCAL_SERVICES_ROOT_DIR}/reverse_proxy/context'
-REVERSE_PROXY_DOCKERFILE='${LOCAL_SERVICES_ROOT_DIR}/reverse_proxy/reverse_proxy.dockerfile'
 REVERSE_PROXY_IMAGE_REFERENCE='${REVERSE_PROXY_IMAGE_REFERENCE}'
 EOF
 }
@@ -156,17 +153,12 @@ DOCKER_REGISTRY_LOCAL_KEY='${DOCKER_REGISTRY_LOCAL_KEY_PATH}'
 DOCKER_REGISTRY_LOCAL_KEY_DIGEST='${DOCKER_REGISTRY_LOCAL_KEY_SECURE_DIGEST}'
 DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e='${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}'
 EXTERNAL_NETWORK_NAME='${EXTERNAL_NETWORK_NAME}'
-HOST_TIMEZONE='${HOST_TIMEZONE}'
 LOCAL_NODE_ID='${LOCAL_SWARM_NODE_ID}'
 PRIVATE_REGISTRY_CONFIG='${REGISTRY_CONFIG_PATH}'
 PRIVATE_REGISTRY_CONFIG_DIGEST='${REGISTRY_CONFIG_SHA256}'
 PRIVATE_REGISTRY_NGINX_CONFIG='${PRIVATE_REGISTRY_NGINX_CONFIG}'
 PRIVATE_REGISTRY_NGINX_CONFIG_DIGEST='${PRIVATE_REGISTRY_NGINX_CONFIG_DIGEST}'
-REGISTRY_CONTEXT='${LOCAL_SERVICES_ROOT_DIR}/registry/context'
-REGISTRY_DOCKERFILE='${LOCAL_SERVICES_ROOT_DIR}/registry/registry.dockerfile'
-REGISTRY_IMAGE_REFERENCE='${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/registry:1'
-REVERSE_PROXY_CONTEXT='${LOCAL_SERVICES_ROOT_DIR}/reverse_proxy/context'
-REVERSE_PROXY_DOCKERFILE='${LOCAL_SERVICES_ROOT_DIR}/reverse_proxy/reverse_proxy.dockerfile'
+DOCKER_REGISTRY_IMAGE_REFERENCE='${DOCKER_REGISTRY_IMAGE_REFERENCE}'
 REVERSE_PROXY_IMAGE_REFERENCE='${REVERSE_PROXY_IMAGE_REFERENCE}'
 EOF
 }
@@ -188,7 +180,6 @@ GIT_FRONTEND_LOCALHOST_CERT='${GIT_FRONTEND_LOCALHOST_CERT_PATH}'
 GIT_FRONTEND_LOCALHOST_CERT_DIGEST='${GIT_FRONTEND_LOCALHOST_CERT_DIGEST}'
 GIT_FRONTEND_LOCALHOST_KEY='${GIT_FRONTEND_LOCALHOST_KEY_PATH}'
 GIT_FRONTEND_LOCALHOST_KEY_DIGEST='${GIT_FRONTEND_LOCALHOST_KEY_SECURE_DIGEST}'
-HOST_TIMEZONE='${HOST_TIMEZONE}'
 LOCAL_NODE_ID='${LOCAL_SWARM_NODE_ID}'
 MAIN_LOCALHOST_CERT='${MAIN_LOCALHOST_CERT_PATH}'
 MAIN_LOCALHOST_CERT_DIGEST='${MAIN_LOCALHOST_CERT_DIGEST}'
@@ -196,37 +187,33 @@ MAIN_LOCALHOST_KEY='${MAIN_LOCALHOST_KEY_PATH}'
 MAIN_LOCALHOST_KEY_DIGEST='${MAIN_LOCALHOST_KEY_SECURE_DIGEST}'
 MAIN_NGINX_CONFIG='${MAIN_NGINX_CONFIG_PATH}'
 MAIN_NGINX_CONFIG_DIGEST='${MAIN_NGINX_CONFIG_SHA256}'
-REVERSE_PROXY_CONTEXT='${LOCAL_SERVICES_ROOT_DIR}/reverse_proxy/context'
-REVERSE_PROXY_DOCKERFILE='${LOCAL_SERVICES_ROOT_DIR}/reverse_proxy/reverse_proxy.dockerfile'
 REVERSE_PROXY_IMAGE_REFERENCE='${REVERSE_PROXY_IMAGE_REFERENCE}'
 REVISION_DATA_JSON='${REVISION_DATA_JSON}'
 EOF
 }
 
-function build_registries
+function build_images
 {
-  build_docker_stack \
-    generate_registries_env \
-    "${THIS_SCRIPT_DIR}/local_docker_registry.json" \
-    "${DOCKER_REGISTRY_STACK_NAME}"
-}
+  log_info "Building docker images..."
 
-function build_git_frontend
-{
+  docker build \
+    --build-arg HOST_TIMEZONE="${HOST_TIMEZONE}" \
+    --file "${LOCAL_SERVICES_ROOT_DIR}/registry/registry.dockerfile" \
+    --tag "${DOCKER_REGISTRY_IMAGE_REFERENCE}" \
+    "${LOCAL_SERVICES_ROOT_DIR}/registry/context" >/dev/null 2>&1
+
+  docker build \
+    --build-arg HOST_TIMEZONE="${HOST_TIMEZONE}" \
+    --file "${LOCAL_SERVICES_ROOT_DIR}/reverse_proxy/reverse_proxy.dockerfile" \
+    --tag "${REVERSE_PROXY_IMAGE_REFERENCE}" \
+    "${LOCAL_SERVICES_ROOT_DIR}/reverse_proxy/context" >/dev/null 2>&1
+
   bash "${LOCAL_SERVICES_ROOT_DIR}/git_frontend/prepare_build_context.bash"
-
-  build_docker_stack \
-    generate_git_frontend_env \
-    "${THIS_SCRIPT_DIR}/local_git_frontend.json" \
-    "${GIT_FRONTEND_STACK_NAME}"
-}
-
-function build_main_reverse_proxy
-{
-  build_docker_stack \
-    generate_main_reverse_proxy_env \
-    "${THIS_SCRIPT_DIR}/local_reverse_proxy.json" \
-    "${REVERSE_PROXY_STACK_NAME}"
+  docker build \
+    --build-arg HOST_TIMEZONE="${HOST_TIMEZONE}" \
+    --file "${LOCAL_SERVICES_ROOT_DIR}/git_frontend/git_frontend.dockerfile" \
+    --tag "${GIT_FRONTEND_IMAGE_REFERENCE}" \
+    "${LOCAL_SERVICES_ROOT_DIR}/git_frontend/context" >/dev/null 2>&1
 }
 
 function start_registries
@@ -253,46 +240,25 @@ function start_main_reverse_proxy
     "${REVERSE_PROXY_STACK_NAME}"
 }
 
-function push_registries
+function push_images
 {
-  push_docker_stack \
-    generate_registries_env \
-    "${THIS_SCRIPT_DIR}/local_docker_registry.json" \
-    "${DOCKER_REGISTRY_STACK_NAME}"
-}
+  log_info "Pushing docker images..."
 
-function push_git_frontend
-{
-  push_docker_stack \
-    generate_git_frontend_env \
-    "${THIS_SCRIPT_DIR}/local_git_frontend.json" \
-    "${GIT_FRONTEND_STACK_NAME}"
-}
-
-function push_main_reverse_proxy
-{
-  push_docker_stack \
-    generate_main_reverse_proxy_env \
-    "${THIS_SCRIPT_DIR}/local_reverse_proxy.json" \
-    "${REVERSE_PROXY_STACK_NAME}"
+  docker push "${DOCKER_REGISTRY_IMAGE_REFERENCE}" >/dev/null 2>&1
+  docker push "${GIT_FRONTEND_IMAGE_REFERENCE}" >/dev/null 2>&1
+  docker push "${REVERSE_PROXY_IMAGE_REFERENCE}" >/dev/null 2>&1
 }
 
 function main
 {
-  build_registries &
-  build_git_frontend &
-  build_main_reverse_proxy &
-  wait
+  build_images
 
   start_registries &
   start_git_frontend &
   start_main_reverse_proxy &
   wait
 
-  push_registries &
-  push_git_frontend &
-  push_main_reverse_proxy &
-  wait
+  push_images
 
   log_info "Success $(basename "$0")"
 }

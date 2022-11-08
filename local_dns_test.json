@@ -4,14 +4,6 @@
   "secrets": {},
   "services": {
     "dns_test_service": {
-      "build": {
-        "args": {
-          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
-        },
-        "context": "${DNS_TEST_CONTEXT:?}",
-        "dockerfile": "${DNS_TEST_DOCKERFILE:?}",
-        "network": "bridge"
-      },
       "command": [
         "sleep",
         "infinity"

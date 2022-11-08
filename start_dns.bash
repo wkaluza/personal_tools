@@ -34,11 +34,8 @@ DNS_CONFIG_COREFILE='${dns_config_corefile}'
 DNS_CONFIG_COREFILE_DIGEST='${dns_config_corefile_digest}'
 DNS_CONFIG_LOCALHOST_ZONE_FILE='${dns_config_localhost_zone_file}'
 DNS_CONFIG_LOCALHOST_ZONE_FILE_DIGEST='${dns_config_localhost_zone_file_digest}'
-DNS_CONTEXT='${LOCAL_SERVICES_ROOT_DIR}/dns/context'
-DNS_DOCKERFILE='${LOCAL_SERVICES_ROOT_DIR}/dns/dns.dockerfile'
 DNS_IMAGE_REFERENCE='${DNS_IMAGE_REFERENCE}'
 DNS_IP_48zyazy8='${DNS_IP_48zyazy8}'
-HOST_TIMEZONE='${HOST_TIMEZONE}'
 LOCAL_NODE_ID='${LOCAL_SWARM_NODE_ID}'
 EOF
 }
@@ -47,20 +44,18 @@ function start_dns
 {
   bash "${LOCAL_SERVICES_ROOT_DIR}/dns/prepare_build_context.bash"
 
-  build_docker_stack \
-    generate_dns_env \
-    "${THIS_SCRIPT_DIR}/local_dns.json" \
-    "${DNS_STACK_NAME}"
+  docker build \
+    --build-arg HOST_TIMEZONE="${HOST_TIMEZONE}" \
+    --file "${LOCAL_SERVICES_ROOT_DIR}/dns/dns.dockerfile" \
+    --tag "${DNS_IMAGE_REFERENCE}" \
+    "${LOCAL_SERVICES_ROOT_DIR}/dns/context" >/dev/null 2>&1
 
   start_docker_stack \
     generate_dns_env \
     "${THIS_SCRIPT_DIR}/local_dns.json" \
     "${DNS_STACK_NAME}"
 
-  push_docker_stack \
-    generate_dns_env \
-    "${THIS_SCRIPT_DIR}/local_dns.json" \
-    "${DNS_STACK_NAME}"
+  docker push "${DNS_IMAGE_REFERENCE}" >/dev/null 2>&1
 
   connect_stack_containers_to_network \
     "minikube" \

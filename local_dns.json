@@ -13,14 +13,6 @@
   "secrets": {},
   "services": {
     "dns_service": {
-      "build": {
-        "args": {
-          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
-        },
-        "context": "${DNS_CONTEXT:?}",
-        "dockerfile": "${DNS_DOCKERFILE:?}",
-        "network": "bridge"
-      },
       "command": [
         "-conf",
         "/docker/corefile"

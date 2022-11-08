@@ -32,14 +32,6 @@
   },
   "services": {
     "git_frontend_reverse_proxy": {
-      "build": {
-        "args": {
-          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
-        },
-        "context": "${REVERSE_PROXY_CONTEXT:?}",
-        "dockerfile": "${REVERSE_PROXY_DOCKERFILE:?}",
-        "network": "bridge"
-      },
       "configs": [
         {
           "source": "git_frontend_nginx_config",
@@ -127,14 +119,6 @@
       ]
     },
     "gogs_c3a3afb4": {
-      "build": {
-        "args": {
-          "HOST_TIMEZONE": "${HOST_TIMEZONE:?}"
-        },
-        "context": "${GIT_FRONTEND_CONTEXT:?}",
-        "dockerfile": "${GIT_FRONTEND_DOCKERFILE:?}",
-        "network": "bridge"
-      },
       "configs": [
         {
           "source": "gogs_config",
