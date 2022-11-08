@@ -165,9 +165,13 @@ function current_timezone
 {
   local output
 
-  output="$(source <(timedatectl show |
-    grep -E '^Timezone=') &&
-    echo "${Timezone}")"
+  if command -v timedatectl &>/dev/null; then
+    output="$(source <(timedatectl show |
+      grep -E '^Timezone=') &&
+      echo "${Timezone}")"
+  else
+    output="$(cat /etc/timezone)"
+  fi
 
   echo "${output}"
 }

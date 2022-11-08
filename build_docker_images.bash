@@ -81,7 +81,7 @@ function build_base_image
   docker build \
     --file "${dockerfile}" \
     --tag "${final_tag}" \
-    --build-arg HOST_TIMEZONE="$(cat /etc/timezone)" \
+    --build-arg HOST_TIMEZONE="$(current_timezone)" \
     --build-arg IMAGE="${EXTERNAL_IMAGE_PREFIX}/${source_name}/${source_tag}:${destination_tag}" \
     --build-arg USERNAME="${USERNAME}" \
     --build-arg UID="${uid}" \
