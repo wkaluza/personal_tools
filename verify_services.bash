@@ -10,8 +10,6 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 DNS_IP_48zyazy8="192.168.49.200"
 DNS_TEST_STACK_NAME="local_dns_test_stack"
 DNS_TEST_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/app/dns_tools:1"
-HOST_TIMEZONE="$(current_timezone)"
-LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/docker/swarm"
 LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 
 function wait_for_rolling_update
@@ -176,10 +174,7 @@ function generate_dns_test_env
 {
   cat <<EOF
 DNS_IP_48zyazy8='${DNS_IP_48zyazy8}'
-DNS_TEST_CONTEXT='${LOCAL_SERVICES_ROOT_DIR}/dns_tools/context'
-DNS_TEST_DOCKERFILE='${LOCAL_SERVICES_ROOT_DIR}/dns_tools/dns_tools.dockerfile'
 DNS_TEST_IMAGE_REFERENCE='${DNS_TEST_IMAGE_REFERENCE}'
-HOST_TIMEZONE='${HOST_TIMEZONE}'
 LOCAL_NODE_ID='${LOCAL_SWARM_NODE_ID}'
 EOF
 }
