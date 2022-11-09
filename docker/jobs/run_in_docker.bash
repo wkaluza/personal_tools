@@ -92,9 +92,9 @@ function docker_build
   docker build \
     --tag "${image_name}" \
     --file "${dockerfile}" \
-    --build-arg UID="${uid}" \
-    --build-arg GID="${gid}" \
-    --build-arg USERNAME="${username}" \
+    --build-arg DOCKER_UID="${uid}" \
+    --build-arg DOCKER_GID="${gid}" \
+    --build-arg DOCKER_USERNAME="${username}" \
     --build-arg HOST_TIMEZONE="$(current_timezone)" \
     "${build_context}" >/dev/null
 }

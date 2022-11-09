@@ -1,16 +1,16 @@
 FROM ubuntu:22.04
 
-ARG USER_ID
-ARG GROUP_ID
-ARG USERNAME
+ARG DOCKER_UID
+ARG DOCKER_GID
+ARG DOCKER_USERNAME
 ARG TIMEZONE
-ARG DOCKER_GROUP_ID
+ARG DOCKER_SYSTEM_GID
 
-ENV USER=$USERNAME
-ENV UID=$USER_ID
+ENV DOCKER_USER=$DOCKER_USERNAME
+ENV DOCKER_UID=$DOCKER_UID
 ENV HOST_TIMEZONE=$TIMEZONE
 
-ARG _HOME=/home/$USERNAME
+ARG _HOME=/home/$DOCKER_USERNAME
 ARG _WORKSPACE=$_HOME/workspace
 
 SHELL ["bash","-c"]
@@ -19,31 +19,31 @@ RUN apt-get update
 RUN apt-get install --yes sudo
 
 RUN addgroup \
---gid "$GROUP_ID" \
-"$USERNAME"
+--gid "$DOCKER_GID" \
+"$DOCKER_USERNAME"
 
 RUN adduser \
 --disabled-password \
 --gecos "" \
---gid "$GROUP_ID" \
+--gid "$DOCKER_GID" \
 --home "$(realpath $_HOME)" \
 --shell "/bin/bash" \
---uid "$USER_ID" \
-"$USERNAME"
+--uid "$DOCKER_UID" \
+"$DOCKER_USERNAME"
 
 RUN mkdir --parents $_WORKSPACE
 COPY ubuntu_bare_minimum.bash jetbrains-toolbox___.tar.gz $_WORKSPACE/
-RUN chown --recursive $USERNAME:$USERNAME $_WORKSPACE
+RUN chown --recursive $DOCKER_USERNAME:$DOCKER_USERNAME $_WORKSPACE
 
-RUN adduser "$USERNAME" sudo
+RUN adduser "$DOCKER_USERNAME" sudo
 RUN echo "%sudo ALL=(ALL) NOPASSWD:ALL" >>"/etc/sudoers"
 
 RUN addgroup \
---gid "$DOCKER_GROUP_ID" \
+--gid "$DOCKER_SYSTEM_GID" \
 docker
 
-RUN adduser "$USERNAME" docker
+RUN adduser "$DOCKER_USERNAME" docker
 
-USER $USERNAME
+USER $DOCKER_USERNAME
 
 WORKDIR $_WORKSPACE

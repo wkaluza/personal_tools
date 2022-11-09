@@ -26,11 +26,11 @@ function main
   gpgconf --kill gpg-agent scdaemon
 
   docker build \
-    --build-arg "USER_ID=$(id -u)" \
-    --build-arg "GROUP_ID=$(id -g)" \
-    --build-arg "USERNAME=$(id -un)" \
+    --build-arg "DOCKER_UID=$(id -u)" \
+    --build-arg "DOCKER_GID=$(id -g)" \
+    --build-arg "DOCKER_USERNAME=$(id -un)" \
     --build-arg "TIMEZONE=$(readlink -e /etc/localtime)" \
-    --build-arg "DOCKER_GROUP_ID=$(getent group docker | awk -F: '{print $3}')" \
+    --build-arg "DOCKER_SYSTEM_GID=$(getent group docker | awk -F: '{print $3}')" \
     --file "${THIS_SCRIPT_DIR}/test_ubuntu_bare_minimum.dockerfile" \
     --tag "${DOCKER_IMAGE_TAG}" \
     "${THIS_SCRIPT_DIR}"

@@ -8,7 +8,7 @@ cd "${THIS_SCRIPT_DIR}"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
 REMOTE_NAME="gogs"
-USERNAME="wkaluza"
+GOGS_USERNAME="wkaluza"
 
 function add_git_remote
 {
@@ -16,7 +16,7 @@ function add_git_remote
 
   git remote add \
     "${REMOTE_NAME}" \
-    "git@${DOMAIN_GIT_FRONTEND_df29c969}:${USERNAME}/${repo_name}.git"
+    "git@${DOMAIN_GIT_FRONTEND_df29c969}:${GOGS_USERNAME}/${repo_name}.git"
 }
 
 function perform_fetch
@@ -59,18 +59,18 @@ function main
   local description="placeholder description"
 
   local token
-  token="$(pass show "local_gogs_token_${USERNAME}")"
+  token="$(pass show "local_gogs_token_${GOGS_USERNAME}")"
   local auth_header="Authorization: token ${token}"
 
   if ! gogs_check_repo_exists \
     "${DOMAIN_GIT_FRONTEND_df29c969}" \
-    "${USERNAME}" \
+    "${GOGS_USERNAME}" \
     "${repo_name}" \
     "${auth_header}"; then
     log_info "Creating gogs repository..."
     gogs_create_repo \
       "${DOMAIN_GIT_FRONTEND_df29c969}" \
-      "${USERNAME}" \
+      "${GOGS_USERNAME}" \
       "${repo_name}" \
       "${description}" \
       "${auth_header}" >/dev/null 2>&1
@@ -78,7 +78,7 @@ function main
 
   if ! gogs_list_webhooks \
     "${DOMAIN_GIT_FRONTEND_df29c969}" \
-    "${USERNAME}" \
+    "${GOGS_USERNAME}" \
     "${auth_header}" \
     "${repo_name}" |
     jq 'if . | length > 0 then . else error("No webhooks found") end' - >/dev/null 2>&1; then
@@ -86,7 +86,7 @@ function main
     gogs_create_webhook \
       "${DOMAIN_GIT_FRONTEND_df29c969}" \
       "https://${DOMAIN_WEBHOOK_SINK_a8800f5b}/gogs" \
-      "${USERNAME}" \
+      "${GOGS_USERNAME}" \
       "$(pass_show_or_generate "local_gogs_webhook_secret")" \
       "${auth_header}" \
       "${repo_name}" >/dev/null
