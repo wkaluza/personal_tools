@@ -10,7 +10,12 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 APP_IMAGE_PREFIX="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/app"
 BASE_IMAGE_PREFIX="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/base"
 EXTERNAL_IMAGE_PREFIX="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/external"
-USERNAME="sostratus"
+
+DOCKER_USERNAME="sostratus"
+DOCKER_UID="54321"
+DOCKER_GID="43210"
+
+HOST_TIMEZONE="$(current_timezone)"
 
 function pull_retag_external
 {
@@ -44,7 +49,7 @@ function process_image
     --tag "${output_image}" \
     --target "${target_image}" \
     --build-arg IMAGE="${input_image}" \
-    --build-arg USERNAME="${USERNAME}" \
+    --build-arg DOCKER_USERNAME="${DOCKER_USERNAME}" \
     "${context}"
 }
 
@@ -63,6 +68,24 @@ function add_image_epilogue
     "${meta_dir}/context/" >/dev/null 2>&1
 }
 
+function _build_image
+{
+  local source_image_ref="$1"
+  local final_image_ref="$2"
+  local dockerfile="$3"
+  local context="$4"
+
+  docker build \
+    --file "${dockerfile}" \
+    --tag "${final_image_ref}" \
+    --build-arg HOST_TIMEZONE="${HOST_TIMEZONE}" \
+    --build-arg IMAGE="${source_image_ref}" \
+    --build-arg DOCKER_USERNAME="${DOCKER_USERNAME}" \
+    --build-arg DOCKER_UID="${DOCKER_UID}" \
+    --build-arg DOCKER_GID="${DOCKER_GID}" \
+    "${context}" >/dev/null 2>&1
+}
+
 function build_base_image
 {
   local source_name="$1"
@@ -71,25 +94,19 @@ function build_base_image
   local dockerfile="$4"
   local context="$5"
 
-  local final_tag="${BASE_IMAGE_PREFIX}/${source_name}/${source_tag}:${destination_tag}"
+  local final_image_ref="${BASE_IMAGE_PREFIX}/${source_name}/${source_tag}:${destination_tag}"
+  local source_image_ref="${EXTERNAL_IMAGE_PREFIX}/${source_name}/${source_tag}:${destination_tag}"
 
-  local uid="54321"
-  local gid="43210"
+  log_info "Building image ${final_image_ref}..."
 
-  log_info "Building image ${final_tag}..."
-
-  docker build \
-    --file "${dockerfile}" \
-    --tag "${final_tag}" \
-    --build-arg HOST_TIMEZONE="$(current_timezone)" \
-    --build-arg IMAGE="${EXTERNAL_IMAGE_PREFIX}/${source_name}/${source_tag}:${destination_tag}" \
-    --build-arg USERNAME="${USERNAME}" \
-    --build-arg UID="${uid}" \
-    --build-arg GID="${gid}" \
-    "${context}" >/dev/null 2>&1
+  _build_image \
+    "${source_image_ref}" \
+    "${final_image_ref}" \
+    "${dockerfile}" \
+    "${context}"
 }
 
-function build_app_image
+function build_app_image_with_epilogue
 {
   local source_image="$1"
   local source_tag="$2"
@@ -98,26 +115,27 @@ function build_app_image
   local dockerfile="$5"
   local context="$6"
 
-  local final_tag="${APP_IMAGE_PREFIX}/${destination_name}:${destination_tag}"
-  local temp_tag
-  temp_tag="$(openssl rand -hex 8)"
+  local final_image_ref="${APP_IMAGE_PREFIX}/${destination_name}:${destination_tag}"
+  local source_image_ref="${source_image}:${source_tag}"
+  local temp_image_ref
+  temp_image_ref="temp_$(openssl rand -hex 8)"
 
-  log_info "Building image ${final_tag}..."
+  log_info "Building image ${final_image_ref}..."
 
-  docker build \
-    --file "${dockerfile}" \
-    --tag "${temp_tag}" \
-    --build-arg IMAGE="${source_image}:${source_tag}" \
-    "${context}" >/dev/null 2>&1
+  _build_image \
+    "${source_image_ref}" \
+    "${temp_image_ref}" \
+    "${dockerfile}" \
+    "${context}"
 
   add_image_epilogue \
-    "${temp_tag}" \
-    "${final_tag}"
+    "${temp_image_ref}" \
+    "${final_image_ref}"
 
   docker rmi \
     --force \
     --no-prune \
-    "${temp_tag}" >/dev/null 2>&1
+    "${temp_image_ref}" >/dev/null 2>&1
 }
 
 function main
@@ -137,7 +155,7 @@ function main
     "${base_dir}/ubuntu/ubuntu.dockerfile" \
     "${base_dir}/ubuntu/context"
 
-  build_app_image \
+  build_app_image_with_epilogue \
     "${BASE_IMAGE_PREFIX}/ubuntu/22.04" \
     "1" \
     "dns_tools" \
@@ -145,7 +163,7 @@ function main
     "${app_dir}/dns_tools/dns_tools.dockerfile" \
     "${app_dir}/dns_tools/context"
 
-  build_app_image \
+  build_app_image_with_epilogue \
     "${BASE_IMAGE_PREFIX}/ubuntu/22.04" \
     "1" \
     "git" \
