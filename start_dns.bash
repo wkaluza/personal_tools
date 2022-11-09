@@ -42,14 +42,13 @@ EOF
 
 function start_dns
 {
-  bash "${LOCAL_SERVICES_ROOT_DIR}/dns/prepare_build_context.bash"
-
   docker build \
     --build-arg HOST_TIMEZONE="${HOST_TIMEZONE}" \
     --file "${LOCAL_SERVICES_ROOT_DIR}/dns/dns.dockerfile" \
     --tag "${DNS_IMAGE_REFERENCE}" \
     "${LOCAL_SERVICES_ROOT_DIR}/dns/context" >/dev/null 2>&1
 
+  bash "${LOCAL_SERVICES_ROOT_DIR}/dns/prepare_startup_context.bash"
   start_docker_stack \
     generate_dns_env \
     "${THIS_SCRIPT_DIR}/local_dns.json" \
