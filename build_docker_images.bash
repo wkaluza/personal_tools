@@ -106,6 +106,27 @@ function build_base_image
     "${context}"
 }
 
+function build_app_image
+{
+  local source_image="$1"
+  local source_tag="$2"
+  local destination_name="$3"
+  local destination_tag="$4"
+  local dockerfile="$5"
+  local context="$6"
+
+  local final_image_ref="${APP_IMAGE_PREFIX}/${destination_name}:${destination_tag}"
+  local source_image_ref="${source_image}:${source_tag}"
+
+  log_info "Building image ${final_image_ref}..."
+
+  _build_image \
+    "${source_image_ref}" \
+    "${final_image_ref}" \
+    "${dockerfile}" \
+    "${context}"
+}
+
 function build_app_image_with_epilogue
 {
   local source_image="$1"
@@ -148,6 +169,26 @@ function main
     "22.04" \
     "1"
 
+  pull_retag_external \
+    "coredns/coredns" \
+    "1.10.0" \
+    "1"
+
+  pull_retag_external \
+    "gogs/gogs" \
+    "0.12.6" \
+    "1"
+
+  pull_retag_external \
+    "registry" \
+    "2.8.1" \
+    "1"
+
+  pull_retag_external \
+    "nginx" \
+    "1.21.6-alpine" \
+    "1"
+
   build_base_image \
     "ubuntu" \
     "22.04" \
@@ -170,6 +211,39 @@ function main
     "1" \
     "${app_dir}/git/git.dockerfile" \
     "${app_dir}/git/context"
+
+  build_app_image \
+    "${EXTERNAL_IMAGE_PREFIX}/coredns/coredns/1.10.0" \
+    "1" \
+    "dns" \
+    "1" \
+    "${app_dir}/dns/dns.dockerfile" \
+    "${app_dir}/dns/context"
+
+  build_app_image \
+    "${EXTERNAL_IMAGE_PREFIX}/registry/2.8.1" \
+    "1" \
+    "registry" \
+    "1" \
+    "${app_dir}/registry/registry.dockerfile" \
+    "${app_dir}/registry/context"
+
+  bash "${app_dir}/git_frontend/prepare_build_context.bash"
+  build_app_image \
+    "${EXTERNAL_IMAGE_PREFIX}/gogs/gogs/0.12.6" \
+    "1" \
+    "gogs" \
+    "1" \
+    "${app_dir}/git_frontend/git_frontend.dockerfile" \
+    "${app_dir}/git_frontend/context"
+
+  build_app_image \
+    "${EXTERNAL_IMAGE_PREFIX}/nginx/1.21.6-alpine" \
+    "1" \
+    "nginx" \
+    "1" \
+    "${app_dir}/reverse_proxy/reverse_proxy.dockerfile" \
+    "${app_dir}/reverse_proxy/context"
 
   log_info "Success $(basename "$0")"
 }

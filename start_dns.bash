@@ -8,12 +8,11 @@ cd "${THIS_SCRIPT_DIR}"
 source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
 LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/docker/swarm"
-HOST_TIMEZONE="$(current_timezone)"
 DNS_STACK_NAME="local_dns_stack"
 LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 DNS_IP_48zyazy8="192.168.49.200"
 
-DNS_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/dns:1"
+DNS_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/app/dns:1"
 
 function generate_dns_env
 {
@@ -42,19 +41,11 @@ EOF
 
 function start_dns
 {
-  docker build \
-    --build-arg HOST_TIMEZONE="${HOST_TIMEZONE}" \
-    --file "${LOCAL_SERVICES_ROOT_DIR}/dns/dns.dockerfile" \
-    --tag "${DNS_IMAGE_REFERENCE}" \
-    "${LOCAL_SERVICES_ROOT_DIR}/dns/context" >/dev/null 2>&1
-
   bash "${LOCAL_SERVICES_ROOT_DIR}/dns/prepare_startup_context.bash"
   start_docker_stack \
     generate_dns_env \
     "${THIS_SCRIPT_DIR}/local_dns.json" \
     "${DNS_STACK_NAME}"
-
-  docker push "${DNS_IMAGE_REFERENCE}" >/dev/null 2>&1
 
   connect_stack_containers_to_network \
     "minikube" \

@@ -1,4 +1,4 @@
-ARG IMAGE="nginx:1.21.6-alpine"
+ARG IMAGE
 FROM $IMAGE
 
 ARG HOST_TIMEZONE="Etc/UTC"
