@@ -8,7 +8,8 @@ cd "${THIS_SCRIPT_DIR}"
 function main_root
 {
   apt-get install --yes \
-    git
+    git \
+    gpg
 }
 
 function main
