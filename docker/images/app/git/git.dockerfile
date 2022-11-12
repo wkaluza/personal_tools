@@ -1,5 +1,5 @@
 ARG IMAGE
-FROM $IMAGE
+FROM $IMAGE AS base
 
 ARG _DOCKER_BUILD_TEMP_ROOT_DIR="/docker_root_build_temp"
 ARG _IMAGE_SETUP_SCRIPT="set_up_image.bash"

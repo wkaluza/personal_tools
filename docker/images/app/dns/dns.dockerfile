@@ -1,4 +1,4 @@
 ARG IMAGE
-FROM $IMAGE
+FROM $IMAGE AS base
 
 COPY "./" "/docker/"

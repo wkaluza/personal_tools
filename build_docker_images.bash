@@ -38,8 +38,8 @@ function process_image
 {
   local input_image="$1"
   local output_image="$2"
-  local dockerfile="$3"
-  local target_image="$4"
+  local dockerfile_target="$3"
+  local dockerfile="$4"
   local context="$5"
 
   log_info "Processing image ${input_image} to ${output_image}..."
@@ -47,7 +47,7 @@ function process_image
   docker build \
     --file "${dockerfile}" \
     --tag "${output_image}" \
-    --target "${target_image}" \
+    --target "${dockerfile_target}" \
     --build-arg IMAGE="${input_image}" \
     --build-arg DOCKER_USERNAME="${DOCKER_USERNAME}" \
     "${context}"
@@ -63,8 +63,8 @@ function add_image_epilogue
   process_image \
     "${input_image}" \
     "${output_image}" \
-    "${meta_dir}/epilogue.dockerfile" \
     "epilogue-bash-user-wo3sglfw" \
+    "${meta_dir}/epilogue.dockerfile" \
     "${meta_dir}/context/" >/dev/null 2>&1
 }
 
@@ -72,12 +72,14 @@ function _build_image
 {
   local source_image_ref="$1"
   local final_image_ref="$2"
-  local dockerfile="$3"
-  local context="$4"
+  local dockerfile_target="$3"
+  local dockerfile="$4"
+  local context="$5"
 
   docker build \
     --file "${dockerfile}" \
     --tag "${final_image_ref}" \
+    --target "${dockerfile_target}" \
     --build-arg HOST_TIMEZONE="${HOST_TIMEZONE}" \
     --build-arg IMAGE="${source_image_ref}" \
     --build-arg DOCKER_USERNAME="${DOCKER_USERNAME}" \
@@ -89,19 +91,22 @@ function _build_image
 function build_base_image
 {
   local source_name="$1"
-  local source_tag="$2"
-  local destination_tag="$3"
-  local dockerfile="$4"
-  local context="$5"
+  local external_tag="$2"
+  local source_tag="$3"
+  local destination_tag="$4"
+  local dockerfile_target="$5"
+  local dockerfile="$6"
+  local context="$7"
 
-  local final_image_ref="${BASE_IMAGE_PREFIX}/${source_name}/${source_tag}:${destination_tag}"
-  local source_image_ref="${EXTERNAL_IMAGE_PREFIX}/${source_name}/${source_tag}:${destination_tag}"
+  local final_image_ref="${BASE_IMAGE_PREFIX}/${source_name}/${external_tag}:${destination_tag}"
+  local source_image_ref="${EXTERNAL_IMAGE_PREFIX}/${source_name}/${external_tag}:${source_tag}"
 
   log_info "Building image ${final_image_ref}..."
 
   _build_image \
     "${source_image_ref}" \
     "${final_image_ref}" \
+    "${dockerfile_target}" \
     "${dockerfile}" \
     "${context}"
 }
@@ -112,8 +117,9 @@ function build_app_image
   local source_tag="$2"
   local destination_name="$3"
   local destination_tag="$4"
-  local dockerfile="$5"
-  local context="$6"
+  local dockerfile_target="$5"
+  local dockerfile="$6"
+  local context="$7"
 
   local final_image_ref="${APP_IMAGE_PREFIX}/${destination_name}:${destination_tag}"
   local source_image_ref="${source_image}:${source_tag}"
@@ -123,6 +129,7 @@ function build_app_image
   _build_image \
     "${source_image_ref}" \
     "${final_image_ref}" \
+    "${dockerfile_target}" \
     "${dockerfile}" \
     "${context}"
 }
@@ -133,8 +140,9 @@ function build_app_image_with_epilogue
   local source_tag="$2"
   local destination_name="$3"
   local destination_tag="$4"
-  local dockerfile="$5"
-  local context="$6"
+  local dockerfile_target="$5"
+  local dockerfile="$6"
+  local context="$7"
 
   local final_image_ref="${APP_IMAGE_PREFIX}/${destination_name}:${destination_tag}"
   local source_image_ref="${source_image}:${source_tag}"
@@ -146,6 +154,7 @@ function build_app_image_with_epilogue
   _build_image \
     "${source_image_ref}" \
     "${temp_image_ref}" \
+    "${dockerfile_target}" \
     "${dockerfile}" \
     "${context}"
 
@@ -194,6 +203,8 @@ function main
     "ubuntu" \
     "22.04" \
     "1" \
+    "1" \
+    "base" \
     "${base_dir}/ubuntu/ubuntu.dockerfile" \
     "${base_dir}/ubuntu/context"
 
@@ -202,6 +213,7 @@ function main
     "1" \
     "dns_tools" \
     "1" \
+    "base" \
     "${app_dir}/dns_tools/dns_tools.dockerfile" \
     "${app_dir}/dns_tools/context"
 
@@ -210,6 +222,7 @@ function main
     "1" \
     "git" \
     "1" \
+    "base" \
     "${app_dir}/git/git.dockerfile" \
     "${app_dir}/git/context"
 
@@ -218,6 +231,7 @@ function main
     "1" \
     "dns" \
     "1" \
+    "base" \
     "${app_dir}/dns/dns.dockerfile" \
     "${app_dir}/dns/context"
 
@@ -226,6 +240,7 @@ function main
     "1" \
     "registry" \
     "1" \
+    "base" \
     "${app_dir}/registry/registry.dockerfile" \
     "${app_dir}/registry/context"
 
@@ -235,6 +250,7 @@ function main
     "1" \
     "gogs" \
     "1" \
+    "base" \
     "${app_dir}/git_frontend/git_frontend.dockerfile" \
     "${app_dir}/git_frontend/context"
 
@@ -243,6 +259,7 @@ function main
     "1" \
     "nginx" \
     "1" \
+    "base" \
     "${app_dir}/reverse_proxy/reverse_proxy.dockerfile" \
     "${app_dir}/reverse_proxy/context"
 
