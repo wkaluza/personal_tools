@@ -46,6 +46,18 @@ function create_user
     "${username}"
 }
 
+function install_trusted_ca_certs_ubuntu
+{
+  apt-get install --yes \
+    ca-certificates
+
+  cp \
+    "${THIS_SCRIPT_DIR}/ca___"/*.crt \
+    "/usr/local/share/ca-certificates/"
+
+  update-ca-certificates
+}
+
 function main_root
 {
   local uid="$1"
@@ -60,6 +72,7 @@ function main_root
     "${uid}" \
     "${gid}" \
     "${username}"
+  install_trusted_ca_certs_ubuntu
 }
 
 function main

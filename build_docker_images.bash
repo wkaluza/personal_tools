@@ -189,6 +189,7 @@ function main
     "1.21.6-alpine" \
     "1"
 
+  bash "${base_dir}/ubuntu/prepare_build_context.bash"
   build_base_image \
     "ubuntu" \
     "22.04" \
