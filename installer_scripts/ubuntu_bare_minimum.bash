@@ -406,7 +406,7 @@ function ensure_user_is_in_docker_group
     # Create the docker group if it does not exist
     getent group docker || sudo addgroup --system docker
 
-    sudo adduser "${USER}" docker
+    sudo adduser "$(id -un)" docker
     log_info "User added to docker group"
     log_info "Log out and back in for change to take effect"
 

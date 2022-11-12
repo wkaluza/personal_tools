@@ -49,7 +49,7 @@ function enable_sudoless_docker
   # Create the docker group if it does not exist
   getent group docker || sudo addgroup docker
 
-  sudo adduser "${USER}" docker
+  sudo adduser "$(id -un)" docker
 }
 
 function install_docker_unless_already_installed
