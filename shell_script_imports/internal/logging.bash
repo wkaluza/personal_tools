@@ -34,3 +34,11 @@ function print_trace
 
   echo "[***TRACE***]: ${trace}"
 }
+
+function quiet
+{
+  local command="$1"
+  local args=("${@:2}")
+
+  ${command} "${args[@]}" >/dev/null 2>&1
+}

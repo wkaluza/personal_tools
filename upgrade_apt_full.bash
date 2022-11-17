@@ -11,13 +11,13 @@ function main
 {
   log_info "Updating software packages..."
 
-  sudo apt-get autoremove --yes >/dev/null 2>&1
-  sudo apt-get update >/dev/null 2>&1
-  sudo apt-get upgrade --with-new-pkgs --yes >/dev/null 2>&1
-  # sudo apt-get dist-upgrade --yes
-  # sudo apt-get clean
+  quiet sudo apt-get autoremove --yes
+  quiet sudo apt-get update
+  quiet sudo apt-get upgrade --with-new-pkgs --yes
+  # quiet sudo apt-get dist-upgrade --yes
+  # quiet sudo apt-get clean
 
-  sudo snap refresh >/dev/null 2>&1 || true
+  quiet sudo snap refresh || true
 
   if test -f /var/run/reboot-required; then
     log_warning "Reboot required"
