@@ -7,7 +7,7 @@ cd "${THIS_SCRIPT_DIR}"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
-TEMP_UNPACK_DIR="${HOME}/.wk_backup_test_restorations___"
+TEMP_UNPACK_DIR="$(mktemp -d)"
 
 RSYNC_BASE_COMMAND="rsync -avuX --exclude '*/.idea/' --exclude '*/node_modules/'"
 
@@ -229,8 +229,6 @@ function main
 
   mkdir --parents "${dir_wk_home_copy}"
   mkdir --parents "${dir_wk_sda_copy}"
-
-  rm -rf "${TEMP_UNPACK_DIR}" &
 
   sync_with_deletion \
     "${dir_wk_home}" \
