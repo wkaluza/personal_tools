@@ -21,7 +21,7 @@ function main
   local mount_point="${HOME}/luks/${mapping_name}"
 
   if mount | grep "${mapped_device} on ${mount_point}" >/dev/null; then
-    echo "Already mounted: ${mapped_device} on ${mount_point}"
+    log_warning "Already mounted: ${mapped_device} on ${mount_point}"
 
     exit 0
   fi

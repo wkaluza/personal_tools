@@ -5,6 +5,8 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
+source "${THIS_SCRIPT_DIR}/../shell_script_imports/preamble.bash"
+
 function main
 {
   local dislocker_dir="$1"
@@ -13,6 +15,8 @@ function main
   sudo umount -d "${mount_point}"
   sleep 5
   sudo umount -d "${dislocker_dir}"
+
+  log_info "Success $(basename "$0")"
 }
 
 # Entry point
