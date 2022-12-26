@@ -304,49 +304,6 @@ function set_up_pass
   pass init "${PRIMARY_KEY_FINGERPRINT}"
 }
 
-function install_tmux
-{
-  print_trace
-
-  sudo apt-get install --yes \
-    tmux
-
-  local session_name="main_session"
-  local window_name="main_window"
-
-  cat <<EOF >"${HOME}/.tmux.conf"
-set -g mouse on
-set -g display-panes-time 10000
-
-new-session -s "${session_name}" -n "${window_name}"
-select-window -t "${session_name}:${window_name}"
-
-select-pane -t 0
-send-keys "cd \${WK_START_WORKDIR}" C-m
-send-keys "clear" C-m
-
-split-window -v -p 50
-
-select-pane -t 1
-send-keys "cd \${WK_START_WORKDIR}" C-m
-send-keys "clear" C-m
-
-split-window -h -p 50
-
-select-pane -t 2
-send-keys "cd \${WK_START_WORKDIR}" C-m
-send-keys "clear" C-m
-
-# select-layout even-horizontal
-# select-layout even-vertical
-select-layout main-horizontal
-# select-layout main-vertical
-# select-layout tiled
-
-select-pane -t 0
-EOF
-}
-
 function install_latest_git
 {
   print_trace
@@ -596,7 +553,6 @@ function main
 
   install_rng_tools
   install_openssl
-  install_tmux
   install_xxd
   install_mkcert
 
