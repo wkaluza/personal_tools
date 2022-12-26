@@ -40,5 +40,21 @@ function quiet
   local command="$1"
   local args=("${@:2}")
 
-  ${command} "${args[@]}" >/dev/null 2>&1
+  quiet_stdout quiet_stderr ${command} "${args[@]}"
+}
+
+function quiet_stdout
+{
+  local command="$1"
+  local args=("${@:2}")
+
+  ${command} "${args[@]}" >/dev/null
+}
+
+function quiet_stderr
+{
+  local command="$1"
+  local args=("${@:2}")
+
+  ${command} "${args[@]}" 2>/dev/null
 }
