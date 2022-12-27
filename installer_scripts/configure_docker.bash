@@ -9,21 +9,6 @@ BASHRC="${HOME}/.bashrc"
 
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/preamble.bash"
 
-CREDENTIAL_HELPERS_DIR="${THIS_SCRIPT_DIR}/docker_credential_helpers___deleteme"
-
-function on_exit
-{
-  local exit_code=$?
-
-  if [[ ${exit_code} -eq 0 ]]; then
-    rm -rf "${CREDENTIAL_HELPERS_DIR}"
-  fi
-
-  exit "${exit_code}"
-}
-
-trap on_exit EXIT
-
 function build_docker_pass_credential_helper
 {
   print_trace
@@ -131,8 +116,10 @@ function install_docker_pass_credential_helper
   local dest_dir="${HOME}/.local/bin"
   local docker_config="${HOME}/.docker/config.json"
 
+  local temp_cred_helper_dir
+  temp_cred_helper_dir="$(mktemp -d)"
   run_in_context \
-    "${CREDENTIAL_HELPERS_DIR}" \
+    "${temp_cred_helper_dir}" \
     build_docker_pass_credential_helper \
     "${dest_dir}"
 
