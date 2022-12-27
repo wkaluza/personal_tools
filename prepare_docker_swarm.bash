@@ -19,43 +19,6 @@ DOCKER_REGISTRY_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/app/
 GIT_FRONTEND_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/app/gogs:1"
 REVERSE_PROXY_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/app/nginx:1"
 
-function generate_git_commit
-{
-  echo \
-    "commit:" \
-    "\"$(git rev-parse 'HEAD' 2>/dev/null)\""
-}
-
-function generate_git_branch
-{
-  echo \
-    "branch:" \
-    "\"$(git branch --show-current)\""
-}
-
-function generate_git_wip
-{
-  echo \
-    "work_in_progress:" \
-    "$(if is_git_repo && ! repo_is_clean; then echo "true"; else echo "false"; fi)"
-}
-
-function generate_revision_data
-{
-  local output='{"vcs_in_use":""}'
-
-  if is_git_repo; then
-    output=$(echo '{ "vcs_in_use": "git" }' |
-      jq ". + { git: { $(generate_git_commit), $(generate_git_wip), $(generate_git_branch) }}" -)
-  fi
-
-  echo "${output}" |
-    jq --sort-keys --compact-output '.' - |
-    tr -d '\n'
-}
-
-REVISION_DATA_JSON="$(generate_revision_data)"
-
 LOCAL_SERVICES_ROOT_DIR="${THIS_SCRIPT_DIR}/docker/swarm"
 LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 
@@ -187,7 +150,6 @@ MAIN_LOCALHOST_KEY_DIGEST='${MAIN_LOCALHOST_KEY_SECURE_DIGEST}'
 MAIN_NGINX_CONFIG='${MAIN_NGINX_CONFIG_PATH}'
 MAIN_NGINX_CONFIG_DIGEST='${MAIN_NGINX_CONFIG_SHA256}'
 REVERSE_PROXY_IMAGE_REFERENCE='${REVERSE_PROXY_IMAGE_REFERENCE}'
-REVISION_DATA_JSON='${REVISION_DATA_JSON}'
 EOF
 }
 

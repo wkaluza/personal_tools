@@ -62,8 +62,8 @@ http {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_session_cache shared:SSL:10m;
 
-    location = /_/revision {
-      return 200 '${REVISION_DATA_JSON}\n';
+    location = /_/healthcheck {
+      return 200 'HEALTHY\n';
     }
   }
 

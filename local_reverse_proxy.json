@@ -94,8 +94,7 @@
         "DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e": "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e:?}",
         "DOMAIN_GIT_FRONTEND_df29c969": "${DOMAIN_GIT_FRONTEND_df29c969:?}",
         "DOMAIN_MAIN_REVERSE_PROXY_cab92795": "${DOMAIN_MAIN_REVERSE_PROXY_cab92795:?}",
-        "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx",
-        "REVISION_DATA_JSON": "${REVISION_DATA_JSON:?}"
+        "NGINX_ENVSUBST_OUTPUT_DIR": "/etc/nginx"
       },
       "healthcheck": {
         "disable": false,

@@ -12,20 +12,6 @@ DNS_TEST_STACK_NAME="local_dns_test_stack"
 DNS_TEST_IMAGE_REFERENCE="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/app/dns_tools:1"
 LOCAL_SWARM_NODE_ID="$(get_local_node_id)"
 
-function wait_for_rolling_update
-{
-  local host="$1"
-
-  local scheme="https"
-  local endpoint="_/revision"
-
-  if is_git_repo; then
-    curl --silent \
-      "${scheme}://${host}/${endpoint}" |
-      grep "$(git rev-parse HEAD)"
-  fi
-}
-
 function ping_gogs
 {
   local host="$1"
@@ -55,11 +41,23 @@ function ping_registry
     grep "repositories"
 }
 
+function ping_hub
+{
+  local host="$1"
+
+  local scheme="https"
+  local endpoint="_/healthcheck"
+
+  curl --silent \
+    "${scheme}://${host}/${endpoint}" |
+    grep "HEALTHY"
+}
+
 function ensure_services_are_running
 {
   retry_until_success \
-    "wait_for_rolling_update ${DOMAIN_MAIN_REVERSE_PROXY_cab92795}" \
-    wait_for_rolling_update "${DOMAIN_MAIN_REVERSE_PROXY_cab92795}"
+    "ping_hub ${DOMAIN_MAIN_REVERSE_PROXY_cab92795}" \
+    ping_hub "${DOMAIN_MAIN_REVERSE_PROXY_cab92795}"
 
   retry_until_success \
     "ping_registry ${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}" \
