@@ -281,7 +281,7 @@ function configure_git_ssh_substitutions
 {
   print_trace
 
-  git config --global url."git@github.com:".insteadOf "https://github.com/"
+  git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
 }
 
 function ensure_user_is_in_docker_group
