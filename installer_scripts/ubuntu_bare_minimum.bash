@@ -461,6 +461,10 @@ function main
 
   ensure_not_sudo
   prime_sudo_password_cache
+
+  # Create this early so .profile adds it to PATH
+  mkdir --parents "${HOME}/.local/bin"
+
   ensure_user_is_in_docker_group
 
   configure_bash
