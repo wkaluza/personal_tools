@@ -210,36 +210,17 @@ function install_configure_ufw
   sudo ufw default deny routed
 }
 
-function clean_tools_repo
-{
-  print_trace
-
-  local tools_dir="$1"
-
-  quiet pushd "${tools_dir}"
-  git clean -dffxn
-  git reset --hard 'HEAD'
-  quiet popd
-}
-
 function clone_personal_tools
 {
   print_trace
 
   local tools_dir="$1"
 
-  sudo apt-get install --yes \
-    git
+  local url="ssh://git@github.com/wkaluza/personal_tools.git"
 
-  local url="https://github.com/wkaluza/personal_tools.git"
-
-  if ! test -d "${tools_dir}"; then
-    git clone \
-      --recurse-submodules \
-      --tags \
-      "${url}" \
-      "${tools_dir}"
-  fi
+  clone_or_fetch \
+    "${url}" \
+    "${tools_dir}"
 }
 
 function set_up_pass
@@ -503,10 +484,10 @@ function main
 
   disable_swap
 
-  bash "${tools_dir}/installer_scripts/install_docker.bash"
-  bash "${tools_dir}/installer_scripts/configure_docker.bash"
+  bash "${THIS_SCRIPT_DIR}/install_docker.bash"
+  bash "${THIS_SCRIPT_DIR}/configure_docker.bash"
 
-  bash "${tools_dir}/installer_scripts/install_applications.bash"
+  bash "${THIS_SCRIPT_DIR}/install_applications.bash"
 
   install_kind
   install_minikube
@@ -520,9 +501,6 @@ function main
   set_umask_and_home_permissions
 
   manage_sudo_password_in_pass
-
-  clean_tools_repo \
-    "${tools_dir}"
 
   install_configure_ufw
 
