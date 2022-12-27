@@ -32,7 +32,6 @@ RUN adduser \
 "$DOCKER_USERNAME"
 
 RUN mkdir --parents $_WORKSPACE
-COPY ubuntu_bare_minimum.bash jetbrains-toolbox___.tar.gz $_WORKSPACE/
 RUN chown --recursive $DOCKER_USERNAME:$DOCKER_USERNAME $_WORKSPACE
 
 RUN adduser "$DOCKER_USERNAME" sudo

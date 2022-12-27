@@ -10,7 +10,6 @@ source "${THIS_SCRIPT_DIR}/../shell_script_imports/preamble.bash"
 PRIMARY_KEY_FINGERPRINT="174C9368811039C87F0C806A896572D1E78ED6A7"
 SIGNING_KEY_FINGERPRINT="143EE89AAC97053810D13E378A7E8CA85A62CF20"
 BASHRC_PATH="${HOME}/.bashrc"
-ERR_JETBRAINS_PATH_NOT_SET="___ERR_JETBRAINS_PATH_NOT_SET___"
 
 function prime_sudo_password_cache
 {
@@ -476,21 +475,8 @@ function install_kubectl
 
 function main
 {
-  local jetbrains_toolbox_tar_gz
-  jetbrains_toolbox_tar_gz="$(realpath "$1")"
-
   local tools_dir
   tools_dir="$(realpath "${HOME}/.wk_tools")"
-
-  if [[ "$(basename "${jetbrains_toolbox_tar_gz}")" == "${ERR_JETBRAINS_PATH_NOT_SET}" ]]; then
-    log_error "Path to jetbrains toolbox tar.gz archive required as argument"
-    exit 1
-  fi
-
-  if ! test -f "${jetbrains_toolbox_tar_gz}"; then
-    log_error "File not found: ${jetbrains_toolbox_tar_gz}"
-    exit 1
-  fi
 
   ensure_not_sudo
   prime_sudo_password_cache
@@ -520,8 +506,6 @@ function main
   bash "${tools_dir}/installer_scripts/install_docker.bash"
   bash "${tools_dir}/installer_scripts/configure_docker.bash"
 
-  bash "${tools_dir}/installer_scripts/install_jetbrains.bash" \
-    "${jetbrains_toolbox_tar_gz}"
   bash "${tools_dir}/installer_scripts/install_applications.bash"
 
   install_kind
@@ -545,4 +529,4 @@ function main
   log_info "Success: $(basename "$0")"
 }
 
-main "${1-"${ERR_JETBRAINS_PATH_NOT_SET}"}"
+main
