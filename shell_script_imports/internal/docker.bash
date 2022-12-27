@@ -20,11 +20,11 @@ function is_stack_running
     jq \
       --slurp \
       "map(select( .Name == \"${stack_name}\" ))" - |
-    jq \
+    quiet_stderr jq \
       --raw-output \
-      'if . | length == 1 then .[0].Name else error("Expected stack not found") end' - 2>/dev/null |
+      'if . | length == 1 then .[0].Name else error("Expected stack not found") end' - |
     head -n 1 |
-    grep -E "^${stack_name}$" >/dev/null
+    quiet grep -E "^${stack_name}$"
 }
 
 function stack_internal_networks
@@ -48,7 +48,7 @@ function wait_for_networks_deletion
     "${stack_name}" \
     "${compose_file}"); do
     if docker network ls --format '{{ .Name }}' |
-      grep -E "^${network_name}$" >/dev/null; then
+      quiet grep -E "^${network_name}$"; then
       false
     fi
   done
@@ -84,8 +84,8 @@ function start_docker_stack
   local compose_file="$2"
   local stack_name="$3"
 
-  docker stack rm \
-    "${stack_name}" >/dev/null 2>&1 ||
+  quiet docker stack rm \
+    "${stack_name}" ||
     true
 
   retry_until_success \
@@ -215,7 +215,7 @@ function connect_stack_containers_to_network
     for_each filter container_has_label \
       "${label_name}" \
       "${label_value}" |
-    for_each no_fail connect_container_to_network \
+    for_each quiet no_fail connect_container_to_network \
       "${network}" \
-      "${ip}" >/dev/null 2>&1
+      "${ip}"
 }

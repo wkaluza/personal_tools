@@ -5,6 +5,8 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
+source "${THIS_SCRIPT_DIR}/../shell_script_imports/preamble.bash"
+
 function main
 {
   local encrypted_file
@@ -18,13 +20,13 @@ function main
 
   mkdir --parents "${target_dir}"
 
-  pushd "${target_dir}" >/dev/null
+  quiet pushd "${target_dir}"
   cat "${encrypted_file}" |
     gpg \
       --verbose \
       --decrypt |
     tar -xzv .
-  popd >/dev/null
+  quiet popd
 }
 
 # Entry point

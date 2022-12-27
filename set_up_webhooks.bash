@@ -48,7 +48,7 @@ function webhook_exists
     "${auth_header}" \
     "${repo_name}" |
     jq ". | map( select( .config.url == \"${webhook_url}\" ) )" - |
-    jq "if . | length == 0 then error(\"Webhook not found: ${webhook_url}\") else . end" - >/dev/null 2>&1
+    quiet jq "if . | length == 0 then error(\"Webhook not found: ${webhook_url}\") else . end" -
 }
 
 function escape_dots
@@ -96,13 +96,13 @@ function create_webhook_for_receiver
     "${webhook_url}"; then
     log_info "Creating webhook for ${username}/${repo_name} aimed at ${webhook_url}"
 
-    gogs_create_webhook \
+    quiet gogs_create_webhook \
       "${DOMAIN_GIT_FRONTEND_df29c969}" \
       "${webhook_url}" \
       "${username}" \
       "$(pass_show_or_generate "local_gogs_webhook_secret")" \
       "${auth_header}" \
-      "${repo_name}" >/dev/null
+      "${repo_name}"
   fi
 }
 
@@ -119,12 +119,12 @@ function create_webhooks_for_all_receivers
 
 function wait_for_receivers_ready
 {
-  kubectl wait \
+  quiet kubectl wait \
     --all-namespaces \
     receiver \
     --all \
     --for="condition=Ready" \
-    --timeout="60s" >/dev/null
+    --timeout="60s"
 }
 
 function delete_webhook

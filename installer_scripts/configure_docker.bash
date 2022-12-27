@@ -165,7 +165,7 @@ function install_docker_compose_if_absent
   local plugin_version="2.2.3"
   local download_url="https://github.com/docker/compose/releases/download"
 
-  if docker compose version >/dev/null 2>&1; then
+  if quiet docker compose version; then
     log_info "docker compose already installed"
   else
     mkdir --parents "${docker_plugins_dir}"
@@ -174,7 +174,7 @@ function install_docker_compose_if_absent
       -o "${docker_plugins_dir}/docker-compose"
     chmod u+x "${docker_plugins_dir}/docker-compose"
 
-    if ! docker compose version | grep "${plugin_version}" >/dev/null 2>&1; then
+    if ! docker compose version | quiet grep "${plugin_version}"; then
       log_error "Unexpected docker compose version number"
       exit 1
     fi

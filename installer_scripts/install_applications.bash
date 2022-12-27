@@ -43,7 +43,7 @@ function install_chrome
 {
   print_trace
 
-  if google-chrome --version >/dev/null; then
+  if quiet google-chrome --version; then
     log_info "Chrome is already installed"
   else
     local url="https://dl.google.com/linux/direct"
@@ -69,7 +69,7 @@ function install_brave
 {
   print_trace
 
-  if brave-browser --version >/dev/null; then
+  if quiet brave-browser --version; then
     log_info "Brave is already installed"
   else
     local key="/usr/share/keyrings/brave-browser-archive-keyring.gpg"

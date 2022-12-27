@@ -94,13 +94,13 @@ function gogs_check_repo_exists
   local content_type_app_json="Content-Type: application/json"
   local v1_api="https://${gogs_host}/api/v1"
 
-  curl \
+  quiet curl \
     --fail \
     --header "${auth_header}" \
     --header "${content_type_app_json}" \
     --show-error \
     --silent \
-    "${v1_api}/repos/${username}/${repo_name}" >/dev/null 2>&1
+    "${v1_api}/repos/${username}/${repo_name}"
 }
 
 function gogs_list_own_repos
@@ -279,7 +279,7 @@ function gogs_ssh_key_exists
 
   echo "${output}" |
     jq --raw-output '.title' - |
-    grep -E "^${ssh_key_name}$" >/dev/null 2>&1
+    quiet grep -E "^${ssh_key_name}$"
 
   echo "${output}" |
     jq --raw-output '.key' -
@@ -301,13 +301,13 @@ function gogs_create_ssh_key
     jq ". + {key: \"${ssh_public_key}\"}" - |
     jq --compact-output --sort-keys '.' -)"
 
-  curl \
+  quiet curl \
     --data "${data}" \
     --header "${auth_header}" \
     --header "${content_type_app_json}" \
     --request "POST" \
     --silent \
-    "${v1_api}/user/keys" >/dev/null
+    "${v1_api}/user/keys"
 }
 
 function gogs_delete_ssh_key
@@ -330,15 +330,15 @@ function gogs_delete_ssh_key
 
   echo "${output}" |
     jq --raw-output '.title' - |
-    grep -E "^${ssh_key_name}$" >/dev/null 2>&1
+    quiet grep -E "^${ssh_key_name}$"
 
   local id
   id="$(echo "${output}" | jq --raw-output '.id' -)"
 
-  curl \
+  quiet curl \
     --header "${auth_header}" \
     --header "${content_type_app_json}" \
     --request "DELETE" \
     --silent \
-    "${v1_api}/user/keys/${id}" >/dev/null 2>&1
+    "${v1_api}/user/keys/${id}"
 }

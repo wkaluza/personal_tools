@@ -5,82 +5,31 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
+source "${THIS_SCRIPT_DIR}/../shell_script_imports/preamble.bash"
+
 PRIMARY_KEY_FINGERPRINT="174C9368811039C87F0C806A896572D1E78ED6A7"
 SIGNING_KEY_FINGERPRINT="143EE89AAC97053810D13E378A7E8CA85A62CF20"
 BASHRC_PATH="${HOME}/.bashrc"
 ERR_JETBRAINS_PATH_NOT_SET="___ERR_JETBRAINS_PATH_NOT_SET___"
 
-function log_info
-{
-  local message="$1"
-
-  echo "INFO: ${message}"
-}
-
-function log_warning
-{
-  local message="$1"
-
-  echo "WARNING: ${message}"
-}
-
-function log_error
-{
-  local message="$1"
-
-  echo "ERROR: ${message}"
-}
-
-function print_trace
-{
-  local func="${FUNCNAME[1]}"
-  local line="${BASH_LINENO[1]}"
-  local file="${BASH_SOURCE[2]}"
-
-  local trace="Entered ${func} on line ${line} of ${file}"
-
-  echo "[***TRACE***]: ${trace}"
-}
-
-function untar_gzip_to
-{
-  local archive
-  archive="$(realpath "$1")"
-  local target_dir
-  target_dir="$(realpath "$2")"
-
-  mkdir --parents "${target_dir}"
-
-  tar \
-    --directory "${target_dir}" \
-    --extract \
-    --file "${archive}" \
-    --gzip
-}
-
 function prime_sudo_password_cache
 {
   print_trace
 
-  sudo ls "${HOME}" >/dev/null
-}
-
-function ensure_not_sudo
-{
-  print_trace
-
-  if test "0" -eq "$(id -u)"; then
-    log_error "Do not run this as root"
-    exit 1
-  fi
+  quiet sudo ls "${HOME}"
 }
 
 function disable_swap
 {
   print_trace
 
+  local fstab_file="/etc/fstab"
+  local temp_file
+  temp_file="$(mktemp)"
+
   sudo swapoff --all
-  cat /etc/fstab | grep -v ' swap ' | sudo tee /etc/fstab >/dev/null
+  cat "${fstab_file}" >"${temp_file}"
+  cat "${temp_file}" | grep -v ' swap ' | quiet sudo tee "${fstab_file}"
 }
 
 function prepare_apt
@@ -199,8 +148,8 @@ EOF
 
   gpgconf --kill gpg-agent scdaemon
 
-  gpg --list-keys >/dev/null
-  gpg --list-secret-keys >/dev/null
+  quiet gpg --list-keys
+  quiet gpg --list-secret-keys
 
   gpg --receive-keys "${PRIMARY_KEY_FINGERPRINT}"
   # Set trust to ultimate
@@ -227,7 +176,7 @@ EOF
   primary_key_short="$(echo -n "${PRIMARY_KEY_FINGERPRINT}" |
     cut -c "$((primary_key_length - 15))-${primary_key_length}")"
 
-  if gpg --card-status | grep "${primary_key_short}" >/dev/null; then
+  if gpg --card-status | quiet grep "${primary_key_short}"; then
     log_info "Smart card detected"
   else
     log_info "Smart card not detected"
@@ -268,10 +217,10 @@ function clean_tools_repo
 
   local tools_dir="$1"
 
-  pushd "${tools_dir}" >/dev/null
+  quiet pushd "${tools_dir}"
   git clean -dffxn
   git reset --hard 'HEAD'
-  popd >/dev/null
+  quiet popd
 }
 
 function clone_personal_tools
@@ -359,7 +308,7 @@ function ensure_user_is_in_docker_group
 {
   print_trace
 
-  if ! groups | grep docker >/dev/null; then
+  if ! groups | quiet grep docker; then
     # Create the docker group if it does not exist
     getent group docker || sudo addgroup --system docker
 

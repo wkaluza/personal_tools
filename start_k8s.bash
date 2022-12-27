@@ -11,23 +11,23 @@ function wait_for_k8s_node_ready
 {
   log_info "Waiting for k8s node readiness..."
 
-  kubectl wait \
+  quiet kubectl wait \
     node \
     --all \
     --for="condition=Ready" \
-    --timeout="60s" >/dev/null
+    --timeout="60s"
 }
 
 function _minikube_status_raw
 {
-  minikube status --output "json" 2>/dev/null
+  quiet_stderr minikube status --output "json"
 }
 
 function minikube_status
 {
   local status=""
 
-  if _minikube_status_raw >/dev/null; then
+  if quiet _minikube_status_raw; then
     status="$(_minikube_status_raw |
       jq --sort-keys 'if . | type == "array" then .[] else . end' - |
       jq --raw-output '. | select(.Name == "minikube") | .Host' -)"
@@ -55,7 +55,7 @@ function start_minikube
   mkdir --parents "${host_path}"
 
   if [[ "${status}" == "deleted" ]]; then
-    minikube start \
+    quiet minikube start \
       --cpus 8 \
       --disk-size "100G" \
       --driver "docker" \
@@ -64,9 +64,9 @@ function start_minikube
       --memory "8G" \
       --mount "true" \
       --mount-string "${host_path}:${node_path}" \
-      --nodes 2 >/dev/null 2>&1
+      --nodes 2
   elif [[ "${status}" == "stopped" ]]; then
-    minikube start >/dev/null 2>&1
+    quiet minikube start
   fi
 }
 
@@ -81,7 +81,7 @@ function install_root_ca_minikube
 
 function enable_load_balancer_support
 {
-  minikube tunnel >/dev/null 2>&1 &
+  quiet minikube tunnel &
   disown
 }
 
@@ -89,10 +89,10 @@ function taint_control_plane
 {
   local role="node-role.kubernetes.io/control-plane"
 
-  kubectl taint node \
+  quiet kubectl taint node \
     --overwrite \
     --selector "${role}" \
-    "${role}:NoSchedule" >/dev/null
+    "${role}:NoSchedule"
 }
 
 function annotate_k8s_object
@@ -101,11 +101,11 @@ function annotate_k8s_object
   local annotation="$2"
   local name="$3"
 
-  kubectl annotate \
+  quiet kubectl annotate \
     --overwrite \
     "${kind}" \
     "${name}" \
-    "${annotation}" >/dev/null
+    "${annotation}"
 }
 
 function get_object_by_annotation

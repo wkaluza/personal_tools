@@ -18,9 +18,9 @@ function run_in_context
   local fn_arg="$2"
 
   mkdir --parents "${dir_path}"
-  pushd "${dir_path}" >/dev/null
+  quiet pushd "${dir_path}"
   ${fn_arg} "${@:3}"
-  popd >/dev/null
+  quiet popd
 }
 
 function set_up_new_gpg_homedir
@@ -41,14 +41,14 @@ function set_up_new_gpg_homedir
   gpgconf --kill scdaemon
   sleep 2
 
-  gpg --list-keys >/dev/null
+  quiet gpg --list-keys
   sleep 2
-  gpg --list-secret-keys >/dev/null
+  quiet gpg --list-secret-keys
   sleep 2
 
-  gpg --homedir "${temp_gpg_homedir}" --list-keys >/dev/null
+  quiet gpg --homedir "${temp_gpg_homedir}" --list-keys
   sleep 2
-  gpg --homedir "${temp_gpg_homedir}" --list-secret-keys >/dev/null
+  quiet gpg --homedir "${temp_gpg_homedir}" --list-secret-keys
   sleep 2
 }
 
@@ -63,10 +63,10 @@ function random_bytes
 {
   local how_many="${1:-4096}"
 
-  dd \
+  quiet_stderr dd \
     if=/dev/urandom \
     bs="${how_many}" \
-    count=1 2>/dev/null
+    count=1
 }
 
 function os_version_codename
@@ -87,7 +87,7 @@ function retry_until_success
   local args=("${@:3}")
 
   local i=1
-  until ${command} "${args[@]}" >/dev/null 2>&1; do
+  until quiet ${command} "${args[@]}"; do
     log_info "Retrying: ${task_name}"
 
     i="$((i + 1))"
@@ -155,17 +155,17 @@ function store_in_pass
   local id="$1"
 
   cat - |
-    pass insert \
+    quiet pass insert \
       --force \
       --multiline \
-      "${id}" >/dev/null
+      "${id}"
 }
 
 function current_timezone
 {
   local output
 
-  if command -v timedatectl &>/dev/null; then
+  if quiet command -v timedatectl; then
     output="$(source <(timedatectl show |
       grep -E '^Timezone=') &&
       echo "${Timezone}")"
@@ -181,7 +181,7 @@ function pass_show_or_generate
   local id="$1"
   local how_long="${2:-"32"}"
 
-  if ! pass show "${id}" >/dev/null 2>&1; then
+  if ! quiet pass show "${id}"; then
     random_bytes "${how_long}" |
       hex |
       store_in_pass "${id}"
@@ -222,7 +222,7 @@ function web_connection_working
 {
   local host="example.com"
 
-  ping -c 1 "${host}" >/dev/null 2>&1
+  quiet ping -c 1 "${host}"
 }
 
 function untar_gzip_to
@@ -249,7 +249,7 @@ function filter
   local output
   output="$(mktemp)"
 
-  if ${command} "${args[@]}" >"${output}" 2>/dev/null; then
+  if quiet_stderr ${command} "${args[@]}" >"${output}"; then
     cat "${output}"
   fi
 }
@@ -287,10 +287,10 @@ function run_with_env
   local command="$2"
   local args=("${@:3}")
 
-  env \
+  quiet env \
     --split-string "$(${env_factory} | tr '\n' ' ')" \
     "${command}" \
-    "${args[@]}" >/dev/null 2>&1
+    "${args[@]}"
 }
 
 function strings_are_equal

@@ -71,11 +71,11 @@ function ensure_unlocked_config
 
   local config_lock_code="$1"
 
-  if ! ykman config set-lock-code \
+  if ! quiet ykman config set-lock-code \
     --clear \
-    --lock-code "${config_lock_code}" >/dev/null 2>&1; then
+    --lock-code "${config_lock_code}"; then
     sleep 2
-    ykman config set-lock-code --clear >/dev/null
+    quiet ykman config set-lock-code --clear
   fi
   sleep 2
 }

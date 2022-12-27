@@ -10,9 +10,9 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 function main
 {
   if web_connection_working; then
-    run_in_context \
+    quiet run_in_context \
       "${THIS_SCRIPT_DIR}" \
-      git_get_latest >/dev/null 2>&1
+      git_get_latest
   fi
 
   bash "${THIS_SCRIPT_DIR}/startup_impl.bash"

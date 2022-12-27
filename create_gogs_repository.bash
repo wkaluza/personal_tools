@@ -21,12 +21,12 @@ function main
 
   local repo_url="git@${DOMAIN_GIT_FRONTEND_df29c969}:${username}/${repo_name}.git"
 
-  gogs_create_repo \
+  quiet gogs_create_repo \
     "${DOMAIN_GIT_FRONTEND_df29c969}" \
     "${username}" \
     "${repo_name}" \
     "${repo_description}" \
-    "${auth_header}" >/dev/null 2>&1
+    "${auth_header}"
 
   mkdir --parents "${repo_dir}"
   git clone "${repo_url}" "${repo_dir}"

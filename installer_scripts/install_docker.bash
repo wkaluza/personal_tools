@@ -14,12 +14,12 @@ function install_docker
   local url="https://download.docker.com/linux/ubuntu"
   local key="/usr/share/keyrings/docker-archive-keyring.gpg"
 
-  sudo apt-get update >/dev/null
-  sudo apt-get install --yes \
+  quiet sudo apt-get update
+  quiet sudo apt-get install --yes \
     apt-transport-https \
     ca-certificates \
     curl \
-    gnupg >/dev/null
+    gnupg
 
   curl -fsSL "https://download.docker.com/linux/ubuntu/gpg" |
     sudo gpg --dearmor -o "${key}"
@@ -30,13 +30,13 @@ function install_docker
     "${url}" \
     "$(os_version_codename)" \
     "stable" |
-    sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+    quiet sudo tee /etc/apt/sources.list.d/docker.list
 
-  sudo apt-get update >/dev/null
-  sudo apt-get install --yes \
+  quiet sudo apt-get update
+  quiet sudo apt-get install --yes \
     docker-ce \
     docker-ce-cli \
-    containerd.io >/dev/null
+    containerd.io
 
   sudo systemctl enable docker.service
   sudo systemctl enable containerd.service
@@ -56,9 +56,9 @@ function install_docker_unless_already_installed
 {
   print_trace
 
-  if docker --version >/dev/null 2>&1; then
+  if quiet docker --version; then
     log_info "docker is already installed"
-    docker run --rm hello-world >/dev/null
+    quiet docker run --rm hello-world
     docker info
   else
     log_info "Installing docker"

@@ -23,12 +23,12 @@ function ensure_gogs_repo_exists
     "${repo_name}" \
     "${auth_header}"; then
     log_info "Creating gogs repository ${repo_name}..."
-    gogs_create_repo \
+    quiet gogs_create_repo \
       "${DOMAIN_GIT_FRONTEND_df29c969}" \
       "${username}" \
       "${repo_name}" \
       "${repo_description}" \
-      "${auth_header}" >/dev/null 2>&1
+      "${auth_header}"
   fi
 }
 
@@ -45,26 +45,26 @@ function prepare_local_infrastructure_clone
 
   log_info "Updating local ${repo_name} clone..."
 
-  clone_or_fetch \
+  quiet clone_or_fetch \
     "git@github.com:${username}/${repo_name}.git" \
-    "${infra_dir}" >/dev/null 2>&1
+    "${infra_dir}"
 
-  pushd "${infra_dir}" >/dev/null
-  if ! git remote | grep -E "^${github_remote}$" >/dev/null; then
+  quiet pushd "${infra_dir}"
+  if ! git remote | quiet grep -E "^${github_remote}$"; then
     git remote rename \
       "${default_remote}" \
       "${github_remote}"
   fi
 
-  if ! git remote | grep -E "^${gogs_remote}$" >/dev/null; then
+  if ! git remote | quiet grep -E "^${gogs_remote}$"; then
     git remote add \
       "${gogs_remote}" \
       "git@${DOMAIN_GIT_FRONTEND_df29c969}:${username}/${repo_name}.git"
   fi
 
-  git_get_latest \
+  quiet git_get_latest \
     "${github_remote}" \
-    "${branch}" >/dev/null 2>&1
+    "${branch}"
 
   local github_main
   github_main="$(git rev-parse "${github_remote}/${branch}")"
@@ -74,16 +74,16 @@ function prepare_local_infrastructure_clone
   if git merge-base \
     --is-ancestor "${gogs_main}" \
     "${github_main}"; then
-    git push \
+    quiet git push \
       "${gogs_remote}" \
-      "${branch}" >/dev/null 2>&1
+      "${branch}"
   else
-    git_get_latest \
+    quiet git_get_latest \
       "${gogs_remote}" \
-      "${branch}" >/dev/null 2>&1
+      "${branch}"
   fi
 
-  popd >/dev/null
+  quiet popd
 }
 
 function bootstrap_infrastructure

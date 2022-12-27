@@ -26,7 +26,7 @@ function ensure_docker_swarm_init
     log_info "Swarm is locked, unlocking..."
     if pass show "${swarm_key_pass_id}" >/dev/null &&
       pass show "${swarm_key_pass_id}" |
-      docker swarm unlock >/dev/null 2>&1; then
+      quiet docker swarm unlock; then
       log_info "Swarm unlocked successfully"
     else
       log_info "Cannot unlock swarm, need to leave and re-init..."

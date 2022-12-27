@@ -15,11 +15,11 @@ function ensure_host_is_in_etc_hosts_file
   local hosts_file="/etc/hosts"
 
   if ! cat "${hosts_file}" |
-    grep "${host}" >/dev/null; then
+    quiet grep "${host}"; then
     log_info "Need to add ${host} to ${hosts_file} ..."
 
     echo "${ip} ${host}" |
-      sudo tee --append "${hosts_file}" >/dev/null
+      quiet sudo tee --append "${hosts_file}"
   fi
 }
 
@@ -27,10 +27,10 @@ function generate_cert
 {
   local domain="$1"
 
-  mkcert \
+  quiet mkcert \
     -cert-file "${domain}.pem" \
     -key-file "${domain}.secret" \
-    "${domain}" >/dev/null 2>&1
+    "${domain}"
 }
 
 function list_local_domains
@@ -46,21 +46,21 @@ function main
 {
   local certs_dir="${HOME}/.wk_certificates___"
 
-  mkcert -install >/dev/null 2>&1
+  quiet mkcert -install
 
   rm -rf "${certs_dir}"
   mkdir --parents "${certs_dir}"
 
-  pushd "${certs_dir}" >/dev/null
+  quiet pushd "${certs_dir}"
 
   for domain in $(list_local_domains); do
-    generate_cert "${domain}" >/dev/null 2>&1
-    ensure_host_is_in_etc_hosts_file \
+    quiet generate_cert "${domain}"
+    quiet ensure_host_is_in_etc_hosts_file \
       "${domain}" \
-      "127.0.0.1" >/dev/null 2>&1
+      "127.0.0.1"
   done
 
-  popd >/dev/null
+  quiet popd
 
   log_info "Success: $(basename "$0")"
 }

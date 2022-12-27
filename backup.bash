@@ -151,15 +151,15 @@ function perform_sync
     test -d "${dir_destination}"; then
     log_info "Syncing ${dir_source} to ${dir_destination}"
 
-    ${sync_strategy} \
+    quiet ${sync_strategy} \
       "${dir_source}" \
-      "${dir_destination}" >/dev/null 2>&1
+      "${dir_destination}"
 
     log_info "Comparing ${dir_source} to ${dir_destination}"
 
-    ${diff_strategy} \
+    quiet ${diff_strategy} \
       "${dir_source}" \
-      "${dir_destination}" >/dev/null 2>&1
+      "${dir_destination}"
   fi
 }
 
@@ -230,12 +230,12 @@ function main
   mkdir --parents "${dir_wk_home_copy}"
   mkdir --parents "${dir_wk_sda_copy}"
 
-  sync_with_deletion \
+  quiet sync_with_deletion \
     "${dir_wk_home}" \
-    "${dir_wk_home_copy}" >/dev/null &
-  sync_with_deletion \
+    "${dir_wk_home_copy}" &
+  quiet sync_with_deletion \
     "${dir_wk_sda}" \
-    "${dir_wk_sda_copy}" >/dev/null &
+    "${dir_wk_sda_copy}" &
 
   wait
   log_info "Sync complete"

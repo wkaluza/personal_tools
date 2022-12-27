@@ -20,7 +20,7 @@ function main
   local mapped_device="/dev/mapper/${mapping_name}"
   local mount_point="${HOME}/luks/${mapping_name}"
 
-  if mount | grep "${mapped_device} on ${mount_point}" >/dev/null; then
+  if mount | quiet grep "${mapped_device} on ${mount_point}"; then
     log_warning "Already mounted: ${mapped_device} on ${mount_point}"
 
     exit 0

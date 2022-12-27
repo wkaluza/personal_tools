@@ -23,7 +23,8 @@ function configure_openpgp_card_metadata
   local edit_card_metadata_commands="${THIS_SCRIPT_DIR}/config/gpg_edit_card_metadata_commands___${now}"
 
   local kdf_setup_command
-  if gpg --homedir "${temp_gpg_homedir}" --card-status | grep "^KDF setting" >/dev/null; then
+  if gpg --homedir "${temp_gpg_homedir}" --card-status |
+    quiet grep "^KDF setting"; then
     log_info "OpenPGP smartcard: KDF is supported"
     kdf_setup_command="kdf-setup"
   else

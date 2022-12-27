@@ -33,8 +33,8 @@ function push_image_group
 
   for image in $(list_images "${group_name}"); do
     log_info "Pushing ${image}..."
-    docker push \
-      "${image}" >/dev/null 2>&1
+    quiet docker push \
+      "${image}"
   done
 }
 

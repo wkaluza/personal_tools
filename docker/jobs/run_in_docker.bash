@@ -89,14 +89,14 @@ function docker_build
   local image_name="$6"
 
   echo "Building image..."
-  docker build \
+  quiet docker build \
     --tag "${image_name}" \
     --file "${dockerfile}" \
     --build-arg DOCKER_UID="${uid}" \
     --build-arg DOCKER_GID="${gid}" \
     --build-arg DOCKER_USERNAME="${username}" \
     --build-arg HOST_TIMEZONE="$(current_timezone)" \
-    "${build_context}" >/dev/null
+    "${build_context}"
 }
 
 function main

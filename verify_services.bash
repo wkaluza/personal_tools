@@ -133,7 +133,7 @@ function test_dns_docker
     "${DOMAIN_STARTUP_TEST_dmzrfohk}" \
     "${test_ip}"
 
-  docker stack rm "${DNS_TEST_STACK_NAME}" >/dev/null
+  quiet docker stack rm "${DNS_TEST_STACK_NAME}"
 }
 
 function test_dns_k8s
@@ -151,21 +151,21 @@ function test_dns_k8s
     "${DOMAIN_STARTUP_TEST_dmzrfohk}" \
     "${test_ip}"
 
-  kubectl delete \
+  quiet kubectl delete \
     pod \
     --namespace "${namespace}" \
-    "${test_name}" >/dev/null
+    "${test_name}"
 }
 
 function ensure_all_k8s_pods_are_running
 {
   log_info "Waiting for full k8s pod readiness..."
 
-  kubectl wait pod \
+  quiet kubectl wait pod \
     --all \
     --all-namespaces \
     --for="condition=Ready" \
-    --timeout="60s" >/dev/null
+    --timeout="60s"
 }
 
 function generate_dns_test_env
@@ -224,9 +224,9 @@ function main
   ensure_all_k8s_pods_are_running
 
   start_docker_dns_test
-  start_k8s_dns_test \
+  quiet start_k8s_dns_test \
     "${k8s_dns_test_name}" \
-    "${k8s_dns_test_namespace}" >/dev/null
+    "${k8s_dns_test_namespace}"
 
   test_dns_docker \
     "${test_ip}"

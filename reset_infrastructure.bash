@@ -10,19 +10,19 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 function main
 {
   log_info "Leaving docker swarm..."
-  sudo docker swarm leave --force >/dev/null 2>&1 || true
+  quiet sudo docker swarm leave --force || true
 
   log_info "Deleting k8s cluster..."
-  minikube delete >/dev/null 2>&1
+  quiet minikube delete
 
   log_info "Pruning docker system..."
-  docker system prune --force >/dev/null 2>&1
+  quiet docker system prune --force
 
   log_info "Restarting docker..."
-  sudo systemctl restart docker >/dev/null 2>&1
+  quiet sudo systemctl restart docker
 
   log_info "Deleting local k8s storage..."
-  sudo rm -rf "${HOME}/.wk_k8s_storage___/minikube/" >/dev/null 2>&1
+  quiet sudo rm -rf "${HOME}/.wk_k8s_storage___/minikube/"
 
   log_info "Success: $(basename "$0")"
 }

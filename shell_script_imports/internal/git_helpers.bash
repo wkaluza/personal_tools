@@ -41,7 +41,7 @@ function clone_or_fetch
       "${dir_path}"
   fi
 
-  pushd "${dir_path}" >/dev/null
+  quiet pushd "${dir_path}"
   git fetch \
     --all \
     --force \
@@ -49,12 +49,12 @@ function clone_or_fetch
     --tags
 
   git verify-commit HEAD
-  popd >/dev/null
+  quiet popd
 }
 
 function is_git_repo
 {
-  if git status --short >/dev/null 2>&1; then
+  if quiet git status --short; then
     true
   else
     false
@@ -77,9 +77,9 @@ function repo_is_clean
 
 function clean_repo
 {
-  git add . >/dev/null
-  git reset --hard "HEAD" >/dev/null
-  git clean -dffx >/dev/null
+  quiet git add .
+  quiet git reset --hard "HEAD"
+  quiet git clean -dffx
 }
 
 function git_get_latest
@@ -90,25 +90,25 @@ function git_get_latest
   if repo_is_clean; then
     git verify-commit HEAD
 
-    git checkout \
+    quiet git checkout \
       --force \
-      "${branch_name}" >/dev/null 2>&1 ||
-      git checkout \
+      "${branch_name}" ||
+      quiet git checkout \
         --force \
-        --track "${remote_name}/${branch_name}" >/dev/null 2>&1
+        --track "${remote_name}/${branch_name}"
 
     git verify-commit HEAD
 
-    git fetch \
+    quiet git fetch \
       --all \
       --force \
       --prune \
       --prune-tags \
       --recurse-submodules \
-      --tags >/dev/null
-    git reset \
+      --tags
+    quiet git reset \
       --hard \
-      "${remote_name}/${branch_name}" >/dev/null
+      "${remote_name}/${branch_name}"
 
     git verify-commit HEAD
 

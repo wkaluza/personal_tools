@@ -27,11 +27,11 @@ function pull_retag_external
   local new
   new="${EXTERNAL_IMAGE_PREFIX}/${source_name}/${source_tag}:${destination_tag}"
 
-  docker pull \
-    "${old}" >/dev/null 2>&1
-  docker tag \
+  quiet docker pull \
+    "${old}"
+  quiet docker tag \
     "${old}" \
-    "${new}" >/dev/null 2>&1
+    "${new}"
 }
 
 function process_image
@@ -60,12 +60,12 @@ function add_image_epilogue
 
   local meta_dir="${THIS_SCRIPT_DIR}/docker/images/meta"
 
-  process_image \
+  quiet process_image \
     "${input_image}" \
     "${output_image}" \
     "epilogue-bash-user-wo3sglfw" \
     "${meta_dir}/epilogue.dockerfile" \
-    "${meta_dir}/context/" >/dev/null 2>&1
+    "${meta_dir}/context/"
 }
 
 function _build_image
@@ -76,7 +76,7 @@ function _build_image
   local dockerfile="$4"
   local context="$5"
 
-  docker build \
+  quiet docker build \
     --file "${dockerfile}" \
     --tag "${final_image_ref}" \
     --target "${dockerfile_target}" \
@@ -85,7 +85,7 @@ function _build_image
     --build-arg DOCKER_USERNAME="${DOCKER_USERNAME}" \
     --build-arg DOCKER_UID="${DOCKER_UID}" \
     --build-arg DOCKER_GID="${DOCKER_GID}" \
-    "${context}" >/dev/null 2>&1
+    "${context}"
 }
 
 function build_base_image
@@ -162,10 +162,10 @@ function build_app_image_with_epilogue
     "${temp_image_ref}" \
     "${final_image_ref}"
 
-  docker rmi \
+  quiet docker rmi \
     --force \
     --no-prune \
-    "${temp_image_ref}" >/dev/null 2>&1
+    "${temp_image_ref}"
 }
 
 function main
