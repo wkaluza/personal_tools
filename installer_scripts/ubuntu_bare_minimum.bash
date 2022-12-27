@@ -476,7 +476,7 @@ function install_kubectl
 function main
 {
   local tools_dir
-  tools_dir="$(realpath "${HOME}/.wk_tools")"
+  tools_dir="$(realpath "${HOME}/.wk_tools___")"
 
   ensure_not_sudo
   prime_sudo_password_cache
