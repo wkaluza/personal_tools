@@ -173,7 +173,7 @@ function main
   ensure_not_sudo
 
   install_docker_pass_credential_helper
-  install_docker_compose_if_absent
+  # install_docker_compose_if_absent
 
   log_info "Success: $(basename "$0")"
 }
