@@ -5,8 +5,6 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
-BASHRC="${HOME}/.bashrc"
-
 source "${THIS_SCRIPT_DIR}/../shell_script_imports/preamble.bash"
 
 function build_docker_pass_credential_helper
@@ -15,94 +13,32 @@ function build_docker_pass_credential_helper
 
   local host_installation_dir="$1"
 
-  mkdir --parents "${host_installation_dir}"
+  local destination_path="${host_installation_dir}/docker-credential-pass"
 
-  if test -x "${host_installation_dir}/docker-credential-pass"; then
+  mkdir --parents "${host_installation_dir}"
+  if test -x "${destination_path}"; then
     log_info "docker-credential-pass already installed"
   else
-    local docker_mount_dir="/external_mount"
-
     local random_tag
     random_tag="$(random_bytes 8 | hex | take_first 16)"
+    local random_name
+    random_name="$(random_bytes 8 | hex | take_first 16)"
 
-    cat <<EOF | docker build \
+    docker build \
+      --file "${THIS_SCRIPT_DIR}/build_docker_cred_helper.dockerfile" \
       --tag "${random_tag}" \
-      -
-FROM ubuntu:focal
-WORKDIR /workspace
-RUN echo "set -euo pipefail \n \
-\n \
-function install_basics_inner { \n \
-  apt-get update \n \
-  apt-get install --yes \
-    curl \
-    make \
-    git \n \
-} \n \
-\n \
-function install_golang { \n \
-  local go_archive=\"go.tar.gz\" \n \
-  local v=\"1.17.5\" \n \
-  local download_url=\"https://dl.google.com/go/go\\\${v}.linux-amd64.tar.gz\" \n \
-\n \
-  local target_dir=\"/usr/local\" \n \
-  export PATH=\"\\\${PATH}:\\\${target_dir}/go/bin\" \n \
-\n \
-  if test -d \"\\\${target_dir}/go\"; then \n \
-    echo \"golang is already installed\" \n \
-    go version \n \
-  else \n \
-    curl -fsSL --output \"./\\\${go_archive}\" \"\\\${download_url}\" \n \
-    mv \"./\\\${go_archive}\" \"\\\${target_dir}\" \n \
-\n \
-    pushd \"\\\${target_dir}\" \n \
-    tar -xzf \"./\\\${go_archive}\" \n \
-    rm \"./\\\${go_archive}\" \n \
-    popd \n \
-  fi \n \
-} \n \
-\n \
-function main { \n \
-  local temp_dir=\"temp\" \n \
-\n \
-  install_basics_inner \n \
-  install_golang \n \
-\n \
-  git clone \
-    \"https://github.com/docker/docker-credential-helpers.git\" \
-    \"\\\${temp_dir}\" \n \
-\n \
-  pushd \"\\\${temp_dir}\" \n \
-  make pass \n \
-  popd \n \
-} \n \
-\n \
-main \n \
-" | bash -
-EOF
-
-    local uid
-    uid="$(id -u)"
-    local gid
-    gid="$(id -g)"
-
-    local cmd="mv \
-\"/workspace/temp/bin/docker-credential-pass\" \
-\"${docker_mount_dir}\" \
-&& \
-chown ${uid}:${gid} \"${docker_mount_dir}/docker-credential-pass\" \
-&& \
-chmod 700 \"${docker_mount_dir}/docker-credential-pass\""
+      "${THIS_SCRIPT_DIR}/build_docker_cred_helper_context"
 
     docker run \
-      --rm \
-      --volume "${host_installation_dir}:${docker_mount_dir}" \
+      --name "${random_name}" \
       "${random_tag}" \
-      bash -c "${cmd}"
+      sleep 0
 
-    docker rmi \
-      --no-prune \
-      "${random_tag}"
+    docker cp \
+      "${random_name}:/workspace/docker-credential-pass" \
+      "${destination_path}"
+
+    chmod u+rwx,go-rwx "${destination_path}"
   fi
 }
 
@@ -123,12 +59,6 @@ function install_docker_pass_credential_helper
     build_docker_pass_credential_helper \
     "${dest_dir}"
 
-  cat <<EOF >>"${BASHRC}"
-export PATH="${dest_dir}:\${PATH}"
-EOF
-
-  source "${BASHRC}"
-
   if ! test -f "${docker_config}"; then
     mkdir --parents "$(dirname "${docker_config}")"
     touch "${docker_config}"
@@ -136,11 +66,13 @@ EOF
     echo '{}' >"${docker_config}"
   fi
 
-  cp "${docker_config}" "${docker_config}.temp"
-  jq --sort-keys \
-    '. | { "credsStore": "pass" }' \
-    "${docker_config}.temp" >"${docker_config}"
-  rm "${docker_config}.temp"
+  local temp_docker_config
+  temp_docker_config="$(mktemp)"
+  cp "${docker_config}" "${temp_docker_config}"
+  cat "${temp_docker_config}" |
+    jq --sort-keys \
+      '. + { "credsStore": "pass" }' \
+      - >"${docker_config}"
 }
 
 function install_docker_compose_if_absent
