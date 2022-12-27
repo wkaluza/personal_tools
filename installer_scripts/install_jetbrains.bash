@@ -23,21 +23,8 @@ function install_jetbrains_toolbox
 
     sudo mkdir --parents "$(dirname "${install_destination}")"
 
-    local archive_parent
-    archive_parent="$(dirname "${jetbrains_toolbox_tar_gz_path}")"
-
-    local now
-    now="$(date --utc +'%Y%m%d%H%M%S%N')"
-
     local temp_dir
-    temp_dir="$(realpath "${archive_parent}/deleteme_toolbox___${now}")"
-
-    if test -d "${temp_dir}"; then
-      log_error "Temp dir name conflict"
-      exit 1
-    fi
-
-    mkdir --parents "${temp_dir}"
+    temp_dir="$(mktemp -d)"
 
     tar --directory "${temp_dir}" -xzf "${jetbrains_toolbox_tar_gz_path}"
 
