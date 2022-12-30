@@ -68,17 +68,24 @@ function prepare_local_infrastructure_clone
 
   local github_main
   github_main="$(git rev-parse "${github_remote}/${branch}")"
-  local gogs_main
-  gogs_main="$(git rev-parse "${gogs_remote}/${branch}")"
 
-  if git merge-base \
-    --is-ancestor "${gogs_main}" \
-    "${github_main}"; then
-    quiet git push \
-      "${gogs_remote}" \
-      "${branch}"
+  if quiet git rev-parse "${gogs_remote}/${branch}"; then
+    local gogs_main
+    gogs_main="$(git rev-parse "${gogs_remote}/${branch}")"
+
+    if git merge-base \
+      --is-ancestor "${gogs_main}" \
+      "${github_main}"; then
+      quiet git push \
+        "${gogs_remote}" \
+        "${branch}"
+    else
+      quiet git_get_latest \
+        "${gogs_remote}" \
+        "${branch}"
+    fi
   else
-    quiet git_get_latest \
+    quiet git push \
       "${gogs_remote}" \
       "${branch}"
   fi
