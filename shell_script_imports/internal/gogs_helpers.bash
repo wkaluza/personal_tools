@@ -277,9 +277,11 @@ function gogs_ssh_key_exists
     "${v1_api}/user/keys" |
     jq ".[] | select(.title == \"${ssh_key_name}\")" -)"
 
-  echo "${output}" |
+  if ! echo "${output}" |
     jq --raw-output '.title' - |
-    quiet grep -E "^${ssh_key_name}$"
+    quiet grep -E "^${ssh_key_name}$"; then
+    return 1
+  fi
 
   echo "${output}" |
     jq --raw-output '.key' -
