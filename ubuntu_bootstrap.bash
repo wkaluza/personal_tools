@@ -5,6 +5,15 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
+function install_dependencies
+{
+  sudo apt-get update
+  sudo apt-get upgrade --yes
+  sudo apt-get install --yes \
+    curl \
+    jq
+}
+
 function download_latest_personal_tools
 {
   local temp_dir="$1"
@@ -33,6 +42,8 @@ function main
   temp_dir="$(mktemp -d)"
 
   local repo_dir="${temp_dir}/${repo_name}-${branch_name}"
+
+  install_dependencies
 
   download_latest_personal_tools \
     "${temp_dir}" \
