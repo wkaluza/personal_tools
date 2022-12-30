@@ -7,6 +7,64 @@ cd "${THIS_SCRIPT_DIR}"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
+function repo_exists
+{
+  local auth_header="$1"
+  local username="$2"
+  local receiver_json="$3"
+
+  local repo_name
+  repo_name="$(echo "${receiver_json}" |
+    jq --raw-output '.repo.name' -)"
+
+  if ! gogs_check_repo_exists \
+    "${DOMAIN_GIT_FRONTEND_df29c969}" \
+    "${username}" \
+    "${repo_name}" \
+    "${auth_header}" &>/dev/null; then
+    return 1
+  fi
+
+  echo "${receiver_json}" |
+    jq --sort-keys --compact-output '.' -
+}
+
+function augment_with_repo
+{
+  local receiver_json="$1"
+
+  local source_name
+  source_name="$(echo "${receiver_json}" |
+    jq --raw-output '.source.name' -)"
+  local source_namespace
+  source_namespace="$(echo "${receiver_json}" |
+    jq --raw-output '.source.namespace' -)"
+
+  local source_url
+  source_url="$(kubectl get gitrepository \
+    --namespace "${source_namespace}" \
+    --output json \
+    "${source_name}" |
+    jq --raw-output '.spec.url' -)"
+
+  local escaped_git_host
+  escaped_git_host="$(escape_dots "${DOMAIN_GIT_FRONTEND_df29c969}")"
+
+  if ! echo "${source_url}" | grep -E "^ssh://git@${escaped_git_host}/.+/.+\.git$" &>/dev/null; then
+    return 1
+  fi
+
+  local repo_json
+  repo_json="$(echo "${source_url}" |
+    sed -E "s|^ssh://git@${escaped_git_host}/(.+)/(.+)\.git$|{\"repo\": {\"name\":\"\2\",\"user\":\"\1\"}}|")"
+
+  echo "${receiver_json}" |
+    jq \
+      --compact-output \
+      --sort-keys \
+      ". + ${repo_json}" -
+}
+
 function get_receivers
 {
   kubectl get \
@@ -25,7 +83,8 @@ function get_receivers
       --sort-keys \
       '{ name: .metadata.name , namespace: .metadata.namespace , path: .status.url , source: { name: .spec.resources[0].name , namespace: .spec.resources[0].namespace } }' - |
     sort |
-    uniq
+    uniq |
+    for_each augment_with_repo
 }
 
 function webhook_service_url
@@ -73,18 +132,9 @@ function create_webhook_for_receiver
   local webhook_path
   webhook_path="$(echo "${receiver_json}" |
     jq --raw-output '.path' -)"
-
-  local escaped_git_host
-  escaped_git_host="$(escape_dots "${DOMAIN_GIT_FRONTEND_df29c969}")"
-
   local repo_name
-  repo_name="$(kubectl get GitRepository \
-    --output json \
-    --namespace "${source_namespace}" \
-    "${source_name}" |
-    jq --raw-output '.spec.url' - |
-    grep -E "^ssh://git@${escaped_git_host}/.+/.+\.git$" |
-    sed -E "s|^ssh://git@${escaped_git_host}/.+/(.+)\.git$|\1|")"
+  repo_name="$(echo "${receiver_json}" |
+    jq --raw-output '.repo.name' -)"
 
   local webhook_url
   webhook_url="$(webhook_service_url)${webhook_path}"
@@ -112,6 +162,9 @@ function create_webhooks_for_all_receivers
   local username="$2"
 
   get_receivers |
+    for_each filter repo_exists \
+      "${auth_header}" \
+      "${username}" |
     for_each create_webhook_for_receiver \
       "${auth_header}" \
       "${username}"
