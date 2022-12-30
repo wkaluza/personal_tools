@@ -218,6 +218,13 @@ function clone_personal_tools
 
   local url="ssh://git@github.com/wkaluza/personal_tools.git"
 
+  quiet ssh-keygen \
+    -R "github.com"
+  quiet_stderr ssh-keyscan \
+    -H \
+    -t "ecdsa,ed25519,rsa" \
+    "github.com" >>"${HOME}/.ssh/known_hosts"
+
   clone_or_fetch \
     "${url}" \
     "${tools_dir}"
