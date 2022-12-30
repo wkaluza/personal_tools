@@ -511,9 +511,17 @@ function main
 
   set_umask_and_home_permissions
 
+  install_configure_ufw
+
+  # Do this last so it does not interfere with this script
   manage_sudo_password_in_pass
 
-  install_configure_ufw
+  log_info "========================================"
+  log_info "Populate the following pass secrets:"
+  log_info "  - sudo_$(whoami)_at_$(hostname)"
+  log_info "  - luks_passphrase_system"
+  log_info "  - luks_passphrase_external"
+  log_info "========================================"
 
   log_info "Success: $(basename "$0")"
 }
