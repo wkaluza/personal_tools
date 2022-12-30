@@ -27,7 +27,7 @@ function minikube_status
 {
   local status=""
 
-  if quiet _minikube_status_raw; then
+  if _minikube_status_raw &>/dev/null; then
     status="$(_minikube_status_raw |
       jq --sort-keys 'if . | type == "array" then .[] else . end' - |
       jq --raw-output '. | select(.Name == "minikube") | .Host' -)"
@@ -81,7 +81,7 @@ function install_root_ca_minikube
 
 function enable_load_balancer_support
 {
-  quiet minikube tunnel &
+  minikube tunnel &>/dev/null &
   disown
 }
 

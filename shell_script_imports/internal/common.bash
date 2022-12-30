@@ -165,7 +165,7 @@ function current_timezone
 {
   local output
 
-  if quiet command -v timedatectl; then
+  if command -v timedatectl &>/dev/null; then
     output="$(source <(timedatectl show |
       grep -E '^Timezone=') &&
       echo "${Timezone}")"
@@ -181,7 +181,7 @@ function pass_show_or_generate
   local id="$1"
   local how_long="${2:-"32"}"
 
-  if ! quiet pass show "${id}"; then
+  if ! pass show "${id}" &>/dev/null; then
     random_bytes "${how_long}" |
       hex |
       store_in_pass "${id}"

@@ -25,7 +25,7 @@ function ensure_external_network_exists
 
 function main
 {
-  quiet ensure_external_network_exists
+  ensure_external_network_exists &>/dev/null
 
   echo -n "${EXTERNAL_NETWORK_NAME}"
 }

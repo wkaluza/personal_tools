@@ -279,7 +279,7 @@ function gogs_ssh_key_exists
 
   if ! echo "${output}" |
     jq --raw-output '.title' - |
-    quiet grep -E "^${ssh_key_name}$"; then
+    grep -E "^${ssh_key_name}$" &>/dev/null; then
     return 1
   fi
 
