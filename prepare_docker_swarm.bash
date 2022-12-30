@@ -179,10 +179,9 @@ function start_main_reverse_proxy
 
 function main
 {
-  start_registries &
-  start_git_frontend &
-  start_main_reverse_proxy &
-  wait
+  start_registries
+  start_git_frontend
+  start_main_reverse_proxy
 
   log_info "Success $(basename "$0")"
 }
