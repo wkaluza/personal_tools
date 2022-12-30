@@ -14,6 +14,7 @@ function main
     "system"
   bash "${THIS_SCRIPT_DIR}/reset_infrastructure.bash"
   bash "${THIS_SCRIPT_DIR}/upgrade_apt_full.bash"
+  bash "${THIS_SCRIPT_DIR}/ensure_local_certs_exist.bash"
   bash "${THIS_SCRIPT_DIR}/build_docker_images.bash"
   bash "${THIS_SCRIPT_DIR}/enable_swarm_mode.bash"
   bash "${THIS_SCRIPT_DIR}/prepare_docker_swarm.bash"
