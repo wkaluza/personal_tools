@@ -46,7 +46,7 @@ function prepare_local_infrastructure_clone
   log_info "Updating local ${repo_name} clone..."
 
   quiet clone_or_fetch \
-    "git@github.com:${username}/${repo_name}.git" \
+    "ssh://git@github.com/${username}/${repo_name}.git" \
     "${infra_dir}"
 
   quiet pushd "${infra_dir}"
@@ -59,7 +59,7 @@ function prepare_local_infrastructure_clone
   if ! git remote | quiet grep -E "^${gogs_remote}$"; then
     git remote add \
       "${gogs_remote}" \
-      "git@${DOMAIN_GIT_FRONTEND_df29c969}:${username}/${repo_name}.git"
+      "ssh://git@${DOMAIN_GIT_FRONTEND_df29c969}/${username}/${repo_name}.git"
   fi
 
   quiet git_get_latest \

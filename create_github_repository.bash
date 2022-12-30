@@ -12,7 +12,7 @@ function main
   local repo_name="$2"
   local repo_description="$3"
 
-  local repo_url="git@github.com:wkaluza/${repo_name}.git"
+  local repo_url="ssh://git@github.com/wkaluza/${repo_name}.git"
 
   gh api user/repos \
     --method POST \
