@@ -409,7 +409,7 @@ function install_flux_cli
   print_trace
 
   local url="https://github.com/fluxcd/flux2/releases/download"
-  local version="0.36.0"
+  local version="0.38.2"
   local executable_name="flux"
 
   local output_path="${HOME}/.local/bin/${executable_name}"
