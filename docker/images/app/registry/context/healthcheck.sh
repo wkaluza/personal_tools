@@ -1,3 +1,2 @@
-wget -q -O - "http://localhost:5000/v2/_catalog" |
-  grep "repositories" ||
+wget -q -O - http://localhost:5000 >/dev/null 2>&1 ||
   exit 1
