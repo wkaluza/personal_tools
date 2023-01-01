@@ -11,7 +11,10 @@ function list_images
 {
   local prefix="$1"
 
-  local regex="^private\\\.docker\\\.localhost/${prefix}/.+$"
+  local escaped_host
+  escaped_host="$(echo "${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}" |
+    sed -E 's|\.|\\\\\.|g')"
+  local regex="^${escaped_host}/${prefix}/.+$"
 
   docker image ls \
     --all \
