@@ -21,7 +21,7 @@ function remove_ssh_known_host
 
   quiet ssh-keygen \
     -f "${known_hosts}" \
-    -R "${host}"
+    -R "${host}" || true
 }
 
 function refresh_ssh_known_host
