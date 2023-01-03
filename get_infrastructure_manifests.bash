@@ -5,6 +5,8 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
+source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
+
 function generate_flux_config
 {
   local output_dir="$1"
@@ -86,6 +88,8 @@ function main
     "${infrastructure_root}/tekton"
   download_sealed_secrets \
     "${infrastructure_root}/sealed_secrets"
+
+  log_info "Success $(basename "$0")"
 }
 
 main
