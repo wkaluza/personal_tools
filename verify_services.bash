@@ -197,7 +197,7 @@ function start_k8s_dns_test
   local test_name="$1"
   local namespace="$2"
 
-  kubectl run \
+  quiet kubectl run \
     --image "${DNS_TEST_IMAGE_REFERENCE}" \
     --restart=Always \
     --namespace "${namespace}" \
@@ -205,7 +205,7 @@ function start_k8s_dns_test
     -- \
     sleep infinity
 
-  kubectl wait pod \
+  quiet kubectl wait pod \
     --namespace "${namespace}" \
     "${test_name}" \
     --for="condition=Ready" \
@@ -224,7 +224,7 @@ function main
   ensure_all_k8s_pods_are_running
 
   start_docker_dns_test
-  quiet start_k8s_dns_test \
+  start_k8s_dns_test \
     "${k8s_dns_test_name}" \
     "${k8s_dns_test_namespace}"
 
