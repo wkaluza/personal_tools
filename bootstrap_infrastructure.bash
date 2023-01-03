@@ -12,7 +12,7 @@ function ensure_gogs_repo_exists
   local username="$1"
   local repo_name="$2"
 
-  local repo_description="Personal infrastructure repository"
+  local repo_description="${repo_name}"
   local token
   token="$(pass show "local_gogs_token_${username}")"
   local auth_header="Authorization: token ${token}"
