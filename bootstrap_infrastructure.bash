@@ -105,29 +105,12 @@ function bootstrap_infrastructure
   fi
 }
 
-function refresh_ssh_known_hosts
-{
-  local host="$1"
-
-  quiet ssh-keygen \
-    -R "${host}"
-  quiet_stderr ssh-keyscan \
-    -H \
-    -t "ecdsa,ed25519,rsa" \
-    "${host}" >>"${HOME}/.ssh/known_hosts"
-}
-
 function main
 {
   local username="wkaluza"
   local repo_name="infrastructure"
 
   local infra_dir="${HOME}/.wk_infrastructure___"
-
-  refresh_ssh_known_hosts \
-    "${DOMAIN_GIT_FRONTEND_df29c969}"
-  refresh_ssh_known_hosts \
-    "github.com"
 
   ensure_gogs_repo_exists \
     "${username}" \

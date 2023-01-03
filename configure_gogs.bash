@@ -9,14 +9,6 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
 GIT_FRONTEND_STACK_NAME="local_git_frontend_stack"
 
-function remove_stale_gogs_ssh_key
-{
-  quiet ssh-keygen \
-    -f "${HOME}/.ssh/known_hosts" \
-    -R "${DOMAIN_GIT_FRONTEND_df29c969}" ||
-    true
-}
-
 function ensure_gogs_user_configured
 {
   local username="$1"
@@ -44,9 +36,6 @@ function ensure_gogs_user_configured
       "wkaluza@protonmail.com" \
       "${username}" \
       "${password}"
-
-    # Fresh gogs install
-    remove_stale_gogs_ssh_key
   fi
 
   if gogs_list_token_names \

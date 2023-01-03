@@ -23,6 +23,7 @@ function main
   bash "${THIS_SCRIPT_DIR}/start_dns.bash"
   bash "${THIS_SCRIPT_DIR}/configure_gogs.bash"
   bash "${THIS_SCRIPT_DIR}/push_docker_images.bash"
+  bash "${THIS_SCRIPT_DIR}/configure_ssh.bash"
   bash "${THIS_SCRIPT_DIR}/bootstrap_infrastructure.bash"
   bash "${THIS_SCRIPT_DIR}/verify_services.bash"
   bash "${THIS_SCRIPT_DIR}/set_up_webhooks.bash"
