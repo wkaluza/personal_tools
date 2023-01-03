@@ -10,6 +10,8 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 function main
 {
   if web_connection_working; then
+    refresh_ssh_known_host \
+      "github.com"
     quiet run_in_context \
       "${THIS_SCRIPT_DIR}" \
       git_get_latest
