@@ -480,6 +480,46 @@ function install_tekton_cli
   fi
 }
 
+function install_sealed_secrets_cli
+{
+  print_trace
+
+  local url="https://github.com/bitnami-labs/sealed-secrets/releases/download"
+  local version="0.19.3"
+  local executable_name="kubeseal"
+
+  local output_path="${HOME}/.local/bin/${executable_name}"
+
+  mkdir --parents "$(dirname "${output_path}")"
+
+  local temp_dir_archive
+  temp_dir_archive="$(mktemp -d)"
+  local archive_path="${temp_dir_archive}/${executable_name}.tar.gz"
+
+  local temp_dir_decompressed
+  temp_dir_decompressed="$(mktemp -d)"
+  local executable_path="${temp_dir_decompressed}/${executable_name}"
+
+  wget \
+    -q \
+    -O "${archive_path}" \
+    "${url}/v${version}/${executable_name}-${version}-linux-amd64.tar.gz"
+
+  untar_gzip_to \
+    "${archive_path}" \
+    "${temp_dir_decompressed}"
+
+  if test -f "${executable_path}"; then
+    mv \
+      "${executable_path}" \
+      "${output_path}"
+    chmod u+x "${output_path}"
+  else
+    log_error "File not found: ${executable_path}"
+    exit 1
+  fi
+}
+
 function install_kubectl
 {
   print_trace
@@ -541,6 +581,7 @@ function main
   install_kubectl
   install_flux_cli
   install_tekton_cli
+  install_sealed_secrets_cli
 
   # This has to be done late in the setup process
   # or it interferes with docker testing
