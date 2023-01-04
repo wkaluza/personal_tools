@@ -576,7 +576,7 @@ function main
 
   bash "${THIS_SCRIPT_DIR}/install_applications.bash"
 
-  install_kind
+  # install_kind
   install_minikube
   install_kubectl
   install_flux_cli
