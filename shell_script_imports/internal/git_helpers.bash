@@ -103,7 +103,6 @@ function git_get_latest
       --all \
       --force \
       --prune \
-      --prune-tags \
       --recurse-submodules \
       --tags
     quiet git reset \
