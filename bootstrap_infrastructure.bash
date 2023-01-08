@@ -7,31 +7,6 @@ cd "${THIS_SCRIPT_DIR}"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
-function ensure_gogs_repo_exists
-{
-  local username="$1"
-  local repo_name="$2"
-
-  local repo_description="${repo_name}"
-  local token
-  token="$(pass show "local_gogs_token_${username}")"
-  local auth_header="Authorization: token ${token}"
-
-  if ! gogs_check_repo_exists \
-    "${DOMAIN_GIT_FRONTEND_df29c969}" \
-    "${username}" \
-    "${repo_name}" \
-    "${auth_header}"; then
-    log_info "Creating gogs repository ${repo_name}..."
-    quiet gogs_create_repo \
-      "${DOMAIN_GIT_FRONTEND_df29c969}" \
-      "${username}" \
-      "${repo_name}" \
-      "${repo_description}" \
-      "${auth_header}"
-  fi
-}
-
 function prepare_local_infrastructure_clone
 {
   local username="$1"
@@ -112,9 +87,6 @@ function main
 
   local infra_dir="${HOME}/.wk_infrastructure___"
 
-  ensure_gogs_repo_exists \
-    "${username}" \
-    "${repo_name}"
   prepare_local_infrastructure_clone \
     "${username}" \
     "${repo_name}" \
