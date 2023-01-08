@@ -159,6 +159,10 @@ function test_dns_k8s
     pod \
     --namespace "${namespace}" \
     "${test_name}"
+
+  quiet kubectl delete \
+    namespace \
+    "${namespace}"
 }
 
 function ensure_all_k8s_pods_are_running
@@ -201,6 +205,9 @@ function start_k8s_dns_test
   local test_name="$1"
   local namespace="$2"
 
+  ensure_namespace_exists \
+    "${namespace}"
+
   quiet kubectl run \
     --image "${DNS_TEST_IMAGE_REFERENCE}" \
     --restart=Always \
@@ -220,7 +227,7 @@ function main
 {
   local test_ip="123.132.213.231"
   local k8s_dns_test_name="startup-test-c2kjkrm5"
-  local k8s_dns_test_namespace="default"
+  local k8s_dns_test_namespace="dns-test"
 
   ensure_services_are_running
   ensure_connection_to_swarm

@@ -29,6 +29,28 @@ $(_list_yaml_files "${dir}" | sort | for_each _print_resource)
 EOF
 }
 
+function get_namespaces
+{
+  kubectl get namespace \
+    --output json |
+    jq --raw-output '.items[].metadata.name' - |
+    sort
+}
+
+function ensure_namespace_exists
+{
+  local namespace_name="$1"
+
+  if ! get_namespaces | quiet grep "^${namespace_name}$"; then
+    kubectl create namespace "${namespace_name}" \
+      --dry-run="client" \
+      --output="yaml" |
+      quiet kubectl apply \
+        --filename - \
+        --wait
+  fi
+}
+
 function kubectl_exec
 {
   local namespace="$1"
