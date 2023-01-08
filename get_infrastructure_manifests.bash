@@ -29,25 +29,14 @@ function download_tekton
 
   local tekton_org_url="https://github.com/tektoncd"
   local pipeline_url="${tekton_org_url}/pipeline/releases/download"
-  local dashboard_url="${tekton_org_url}/dashboard/releases/download"
   local triggers_url="${tekton_org_url}/triggers/releases/download"
   local pipeline_version="v0.36.0"
-  local dashboard_version="v0.27.0"
   local triggers_version="v0.20.1"
 
   wget \
     -q \
     -O "${output_dir}/pipeline.yaml" \
     "${pipeline_url}/${pipeline_version}/release.yaml"
-
-  wget \
-    -q \
-    -O "${output_dir}/dashboard_read_only.yaml" \
-    "${dashboard_url}/${dashboard_version}/tekton-dashboard-release-readonly.yaml"
-  wget \
-    -q \
-    -O "${output_dir}/dashboard.yaml" \
-    "${dashboard_url}/${dashboard_version}/tekton-dashboard-release.yaml"
 
   wget \
     -q \
