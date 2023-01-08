@@ -28,3 +28,16 @@ resources:
 $(_list_yaml_files "${dir}" | sort | for_each _print_resource)
 EOF
 }
+
+function kubectl_exec
+{
+  local namespace="$1"
+  local name="$2"
+  local command="$3"
+  local args=("${@:4}")
+
+  kubectl exec \
+    --namespace "${namespace}" \
+    "${name}" -- \
+    "${command}" "${args[@]}"
+}

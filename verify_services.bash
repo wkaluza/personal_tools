@@ -110,9 +110,9 @@ function test_dns_from_k8s
   local host="$3"
   local ip="$4"
 
-  if ! kubectl exec \
-    --namespace "${namespace}" \
-    "${name}" -- \
+  if ! kubectl_exec \
+    "${namespace}" \
+    "${name}" \
     host "${host}" |
     quiet grep "${ip}"; then
     return 1
