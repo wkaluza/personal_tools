@@ -5,7 +5,7 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
-source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
+source "${THIS_SCRIPT_DIR}/../../../shell_script_imports/preamble.bash"
 
 function generate_flux_config
 {
@@ -59,24 +59,26 @@ function download_sealed_secrets
 
   wget \
     -q \
-    -O "${output_dir}/controller_no_rbac.yaml" \
-    "${url}/v${version}/controller-norbac.yaml"
-  wget \
-    -q \
     -O "${output_dir}/controller.yaml" \
     "${url}/v${version}/controller.yaml"
 }
 
 function main
 {
-  local infrastructure_root="${THIS_SCRIPT_DIR}/infrastructure"
+  local src_dir="${THIS_SCRIPT_DIR}/src"
+  local third_party_dir="${src_dir}/third_party"
+
+  rm -rf "${third_party_dir}"
 
   generate_flux_config \
-    "${infrastructure_root}/flux"
+    "${third_party_dir}/flux"
   download_tekton \
-    "${infrastructure_root}/tekton"
+    "${third_party_dir}/tekton"
   download_sealed_secrets \
-    "${infrastructure_root}/sealed_secrets"
+    "${third_party_dir}/sealed_secrets"
+
+  list_shallow_subdirectories 1 "${third_party_dir}" |
+    for_each generate_kustomization_yaml_for_directory
 
   log_info "Success $(basename "$0")"
 }
