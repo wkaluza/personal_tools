@@ -30,8 +30,8 @@ function download_tekton
   local tekton_org_url="https://github.com/tektoncd"
   local pipeline_url="${tekton_org_url}/pipeline/releases/download"
   local triggers_url="${tekton_org_url}/triggers/releases/download"
-  local pipeline_version="v0.36.0"
-  local triggers_version="v0.20.1"
+  local pipeline_version="v0.43.0"
+  local triggers_version="v0.22.0"
 
   wget \
     -q \
