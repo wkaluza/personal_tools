@@ -54,7 +54,7 @@ function main
     "${final_zone_file}"
 
   append_A_record \
-    "${DOMAIN_STARTUP_TEST_dmzrfohk}" \
+    "${DOMAIN_EXTERNAL_STARTUP_TEST_dmzrfohk}" \
     "${startup_test_ip}" \
     "${final_zone_file}"
 

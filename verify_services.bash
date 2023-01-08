@@ -134,7 +134,7 @@ function test_dns_docker
     "test_dns_from_docker" \
     test_dns_from_docker \
     "${test_id}" \
-    "${DOMAIN_STARTUP_TEST_dmzrfohk}" \
+    "${DOMAIN_EXTERNAL_STARTUP_TEST_dmzrfohk}" \
     "${test_ip}"
 
   quiet docker stack rm "${DNS_TEST_STACK_NAME}"
@@ -152,7 +152,7 @@ function test_dns_k8s
     test_dns_from_k8s \
     "${test_name}" \
     "${namespace}" \
-    "${DOMAIN_STARTUP_TEST_dmzrfohk}" \
+    "${DOMAIN_EXTERNAL_STARTUP_TEST_dmzrfohk}" \
     "${test_ip}"
 
   quiet kubectl delete \
