@@ -30,22 +30,22 @@ function download_tekton
   local tekton_org_url="https://github.com/tektoncd"
   local pipeline_url="${tekton_org_url}/pipeline/releases/download"
   local triggers_url="${tekton_org_url}/triggers/releases/download"
-  local pipeline_version="v0.43.0"
-  local triggers_version="v0.22.0"
+  local pipeline_version="0.43.0"
+  local triggers_version="0.22.0"
 
   wget \
     -q \
     -O "${output_dir}/pipeline.yaml" \
-    "${pipeline_url}/${pipeline_version}/release.yaml"
+    "${pipeline_url}/v${pipeline_version}/release.yaml"
 
   wget \
     -q \
     -O "${output_dir}/interceptors.yaml" \
-    "${triggers_url}/${triggers_version}/interceptors.yaml"
+    "${triggers_url}/v${triggers_version}/interceptors.yaml"
   wget \
     -q \
     -O "${output_dir}/triggers.yaml" \
-    "${triggers_url}/${triggers_version}/release.yaml"
+    "${triggers_url}/v${triggers_version}/release.yaml"
 }
 
 function download_sealed_secrets
@@ -55,16 +55,16 @@ function download_sealed_secrets
   mkdir --parents "${output_dir}"
 
   local url="https://github.com/bitnami-labs/sealed-secrets/releases/download"
-  local version="v0.19.3"
+  local version="0.19.3"
 
   wget \
     -q \
     -O "${output_dir}/controller_no_rbac.yaml" \
-    "${url}/${version}/controller-norbac.yaml"
+    "${url}/v${version}/controller-norbac.yaml"
   wget \
     -q \
     -O "${output_dir}/controller.yaml" \
-    "${url}/${version}/controller.yaml"
+    "${url}/v${version}/controller.yaml"
 }
 
 function main
