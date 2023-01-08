@@ -55,7 +55,7 @@ function download_sealed_secrets
   mkdir --parents "${output_dir}"
 
   local url="https://github.com/bitnami-labs/sealed-secrets/releases/download"
-  local version="v0.18.0"
+  local version="v0.19.3"
 
   wget \
     -q \
