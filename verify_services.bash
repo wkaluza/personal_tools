@@ -96,9 +96,11 @@ function test_dns_from_docker
   local host="$2"
   local ip="$3"
 
-  docker exec -it "${id}" \
+  if ! docker exec -it "${id}" \
     host "${host}" |
-    grep "${ip}"
+    quiet grep "${ip}"; then
+    return 1
+  fi
 }
 
 function test_dns_from_k8s
@@ -108,11 +110,13 @@ function test_dns_from_k8s
   local host="$3"
   local ip="$4"
 
-  kubectl exec \
+  if ! kubectl exec \
     --namespace "${namespace}" \
     "${name}" -- \
     host "${host}" |
-    grep "${ip}"
+    quiet grep "${ip}"; then
+    return 1
+  fi
 }
 
 function test_dns_docker
