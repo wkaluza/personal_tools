@@ -13,6 +13,7 @@ function main
   install_shfmt
   install_prettier
   install_yq
+  install_kubectl
 }
 
 # Entry point

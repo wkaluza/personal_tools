@@ -91,6 +91,37 @@ function find_and_format_json_files
     "format_single_json_file"
 }
 
+function k8s_yaml_kustomize
+{
+  local f="$1"
+
+  local temp_dir
+  temp_dir="$(mktemp -d)"
+  local temp_output
+  temp_output="$(mktemp)"
+
+  local temp_file_name
+  temp_file_name="$(basename "${f}")"
+  local temp_file="${temp_dir}/${temp_file_name}"
+
+  cp "${f}" "${temp_file}"
+  cat <<EOF >"${temp_dir}/kustomization.yaml"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ${temp_file_name}
+EOF
+
+  if kubectl kustomize \
+    --output="${temp_output}" \
+    --reorder=legacy \
+    "${temp_dir}" &>/dev/null; then
+    cat "${temp_output}" >"${f}"
+
+    return 0
+  fi
+}
+
 function single_yaml_file_deep_clean
 {
   local f="$1"
@@ -107,12 +138,9 @@ function single_yaml_file_deep_clean
   echo "${output}" >"${f}"
 }
 
-function format_single_yaml_file
+function single_yaml_file_clean
 {
   local f="$1"
-
-  # Good results, but mangles multiline strings
-  # single_yaml_file_deep_clean "${f}"
 
   local output
   output="$(cat "${f}" |
@@ -124,6 +152,18 @@ function format_single_yaml_file
     grep -Ev '^--- null$' |
     grep -Ev '^\.\.\.$')"
   echo "${output}" >"${f}"
+}
+
+function format_single_yaml_file
+{
+  local f="$1"
+
+  # Good results, but mangles multiline strings
+  single_yaml_file_deep_clean "${f}"
+
+  k8s_yaml_kustomize "${f}"
+
+  single_yaml_file_clean "${f}"
 }
 
 function find_and_format_yaml_files
@@ -146,6 +186,8 @@ function main
   export -f format_single_shell_script
   export -f format_single_yaml_file
   export -f single_yaml_file_deep_clean
+  export -f single_yaml_file_clean
+  export -f k8s_yaml_kustomize
 
   echo "Formatting..."
 
