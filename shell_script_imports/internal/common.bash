@@ -302,3 +302,14 @@ function strings_are_equal
     return 1
   fi
 }
+
+function list_shallow_subdirectories
+{
+  local depth="$1"
+  local dir="$2"
+
+  find "${dir}" \
+    -maxdepth "${depth}" \
+    -mindepth "${depth}" \
+    -type d
+}
