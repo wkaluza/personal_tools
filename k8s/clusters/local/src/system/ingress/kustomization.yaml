@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+configMapGenerator:
+  - files:
+      - nginx.conf.template=nginx.conf.template
+    literals:
+      - DOMAIN_WEBHOOK_SINK_a8800f5b=webhooks.localhost
+      - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx
+    name: ingress-system-cm
+    namespace: ingress-system
+kind: Kustomization
+resources:
+  - nginx_reverse_proxy.yaml

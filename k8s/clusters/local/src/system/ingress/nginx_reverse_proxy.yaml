@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-system-lb
+  namespace: ingress-system
+spec:
+  ports:
+    - name: https
+      nodePort: 443
+      port: 443
+      protocol: TCP
+      targetPort: 443
+  selector:
+    app: ingress-system-aeleia1j
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ingress-system-aeleia1j
+  name: ingress-system-v9wj69rs
+  namespace: ingress-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingress-system-aeleia1j
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ingress-system-aeleia1j
+    spec:
+      containers:
+        - env:
+            - name: DOMAIN_WEBHOOK_SINK_a8800f5b
+              valueFrom:
+                configMapKeyRef:
+                  key: DOMAIN_WEBHOOK_SINK_a8800f5b
+                  name: ingress-system-cm
+            - name: NGINX_ENVSUBST_OUTPUT_DIR
+              valueFrom:
+                configMapKeyRef:
+                  key: NGINX_ENVSUBST_OUTPUT_DIR
+                  name: ingress-system-cm
+          image: private.docker.localhost/app/nginx:1
+          name: nginx
+          ports:
+            - containerPort: 443
+          volumeMounts:
+            - mountPath: /etc/nginx/templates/nginx.conf.template
+              name: nginxconfig-c8i55w1p
+              subPath: nginx.conf.template
+            - mountPath: /etc/nginx/certs/webhooks_localhost
+              name: webhooks-localhost-tls-we3spgdu
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - configMap:
+            items:
+              - key: nginx.conf.template
+                path: nginx.conf.template
+            name: ingress-system-cm
+          name: nginxconfig-c8i55w1p
+        - name: webhooks-localhost-tls-we3spgdu
+          secret:
+            secretName: webhooks-localhost-tls-4b9o4rmb
