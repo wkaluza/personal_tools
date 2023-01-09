@@ -278,6 +278,8 @@ function configure_git
   git config --global advice.skippedCherryPicks false
 
   git config --global fetch.showForcedUpdates false
+
+  git config --global core.editor vim
 }
 
 function configure_git_ssh_substitutions
