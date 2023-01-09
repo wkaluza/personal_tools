@@ -1,0 +1,149 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-system
+---
+apiVersion: v1
+data:
+  DOMAIN_WEBHOOK_SINK_a8800f5b: webhooks.localhost
+  NGINX_ENVSUBST_OUTPUT_DIR: /etc/nginx
+  nginx.conf.template: |
+    user nginx;
+    worker_processes auto;
+
+    error_log /var/log/nginx/error.log notice;
+    pid /var/run/nginx.pid;
+
+    events {
+      worker_connections 1024;
+    }
+
+    http {
+      resolver kube-dns.kube-system.svc.cluster.local valid=5s;
+
+      include /etc/nginx/mime.types;
+      default_type application/octet-stream;
+
+      log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+        '$status $body_bytes_sent "$http_referer" '
+        '"$http_user_agent" "$http_x_forwarded_for"';
+
+      access_log /var/log/nginx/access.log main;
+
+      sendfile on;
+      # tcp_nopush on;
+      keepalive_timeout 65;
+      # gzip on;
+
+      map $http_upgrade $connection_upgrade {
+        default upgrade;
+        ''      close;
+      }
+
+      # Webhook sink
+      server {
+        listen 443 http2 ssl;
+
+        server_name ${DOMAIN_WEBHOOK_SINK_a8800f5b};
+
+        ssl_certificate /etc/nginx/certs/webhooks_localhost/tls.crt;
+        ssl_certificate_key /etc/nginx/certs/webhooks_localhost/tls.key;
+
+        # Source https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+        ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
+        ssl_prefer_server_ciphers on;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_session_cache shared:SSL:10m;
+
+        location / {
+          proxy_read_timeout 900;
+
+          proxy_set_header Host $http_host;
+
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_set_header X-Real-IP $remote_addr;
+
+          proxy_set_header X-Signature sha256=$http_x_gogs_signature;
+
+          set $upstream http://webhook-receiver.flux-system.svc.cluster.local;
+          proxy_pass $upstream$request_uri;
+        }
+      }
+    }
+kind: ConfigMap
+metadata:
+  name: ingress-system-cm-h2d8t7tm7t
+  namespace: ingress-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-system-lb
+  namespace: ingress-system
+spec:
+  ports:
+    - name: https
+      nodePort: 443
+      port: 443
+      protocol: TCP
+      targetPort: 443
+  selector:
+    app: ingress-system-aeleia1j
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ingress-system-aeleia1j
+  name: ingress-system-v9wj69rs
+  namespace: ingress-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingress-system-aeleia1j
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ingress-system-aeleia1j
+    spec:
+      containers:
+        - env:
+            - name: DOMAIN_WEBHOOK_SINK_a8800f5b
+              valueFrom:
+                configMapKeyRef:
+                  key: DOMAIN_WEBHOOK_SINK_a8800f5b
+                  name: ingress-system-cm-h2d8t7tm7t
+            - name: NGINX_ENVSUBST_OUTPUT_DIR
+              valueFrom:
+                configMapKeyRef:
+                  key: NGINX_ENVSUBST_OUTPUT_DIR
+                  name: ingress-system-cm-h2d8t7tm7t
+          image: private.docker.localhost/app/nginx:1
+          name: nginx
+          ports:
+            - containerPort: 443
+          volumeMounts:
+            - mountPath: /etc/nginx/templates/nginx.conf.template
+              name: nginxconfig-c8i55w1p
+              subPath: nginx.conf.template
+            - mountPath: /etc/nginx/certs/webhooks_localhost
+              name: webhooks-localhost-tls-we3spgdu
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - configMap:
+            items:
+              - key: nginx.conf.template
+                path: nginx.conf.template
+            name: ingress-system-cm-h2d8t7tm7t
+          name: nginxconfig-c8i55w1p
+        - name: webhooks-localhost-tls-we3spgdu
+          secret:
+            secretName: webhooks-localhost-tls-4b9o4rmb
