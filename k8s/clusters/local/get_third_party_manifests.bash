@@ -48,6 +48,21 @@ function download_tekton
     "${triggers_url}/v${triggers_version}/release.yaml"
 }
 
+function download_kyverno
+{
+  local output_dir="$1"
+
+  mkdir --parents "${output_dir}"
+
+  local url="https://github.com/kyverno/kyverno/releases/download"
+  local version="1.8.5"
+
+  wget \
+    -q \
+    -O "${output_dir}/install.yaml" \
+    "${url}/v${version}/install.yaml"
+}
+
 function download_sealed_secrets
 {
   local output_dir="$1"
@@ -76,6 +91,8 @@ function main
     "${third_party_dir}/tekton"
   download_sealed_secrets \
     "${third_party_dir}/sealed_secrets"
+  download_kyverno \
+    "${third_party_dir}/kyverno"
 
   list_shallow_subdirectories 1 "${third_party_dir}" |
     for_each generate_kustomization_yaml_for_directory
