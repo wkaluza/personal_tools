@@ -7,6 +7,8 @@ cd "${THIS_SCRIPT_DIR}"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
+CERTS_DIR="${HOME}/.wk_certificates___"
+
 function set_up_secrets
 {
   local sync_namespace="$1"
@@ -136,8 +138,8 @@ function set_up_tls_secrets
     tls \
     "webhooks-localhost-tls-4b9o4rmb" \
     --namespace="${namespace}" \
-    --cert="${HOME}/.wk_certificates___/${DOMAIN_WEBHOOK_SINK_a8800f5b}.pem" \
-    --key="${HOME}/.wk_certificates___/${DOMAIN_WEBHOOK_SINK_a8800f5b}.secret" \
+    --cert="${CERTS_DIR}/${DOMAIN_WEBHOOK_SINK_a8800f5b}.pem" \
+    --key="${CERTS_DIR}/${DOMAIN_WEBHOOK_SINK_a8800f5b}.secret" \
     --dry-run="client" \
     --output="yaml" |
     quiet kubectl apply --filename -
