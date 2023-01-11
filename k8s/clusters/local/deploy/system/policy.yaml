@@ -1,0 +1,39 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  annotations:
+    policies.kyverno.io/category: Images
+    policies.kyverno.io/description: The 'latest' tag is mutable by nature and leads
+      to irreproducible environments. Prefer tags which point to a specific image
+      version. This policy ensures that the pod container images use an explcit tag
+      other than 'latest'.
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/title: Disallow Latest Tag
+  name: disallow-latest-tag
+spec:
+  background: true
+  rules:
+    - match:
+        resources:
+          kinds:
+            - Pod
+      name: require-explicit-image-tag
+      validate:
+        message: An explicit image tag is required.
+        pattern:
+          spec:
+            containers:
+              - image: '*:*'
+    - match:
+        resources:
+          kinds:
+            - Pod
+      name: validate-image-tag-not-latest
+      validate:
+        message: 'Image tag ''latest'' is not allowed: use immutable tags'
+        pattern:
+          spec:
+            containers:
+              - image: '!*:latest'
+  validationFailureAction: enforce
