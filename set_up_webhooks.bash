@@ -81,7 +81,7 @@ function get_receivers
     jq \
       --compact-output \
       --sort-keys \
-      '{ name: .metadata.name , namespace: .metadata.namespace , path: .status.url , source: { name: .spec.resources[0].name , namespace: .spec.resources[0].namespace } }' - |
+      '{ name: .metadata.name , namespace: .metadata.namespace , path: .status.webhookPath , source: { name: .spec.resources[0].name , namespace: .spec.resources[0].namespace } }' - |
     sort |
     uniq |
     for_each augment_with_repo
