@@ -54,10 +54,10 @@ function clone_or_fetch
 
 function is_git_repo
 {
-  if quiet git status --short; then
-    true
+  if git status --short &>/dev/null; then
+    return 0
   else
-    false
+    return 1
   fi
 }
 
