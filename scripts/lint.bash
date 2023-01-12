@@ -5,48 +5,181 @@ fi
 THIS_SCRIPT_DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 cd "${THIS_SCRIPT_DIR}"
 
-SHELL_PREAMBLE="set -euo pipefail ; shopt -s inherit_errexit"
+source "${THIS_SCRIPT_DIR}/../shell_script_imports/preamble.bash"
 
-FIND_SHELL_SCRIPTS="-name '*.bash' -or -name '*.sh'"
-FIND_JSON_FILES="-name '*.json'"
-FIND_YAML_FILES="-name '*.yaml' -or -name '*.yml'"
+DIFFERENCES_DIR="$(mktemp -d)"
+LOG_OUTPUT_DIR="$(mktemp -d)"
 
-function invoke_find
+FILE_LIST="$(mktemp)"
+INVALID_COMMIT="___NOT_A_VALID_COMMIT___"
+COMMIT="${INVALID_COMMIT}"
+
+PROJECT_ROOT_DIR="$(realpath "${THIS_SCRIPT_DIR}/..")"
+
+function _list_versioned_files
 {
-  local project_root_dir="$1"
-  local name_selector="$2"
-  local fn_name="$3"
-
-  eval find "${project_root_dir}" \
-    -type f \
-    -and \\\( "${name_selector}" \\\) \
-    -and -not \\\( \
-    -path "'${project_root_dir}/*___*/*'" -or \
-    -path "'${project_root_dir}/.git/*'" -or \
-    -path "'${project_root_dir}/.idea/*'" \\\) \
-    -exec bash -c "'${SHELL_PREAMBLE} ; ${fn_name} \"\$1\"' -- {} \;"
+  cat \
+    <(git ls-files) \
+    <(git status --porcelain | sed -E "s|^...||")
 }
 
-function format_single_shell_script
+function _list_changed_files
 {
-  local f="$1"
+  local commit="$1"
 
-  shfmt -i 2 -fn -w "${f}" >/dev/null
+  cat \
+    <(git diff --name-only "HEAD" "${commit}") \
+    <(git status --porcelain | sed -E "s|^...||")
+}
+
+function _select_list_strategy_and_run
+{
+  local project_root_dir="$1"
+
+  if is_git_repo; then
+    if [[ "${COMMIT}" == "${INVALID_COMMIT}" ]]; then
+      _list_versioned_files |
+        prepend "${project_root_dir}/"
+    else
+      _list_changed_files "${COMMIT}" |
+        prepend "${project_root_dir}/"
+    fi
+  else
+    find "${project_root_dir}" \
+      -type f \
+      -and -not \( \
+      -path "'${project_root_dir}/*___*/*'" -or \
+      -path "'${project_root_dir}/.git/*'" -or \
+      -path "'${project_root_dir}/.idea/*'" \)
+  fi
+}
+
+function file_exists
+{
+  local file_path="$1"
+
+  if ! test -f "${file_path}"; then
+    return 1
+  fi
+
+  echo "${file_path}"
+}
+
+function list_files
+{
+  local project_root_dir="$1"
+
+  if [[ "$(cat "${FILE_LIST}" | wc -l)" == "0" ]]; then
+    _select_list_strategy_and_run "${project_root_dir}" |
+      for_each filter file_exists |
+      sort |
+      uniq >"${FILE_LIST}"
+  fi
+
+  cat "${FILE_LIST}"
+}
+
+function run_formatter
+{
+  local formatter="$1"
+  local log_output_dir="$2"
+  local input_file="$3"
+
+  local scratch_file1
+  scratch_file1="$(mktemp)"
+  local scratch_file2
+  scratch_file2="$(mktemp)"
+
+  cat "${input_file}" >"${scratch_file1}"
+  local digest1
+  digest1="$(cat "${scratch_file1}" | sha256sum | cut -d' ' -f1)"
+
+  local log_file_name
+  log_file_name="$(echo -n "${input_file}" | sha256sum | cut -d' ' -f1).${formatter}"
+  local log_file="${log_output_dir}/${log_file_name}"
+
+  {
+    echo ""
+    echo "=== ${input_file} ==="
+    echo "=== ${formatter} ==="
+  } &>>"${log_file}"
+
+  if ${formatter} \
+    "${scratch_file1}" \
+    "${scratch_file2}" &>>"${log_file}"; then
+    rm -rf "${log_file}"
+  else
+    echo "=====" &>>"${log_file}"
+    echo "" &>>"${log_file}"
+
+    return 1
+  fi
+
+  local digest2
+  digest2="$(cat "${scratch_file2}" | sha256sum | cut -d' ' -f1)"
+
+  if [[ "${digest1}" != "${digest2}" ]]; then
+    cat "${scratch_file2}" >"${input_file}"
+
+    touch "${DIFFERENCES_DIR}/${log_file_name}"
+
+    return 1
+  fi
+}
+
+function run_analyser
+{
+  local analyser="$1"
+  local log_output_dir="$2"
+  local input_file="$3"
+
+  local log_file_name
+  log_file_name="$(echo -n "${input_file}" | sha256sum | cut -d' ' -f1).${analyser}"
+  local log_file="${log_output_dir}/${log_file_name}"
+
+  {
+    echo ""
+    echo "=== ${input_file} ==="
+    echo "=== ${analyser} ==="
+  } &>>"${log_file}"
+
+  if ${analyser} \
+    "${input_file}" &>>"${log_file}"; then
+    rm -rf "${log_file}"
+  else
+    echo "=====" &>>"${log_file}"
+    echo "" &>>"${log_file}"
+
+    return 1
+  fi
+}
+
+function shell_script_formatter
+{
+  local input_file="$1"
+  local output_file="$2"
+
+  cat "${input_file}" |
+    shfmt -i 2 -fn >"${output_file}"
 }
 
 function find_and_format_shell_scripts
 {
   local project_root_dir="$1"
 
-  invoke_find \
-    "${project_root_dir}" \
-    "${FIND_SHELL_SCRIPTS}" \
-    "format_single_shell_script"
+  list_files \
+    "${project_root_dir}" |
+    {
+      grep -E '\.sh$|\.bash$' || true
+    } |
+    for_each no_fail run_formatter \
+      shell_script_formatter \
+      "${LOG_OUTPUT_DIR}"
 }
 
-function analyse_single_shell_script
+function shell_script_analyser
 {
-  local f="$1"
+  local input_file="$1"
 
   local severity="style"
   # local severity="info"
@@ -58,42 +191,50 @@ function analyse_single_shell_script
     --exclude="SC1090,SC1091,SC2002,SC2086,SC2154,SC2310,SC2312" \
     --severity "${severity}" \
     --shell=bash \
-    "${f}"
+    "${input_file}"
 }
 
 function find_and_analyse_shell_scripts
 {
   local project_root_dir="$1"
 
-  invoke_find \
-    "${project_root_dir}" \
-    "${FIND_SHELL_SCRIPTS}" \
-    "analyse_single_shell_script"
+  list_files \
+    "${project_root_dir}" |
+    {
+      grep -E '\.sh$|\.bash$' || true
+    } |
+    for_each no_fail run_analyser \
+      shell_script_analyser \
+      "${LOG_OUTPUT_DIR}"
 }
 
-function format_single_json_file
+function json_file_formatter
 {
-  local f="$1"
+  local input_file="$1"
+  local output_file="$2"
 
-  local json_text
-  json_text="$(cat "${f}")"
-  echo "${json_text}" |
-    jq --sort-keys '.' - >"${f}"
+  cat "${input_file}" |
+    jq --sort-keys '.' - >"${output_file}"
 }
 
 function find_and_format_json_files
 {
   local project_root_dir="$1"
 
-  invoke_find \
-    "${project_root_dir}" \
-    "${FIND_JSON_FILES}" \
-    "format_single_json_file"
+  list_files \
+    "${project_root_dir}" |
+    {
+      grep -E '\.json$' || true
+    } |
+    for_each no_fail run_formatter \
+      json_file_formatter \
+      "${LOG_OUTPUT_DIR}"
 }
 
 function k8s_yaml_kustomize
 {
-  local f="$1"
+  local input_file="$1"
+  local output_file="$2"
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -104,7 +245,7 @@ function k8s_yaml_kustomize
   temp_file_name="$(basename "${f}")"
   local temp_file="${temp_dir}/${temp_file_name}"
 
-  cp "${f}" "${temp_file}"
+  cp "${input_file}" "${temp_file}"
   cat <<EOF >"${temp_dir}/kustomization.yaml"
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -115,8 +256,8 @@ EOF
   if kubectl kustomize \
     --output="${temp_output}" \
     --reorder=legacy \
-    "${temp_dir}" &>/dev/null; then
-    cat "${temp_output}" >"${f}"
+    "${temp_dir}"; then
+    cat "${temp_output}" >"${output_file}"
 
     return 0
   fi
@@ -124,95 +265,125 @@ EOF
 
 function single_yaml_file_deep_clean
 {
-  local f="$1"
+  local input_file="$1"
+  local output_file="$2"
 
-  local output
-  output="$(cat "${f}" |
+  cat "${input_file}" |
     yq \
       --sort-keys \
       --yaml-output \
       '.' \
       - |
     grep -Ev '^--- null$' |
-    grep -Ev '^\.\.\.$')"
-  echo "${output}" >"${f}"
+    grep -Ev '^\.\.\.$' >"${output_file}"
 }
 
 function single_yaml_file_clean
 {
-  local f="$1"
+  local input_file="$1"
+  local output_file="$2"
 
-  local output
-  output="$(cat "${f}" |
+  cat "${input_file}" |
     yq \
       --sort-keys \
       --yaml-roundtrip \
       '.' \
       - |
     grep -Ev '^--- null$' |
-    grep -Ev '^\.\.\.$')"
-  echo "${output}" >"${f}"
+    grep -Ev '^\.\.\.$' >"${output_file}"
 }
 
-function format_single_yaml_file
+function yaml_file_formatter
 {
-  local f="$1"
+  local input_file="$1"
+  local output_file="$2"
 
   # Good results, but mangles multiline strings
-  single_yaml_file_deep_clean "${f}"
+  single_yaml_file_deep_clean \
+    "${input_file}" \
+    "${output_file}"
 
-  k8s_yaml_kustomize "${f}"
+  k8s_yaml_kustomize \
+    "${input_file}" \
+    "${output_file}"
 
-  single_yaml_file_clean "${f}"
+  single_yaml_file_clean \
+    "${input_file}" \
+    "${output_file}"
 }
 
 function find_and_format_yaml_files
 {
   local project_root_dir="$1"
 
-  invoke_find \
-    "${project_root_dir}" \
-    "${FIND_YAML_FILES}" \
-    "format_single_yaml_file"
+  list_files \
+    "${project_root_dir}" |
+    {
+      grep -E '\.yaml$|\.yml$' || true
+    } |
+    for_each no_fail run_formatter \
+      yaml_file_formatter \
+      "${LOG_OUTPUT_DIR}"
 }
 
 function main
 {
-  local project_root_dir
-  project_root_dir="$(realpath "${THIS_SCRIPT_DIR}/..")"
+  cd "${PROJECT_ROOT_DIR}"
 
-  export -f analyse_single_shell_script
-  export -f format_single_json_file
-  export -f format_single_shell_script
-  export -f format_single_yaml_file
-  export -f single_yaml_file_deep_clean
-  export -f single_yaml_file_clean
-  export -f k8s_yaml_kustomize
+  COMMIT="$1"
 
-  echo "Formatting..."
+  if [[ "${COMMIT}" != "${INVALID_COMMIT}" ]]; then
+    if is_git_repo && ! quiet git rev-parse "${COMMIT}"; then
+      log_error "${COMMIT} is not a valid commit"
+      return 1
+    fi
+  fi
+
+  if [[ "$(list_files "${PROJECT_ROOT_DIR}" | wc -l)" == "0" ]]; then
+    log_info "Nothing to do."
+    return 0
+  fi
+
+  log_info "Formatting..."
 
   find_and_format_json_files \
-    "${project_root_dir}"
+    "${PROJECT_ROOT_DIR}"
 
   find_and_format_shell_scripts \
-    "${project_root_dir}"
+    "${PROJECT_ROOT_DIR}"
 
   find_and_format_yaml_files \
-    "${project_root_dir}"
+    "${PROJECT_ROOT_DIR}"
 
   wait
-  echo "Formatting done"
+  log_info "Formatting done"
 
-  echo "Performing static analysis..."
+  log_info "Performing static analysis..."
 
   find_and_analyse_shell_scripts \
-    "${project_root_dir}"
+    "${PROJECT_ROOT_DIR}"
 
   wait
-  echo "Static analysis done"
+  log_info "Static analysis done"
 
-  echo "Success: $(basename "$0")"
+  if [[ "$(ls -A "${LOG_OUTPUT_DIR}")" != "" ]]; then
+    cat "${LOG_OUTPUT_DIR}"/*
+
+    log_warning "Some problems or errors were found; \
+see output above for details"
+
+    return 1
+  fi
+
+  if [[ "$(ls -A "${DIFFERENCES_DIR}")" != "" ]]; then
+    log_warning "Some files were incorrectly formatted; \
+re-run this script and commit the changes to the repository"
+
+    return 1
+  fi
+
+  log_info "Success: $(basename "$0")"
 }
 
 # Entry point
-main
+main "${1:-"${INVALID_COMMIT}"}"

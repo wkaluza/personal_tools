@@ -9,16 +9,19 @@ source "${THIS_SCRIPT_DIR}/../shell_script_imports/preamble.bash"
 
 function main
 {
+  local commit="${1:-"HEAD"}"
+
   local project_root_dir
   project_root_dir="$(realpath "${THIS_SCRIPT_DIR}/..")"
 
   bash "${project_root_dir}/docker/jobs/run_in_docker.bash" \
     "${project_root_dir}" \
     "${project_root_dir}/docker/jobs/docker_jobs.json" \
-    "lint"
+    "lint" \
+    "${commit}"
 
   log_info "Success: $(basename "$0")"
 }
 
 # Entry point
-main
+main "$@"
