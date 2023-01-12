@@ -313,3 +313,11 @@ function list_shallow_subdirectories
     -mindepth "${depth}" \
     -type d
 }
+
+function prepend
+{
+  local prefix="$1"
+  while read -r line; do
+    echo "${prefix}${line}"
+  done
+}
