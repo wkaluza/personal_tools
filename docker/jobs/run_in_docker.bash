@@ -32,6 +32,7 @@ function docker_run
   local command="$5"
   local build_context="$6"
   local image_name="$7"
+  local args=("${@:8}")
 
   local rel_ws_to_build_ctx
   rel_ws_to_build_ctx="$(realpath \
@@ -63,7 +64,7 @@ function docker_run
   )"
 
   log_info "Running command..."
-  docker run \
+  eval docker run \
     --rm \
     --tty \
     --interactive \
@@ -74,9 +75,7 @@ function docker_run
     --volume "${host_workspace}:${docker_workspace}" \
     --workdir "${docker_workspace}" \
     "${image_name}" \
-    "/bin/bash" \
-    "-c" \
-    "${command}"
+    "/bin/bash -c \"${command} ${args[*]}\""
 }
 
 function docker_build
@@ -109,6 +108,7 @@ function main
   local host_workspace
   host_workspace="$(realpath "$4")"
   local command="$5"
+  local args=("${@:6}")
 
   local aggregate_digest
   aggregate_digest="$(compute_digest "${DIGESTS}" | cut -c1-8)"
@@ -137,7 +137,8 @@ function main
     "${host_workspace}" \
     "${command}" \
     "${build_context}" \
-    "${image_name}"
+    "${image_name}" \
+    "${args[@]}"
 }
 
 function main_json
@@ -147,6 +148,7 @@ function main_json
   local json_config
   json_config="$(realpath "$2")"
   local job_name="$3"
+  local args=("${@:4}")
 
   cd "${root_dir}"
 
@@ -177,10 +179,11 @@ function main_json
     "${dockerfile}" \
     "${build_context}" \
     "${host_workspace}" \
-    "${command}"
+    "${command}" \
+    "${args[@]}"
 
   log_info "Success: $(basename "$0")"
 }
 
 # Entry point
-main_json "$1" "$2" "$3"
+main_json "$@"
