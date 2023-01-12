@@ -84,8 +84,8 @@ function clean_repo
 
 function git_get_latest
 {
-  local remote_name="${1:-"origin"}"
-  local branch_name="${2:-"main"}"
+  local remote_name="$1"
+  local branch_name="$2"
 
   if repo_is_clean; then
     git verify-commit HEAD

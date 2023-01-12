@@ -14,7 +14,9 @@ function main
       "github.com"
     quiet run_in_context \
       "${THIS_SCRIPT_DIR}" \
-      git_get_latest
+      git_get_latest \
+      "origin" \
+      "main"
   fi
 
   bash "${THIS_SCRIPT_DIR}/startup_impl.bash"
