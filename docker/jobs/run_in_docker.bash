@@ -62,7 +62,7 @@ function docker_run
       'stty -onlcr && echo "${WORKSPACE}"' # prevent trailing CR in output
   )"
 
-  echo "Running command..."
+  log_info "Running command..."
   docker run \
     --rm \
     --tty \
@@ -88,7 +88,7 @@ function docker_build
   local build_context="$5"
   local image_name="$6"
 
-  echo "Building image..."
+  log_info "Building image..."
   quiet docker build \
     --tag "${image_name}" \
     --file "${dockerfile}" \
@@ -179,7 +179,7 @@ function main_json
     "${host_workspace}" \
     "${command}"
 
-  echo "Success: $(basename "$0")"
+  log_info "Success: $(basename "$0")"
 }
 
 # Entry point
