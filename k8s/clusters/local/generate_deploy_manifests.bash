@@ -57,6 +57,17 @@ function main
   log_info "Formatting..."
   quiet no_fail bash "${PROJECT_ROOT_DIR}/scripts/lint_in_docker.bash"
 
+  log_info "Checking kyverno policies..."
+  find "${deploy_dir}" -type f -iname '*.yaml' |
+    sort |
+    while read -r manifest; do
+      log_info "  - ${manifest}"
+
+      quiet_unless_error kyverno apply \
+        "${deploy_dir}/system/policy.yaml" \
+        --resource "${manifest}"
+    done
+
   log_info "Success: $(basename "$0")"
 }
 

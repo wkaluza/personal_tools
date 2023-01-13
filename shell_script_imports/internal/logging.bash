@@ -43,6 +43,20 @@ function quiet
   quiet_stdout quiet_stderr ${command} "${args[@]}"
 }
 
+function quiet_unless_error
+{
+  local command="$1"
+  local args=("${@:2}")
+
+  local temp
+  temp="$(mktemp)"
+
+  if ! ${command} "${args[@]}" &>"${temp}"; then
+    cat "${temp}"
+    return 1
+  fi
+}
+
 function quiet_stdout
 {
   local command="$1"
