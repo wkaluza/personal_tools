@@ -219,3 +219,19 @@ function connect_stack_containers_to_network
       "${network}" \
       "${ip}"
 }
+
+function image_exists
+{
+  local repository="$1"
+  local tag="$2"
+
+  if [[ "$(docker image ls \
+    --quiet \
+    --no-trunc \
+    --digests \
+    --format '{{ json . }}' |
+    jq ". | select(.Repository == \"${repository}\" and .Tag == \"${tag}\")" - |
+    jq --slurp '. | length' -)" == "0" ]]; then
+    return 1
+  fi
+}

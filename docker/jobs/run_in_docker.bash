@@ -122,13 +122,17 @@ function main
   local username
   username="$(id -un)"
 
-  docker_build \
-    "${dockerfile}" \
-    "${uid}" \
-    "${gid}" \
-    "${username}" \
-    "${build_context}" \
-    "${image_name}"
+  if quiet image_exists "${image_name}" "latest"; then
+    log_info "Image build skipped"
+  else
+    docker_build \
+      "${dockerfile}" \
+      "${uid}" \
+      "${gid}" \
+      "${username}" \
+      "${build_context}" \
+      "${image_name}"
+  fi
 
   docker_run \
     "${container_name}" \
