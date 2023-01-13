@@ -7,6 +7,8 @@ cd "${THIS_SCRIPT_DIR}"
 
 source "${THIS_SCRIPT_DIR}/../../../shell_script_imports/preamble.bash"
 
+PROJECT_ROOT_DIR="$(realpath "${THIS_SCRIPT_DIR}/../../..")"
+
 function run_kustomize
 {
   local input_dir="$1"
@@ -45,11 +47,15 @@ function main
 
   rm -rf "${deploy_dir}"
 
+  log_info "Generating deployment manifests..."
   list_shallow_subdirectories 2 "${src_dir}" |
     for_each kustomize_directory "${deploy_dir}"
 
   list_shallow_subdirectories 1 "${deploy_dir}" |
     for_each generate_kustomization_yaml_for_directory
+
+  log_info "Formatting..."
+  quiet no_fail bash "${PROJECT_ROOT_DIR}/scripts/lint_in_docker.bash"
 
   log_info "Success: $(basename "$0")"
 }
