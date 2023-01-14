@@ -235,3 +235,11 @@ function image_exists
     return 1
   fi
 }
+
+function get_short_image_ids
+{
+  docker image ls \
+    --format '{{ .ID }}' |
+    sort |
+    uniq
+}
