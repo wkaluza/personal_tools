@@ -83,7 +83,7 @@ function ensure_gogs_repo_exists
 
   local repo_description="${repo_name}"
   local token
-  token="$(pass show "local_gogs_token_${username}")"
+  token="$(pass_show "local_gogs_token_${username}")"
   local auth_header="Authorization: token ${token}"
 
   if ! gogs_check_repo_exists \
@@ -147,11 +147,11 @@ function ensure_gogs_user_configured
       "${username}" \
       "${password}" \
       "${token_name}" |
-      store_in_pass "${pass_gogs_token_id}"
+      pass_store "${pass_gogs_token_id}"
   fi
 
   local token_value
-  token_value="$(pass show "${pass_gogs_token_id}")"
+  token_value="$(pass_show "${pass_gogs_token_id}")"
   local auth_header="Authorization: token ${token_value}"
 
   if ! quiet gogs_ssh_key_exists \

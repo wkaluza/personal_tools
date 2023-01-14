@@ -24,8 +24,8 @@ function ensure_docker_swarm_init
 
   if [[ "${swarm_state}" == "locked" ]]; then
     log_info "Swarm is locked, unlocking..."
-    if pass show "${swarm_key_pass_id}" >/dev/null &&
-      pass show "${swarm_key_pass_id}" |
+    if pass_exists "${swarm_key_pass_id}" &&
+      pass_show "${swarm_key_pass_id}" |
       quiet docker swarm unlock; then
       log_info "Swarm unlocked successfully"
     else
@@ -43,7 +43,7 @@ function ensure_docker_swarm_init
       --autolock |
       grep "${swarm_key_magic_prefix}" |
       sed -E "s/^.*(${swarm_key_magic_prefix}.*)$/\1/" |
-      store_in_pass "${swarm_key_pass_id}"
+      pass_store "${swarm_key_pass_id}"
 
     log_info "Swarm is now active"
   elif [[ "${swarm_state}" == "active" ]]; then

@@ -13,7 +13,7 @@ function main
 
   local username="wkaluza"
   local token
-  token="$(pass show "local_gogs_token_${username}")"
+  token="$(pass_show "local_gogs_token_${username}")"
   local auth_header="Authorization: token ${token}"
 
   gogs_delete_repo \

@@ -19,7 +19,7 @@ function main
   local now
   now="$(date --utc +'%Y%m%d%H%M%S')"
   local token
-  token="$(pass show github_cli_access_token_local_pcspec)"
+  token="$(pass_show github_cli_access_token_local_pcspec)"
 
   until [[ "${result_count}" -lt "${count_requested}" ]]; do
     log_info "Fetching page ${page}"

@@ -33,7 +33,7 @@ function main
       "${encrypted_device}" \
       "${mapping_name}"
   else
-    pass show "luks_passphrase_${key_type}" |
+    pass_show "luks_passphrase_${key_type}" |
       tr -d '\n' |
       sudo cryptsetup open \
         --key-file - \

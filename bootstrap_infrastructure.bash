@@ -298,7 +298,7 @@ function set_up_webhook_secrets
 
   local k8s_secret_name="gogs-webhook-secret"
   local gogs_webhook_secret
-  gogs_webhook_secret="$(pass show "local_gogs_webhook_secret")"
+  gogs_webhook_secret="$(pass_show "local_gogs_webhook_secret")"
 
   kubectl create secret generic \
     "${k8s_secret_name}" \
@@ -317,7 +317,7 @@ function set_up_repo_access_secrets
   local k8s_secret_name="gogs-ssh-${username}"
   local gogs_ssh_key_name="gogs_ssh_${username}_${namespace}"
   local token
-  token="$(pass show "local_gogs_token_${username}")"
+  token="$(pass_show "local_gogs_token_${username}")"
   local auth_header="Authorization: token ${token}"
 
   reset_keys_if_necessary \

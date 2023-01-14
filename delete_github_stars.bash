@@ -58,7 +58,7 @@ function get_starred_repos
 function main
 {
   local token
-  token="$(pass show github_cli_access_token_local_pcspec)"
+  token="$(pass_show github_cli_access_token_local_pcspec)"
 
   get_starred_repos "${token}" |
     for_each unstar "${token}"
