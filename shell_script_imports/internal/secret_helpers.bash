@@ -8,24 +8,10 @@ function pass_store
   local id="$1"
 
   cat - |
-    quiet pass insert \
+    pass insert \
       --force \
       --multiline \
-      "${id}"
-}
-
-function pass_show_or_generate
-{
-  local id="$1"
-  local how_long="${2:-"32"}"
-
-  if ! pass_exists "${id}" &>/dev/null; then
-    pass_generate \
-      "${id}" \
-      "${how_long}" &>/dev/null
-  fi
-
-  pass_show "${id}"
+      "${id}" &>/dev/null
 }
 
 function pass_exists
@@ -56,4 +42,14 @@ function pass_generate
   random_bytes "${how_long}" |
     hex |
     pass_store "${id}"
+}
+
+function pass_generate_if_absent
+{
+  local id="$1"
+
+  if ! pass_exists "${id}"; then
+    pass_generate \
+      "${id}"
+  fi
 }

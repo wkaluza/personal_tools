@@ -83,7 +83,8 @@ function ensure_gogs_repo_exists
 
   local repo_description="${repo_name}"
   local token
-  token="$(pass_show "local_gogs_token_${username}")"
+  token="$(pass_show \
+    "${PASS_SECRET_ID_GOGS_ACCESS_TOKEN_t6xznusu}")"
   local auth_header="Authorization: token ${token}"
 
   if ! gogs_check_repo_exists \
@@ -108,13 +109,13 @@ function ensure_gogs_user_configured
 {
   local username="$1"
 
-  local pass_gogs_password_id="local_gogs_password_${username}"
-  local token_name="local_gogs_token_${username}"
-  local pass_gogs_token_id="${token_name}"
+  local gogs_token_name="access_token_${username}"
+  local pass_gogs_token_id="${PASS_SECRET_ID_GOGS_ACCESS_TOKEN_t6xznusu}"
   local ssh_key_name="ssh_key_${username}"
 
   local password
-  password="$(pass_show_or_generate "${pass_gogs_password_id}")"
+  password="$(pass_show \
+    "${PASS_SECRET_ID_GOGS_USER_PASSWORD_hezqdg53}")"
 
   local primary_key_fingerprint="174C9368811039C87F0C806A896572D1E78ED6A7"
 
@@ -137,7 +138,7 @@ function ensure_gogs_user_configured
     "${DOMAIN_GIT_FRONTEND_df29c969}" \
     "${username}" \
     "${password}" |
-    quiet grep -E "^${token_name}$"; then
+    quiet grep -E "^${gogs_token_name}$"; then
     log_info "Gogs token exists"
   else
     log_info "Creating gogs token..."
@@ -146,7 +147,7 @@ function ensure_gogs_user_configured
       "${DOMAIN_GIT_FRONTEND_df29c969}" \
       "${username}" \
       "${password}" \
-      "${token_name}" |
+      "${gogs_token_name}" |
       pass_store "${pass_gogs_token_id}"
   fi
 

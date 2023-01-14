@@ -11,6 +11,12 @@ source <(cat "${_THIS_FILE_DIR}/local_domains.json" |
   jq --raw-output '.[]' - |
   sort)
 
+source <(cat "${_THIS_FILE_DIR}/managed_local_secret_ids.json" |
+  jq '. | to_entries' - |
+  jq '. | map( "\(.key)=\"\(.value)\"" )' - |
+  jq --raw-output '.[]' - |
+  sort)
+
 source "${_THIS_FILE_DIR}/internal/common.bash"
 source "${_THIS_FILE_DIR}/internal/docker.bash"
 source "${_THIS_FILE_DIR}/internal/git_helpers.bash"

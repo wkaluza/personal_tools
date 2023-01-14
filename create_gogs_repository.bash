@@ -16,7 +16,7 @@ function main
 
   local username="wkaluza"
   local token
-  token="$(pass_show "local_gogs_token_${username}")"
+  token="$(pass_show "${PASS_SECRET_ID_GOGS_ACCESS_TOKEN_t6xznusu}")"
   local auth_header="Authorization: token ${token}"
 
   local repo_url="ssh://git@${DOMAIN_GIT_FRONTEND_df29c969}/${username}/${repo_name}.git"

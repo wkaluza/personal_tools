@@ -150,7 +150,8 @@ function create_webhook_for_receiver
       "${DOMAIN_GIT_FRONTEND_df29c969}" \
       "${webhook_url}" \
       "${username}" \
-      "$(pass_show_or_generate "local_gogs_webhook_secret")" \
+      "$(pass_show \
+        "${PASS_SECRET_ID_GOGS_WEBHOOK_SECRET_8q7aqxbl}")" \
       "${auth_header}" \
       "${repo_name}"
   fi
@@ -233,7 +234,7 @@ function main
 {
   local username="wkaluza"
   local token
-  token="$(pass_show "local_gogs_token_${username}")"
+  token="$(pass_show "${PASS_SECRET_ID_GOGS_ACCESS_TOKEN_t6xznusu}")"
   local auth_header="Authorization: token ${token}"
 
   wait_for_receivers_ready

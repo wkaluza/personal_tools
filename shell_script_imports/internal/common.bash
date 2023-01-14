@@ -174,8 +174,11 @@ function encrypt_deterministically
 
   local secret_id="disposable_secret_160_${key}"
 
+  pass_generate_if_absent \
+    "${secret_id}"
+
   local bytes
-  bytes="$(pass_show_or_generate \
+  bytes="$(pass_show \
     "${secret_id}" \
     80)"
 

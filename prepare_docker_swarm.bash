@@ -79,7 +79,8 @@ GIT_FRONTEND_LOCALHOST_KEY_SECURE_DIGEST="$(cat "${GIT_FRONTEND_LOCALHOST_KEY_PA
   sha256 |
   take_first 8)"
 
-GOGS_SECRET_KEY_e6403800="$(pass_show_or_generate "local_gogs_config_secret_key")"
+GOGS_SECRET_KEY_e6403800="$(pass_show \
+  "${PASS_SECRET_ID_GOGS_CONFIG_SECRET_KEY_nelzbcve}")"
 
 DNS_IP_48zyazy8="192.168.49.200"
 
