@@ -150,17 +150,6 @@ function md5
     awk '{ print $1 }'
 }
 
-function store_in_pass
-{
-  local id="$1"
-
-  cat - |
-    quiet pass insert \
-      --force \
-      --multiline \
-      "${id}"
-}
-
 function current_timezone
 {
   local output
@@ -174,20 +163,6 @@ function current_timezone
   fi
 
   echo "${output}"
-}
-
-function pass_show_or_generate
-{
-  local id="$1"
-  local how_long="${2:-"32"}"
-
-  if ! pass show "${id}" &>/dev/null; then
-    random_bytes "${how_long}" |
-      hex |
-      store_in_pass "${id}"
-  fi
-
-  pass show "${id}"
 }
 
 function encrypt_deterministically
