@@ -93,7 +93,7 @@ spec:
   ref:
     branch: main
   secretRef:
-    name: gogs-ssh-wkaluza
+    name: gitops-admin-gogs-ssh-key-lvnwoulc
   timeout: 1m0s
   url: ssh://git@git.localhost/wkaluza/personal_tools.git
   verify:
@@ -111,7 +111,7 @@ spec:
   ref:
     branch: main
   secretRef:
-    name: gogs-ssh-wkaluza
+    name: gitops-admin-gogs-ssh-key-lvnwoulc
   timeout: 1m0s
   url: ssh://git@git.localhost/wkaluza/infrastructure.git
   verify:

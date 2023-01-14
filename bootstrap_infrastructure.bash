@@ -9,6 +9,20 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
 CERTS_DIR="${HOME}/.wk_certificates___"
 
+function secret_exists
+{
+  local namespace="$1"
+  local secret_name="$2"
+
+  if ! kubectl get secret \
+    --namespace="${namespace}" \
+    --output="name" \
+    "${secret_name}" |
+    quiet grep -E "^secret/${secret_name}$"; then
+    return 1
+  fi
+}
+
 function set_up_secrets
 {
   local sync_namespace="$1"
@@ -145,63 +159,6 @@ function set_up_tls_secrets
     quiet kubectl apply --filename -
 }
 
-function reset_ssh_keys
-{
-  local gogs_ssh_key_name="$1"
-  local auth_header="$2"
-  local namespace="$3"
-  local secret_name="$4"
-
-  local keys_temp_dir
-  keys_temp_dir="$(mktemp -d)"
-  local private_key_file
-  private_key_file="${keys_temp_dir}/gogs"
-  local public_key_file="${private_key_file}.pub"
-
-  quiet pushd "${keys_temp_dir}"
-  quiet ssh-keygen \
-    -t rsa \
-    -b 4096 \
-    -C "" \
-    -f "${private_key_file}" \
-    -P ""
-  quiet popd
-
-  ensure_namespace_exists \
-    "${namespace}"
-
-  kubectl create secret generic \
-    "${secret_name}" \
-    --from-file=identity="${private_key_file}" \
-    --from-file=identity.pub="${public_key_file}" \
-    --from-literal=known_hosts="$(ssh_keyscan "${DOMAIN_GIT_FRONTEND_df29c969}")" \
-    --dry-run="client" \
-    --namespace="${namespace}" \
-    --output="yaml" |
-    quiet kubectl apply --filename -
-
-  gogs_delete_ssh_key \
-    "${DOMAIN_GIT_FRONTEND_df29c969}" \
-    "${gogs_ssh_key_name}" \
-    "${auth_header}" || true
-  gogs_create_ssh_key \
-    "${DOMAIN_GIT_FRONTEND_df29c969}" \
-    "${gogs_ssh_key_name}" \
-    "$(cat "${public_key_file}")" \
-    "${auth_header}"
-
-  rm -rf "${keys_temp_dir}"
-
-  retry_until_success \
-    "keys_exist_and_match" \
-    keys_exist_and_match \
-    "${username}" \
-    "${gogs_ssh_key_name}" \
-    "${auth_header}" \
-    "${namespace}" \
-    "${secret_name}"
-}
-
 function wait_for_crds
 {
   quiet kubectl wait \
@@ -228,70 +185,6 @@ function apply_manifest_file
   fi
 }
 
-function normalise_ssh_key
-{
-  cat - |
-    tr -d '\n' |
-    sed -E 's/^([a-z\-]+ [a-zA-Z0-9+/=]+).*$/\1/'
-}
-
-function keys_exist_and_match
-{
-  local username="$1"
-  local gogs_ssh_key_name="$2"
-  local auth_header="$3"
-  local namespace="$4"
-  local secret_name="$5"
-
-  local k8s_key
-  k8s_key="$(quiet_stderr kubectl get secret \
-    "${secret_name}" \
-    --namespace "${namespace}" \
-    --output "json" |
-    jq --raw-output '.data."identity.pub"' - |
-    base64 -d |
-    normalise_ssh_key)"
-
-  local gogs_key
-  gogs_key="$(gogs_ssh_key_exists \
-    "${DOMAIN_GIT_FRONTEND_df29c969}" \
-    "${username}" \
-    "${gogs_ssh_key_name}" \
-    "${auth_header}" |
-    normalise_ssh_key)"
-
-  if ! echo "${k8s_key}" | quiet grep -E '[a-zA-Z0-9]' ||
-    ! echo "${gogs_key}" | quiet grep -E '[a-zA-Z0-9]' ||
-    ! quiet diff \
-      <(echo "${k8s_key}") \
-      <(echo "${gogs_key}"); then
-    return 1
-  fi
-}
-
-function reset_keys_if_necessary
-{
-  local username="$1"
-  local gogs_ssh_key_name="$2"
-  local auth_header="$3"
-  local namespace="$4"
-  local secret_name="$5"
-
-  if ! keys_exist_and_match \
-    "${username}" \
-    "${gogs_ssh_key_name}" \
-    "${auth_header}" \
-    "${namespace}" \
-    "${secret_name}"; then
-    log_info "Resetting SSH key ${gogs_ssh_key_name}..."
-    reset_ssh_keys \
-      "${gogs_ssh_key_name}" \
-      "${auth_header}" \
-      "${namespace}" \
-      "${secret_name}"
-  fi
-}
-
 function set_up_webhook_secrets
 {
   local namespace="$1"
@@ -314,18 +207,27 @@ function set_up_repo_access_secrets
 {
   local namespace="$1"
 
-  local username="wkaluza"
-  local k8s_secret_name="gogs-ssh-${username}"
-  local gogs_ssh_key_name="gogs_ssh_${username}_${namespace}"
-  local token
-  token="$(pass_show \
-    "${PASS_SECRET_ID_GOGS_ACCESS_TOKEN_t6xznusu}")"
-  local auth_header="Authorization: token ${token}"
+  local k8s_secret_name="gitops-admin-gogs-ssh-key-lvnwoulc"
 
-  reset_keys_if_necessary \
-    "${username}" \
-    "${gogs_ssh_key_name}" \
-    "${auth_header}" \
+  ensure_namespace_exists \
+    "${namespace}"
+
+  kubectl create secret generic \
+    "${k8s_secret_name}" \
+    --from-literal=identity="$(pass_show \
+      "${PASS_SECRET_ID_GITOPS_SSH_SECRET_KEY_ADMIN_duccc5fs}")" \
+    --from-literal=identity.pub="$(pass_show \
+      "${PASS_SECRET_ID_GITOPS_SSH_PUBLIC_KEY_ADMIN_rclub6oc}")" \
+    --from-literal=known_hosts="$(ssh_keyscan \
+      "${DOMAIN_GIT_FRONTEND_df29c969}")" \
+    --dry-run="client" \
+    --namespace="${namespace}" \
+    --output="yaml" |
+    quiet kubectl apply --filename -
+
+  retry_until_success \
+    "secret_exists" \
+    secret_exists \
     "${namespace}" \
     "${k8s_secret_name}"
 }

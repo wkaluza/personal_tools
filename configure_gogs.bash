@@ -105,19 +105,39 @@ function ensure_gogs_repo_exists
   fi
 }
 
+function upload_ssh_key_if_absent
+{
+  local username="$1"
+  local ssh_key_name="$2"
+  local auth_header="$3"
+  local public_key="$4"
+
+  if ! quiet gogs_ssh_key_exists \
+    "${DOMAIN_GIT_FRONTEND_df29c969}" \
+    "${username}" \
+    "${ssh_key_name}" \
+    "${auth_header}"; then
+    log_info "Uploading SSH key to gogs..."
+    gogs_create_ssh_key \
+      "${DOMAIN_GIT_FRONTEND_df29c969}" \
+      "${ssh_key_name}" \
+      "${public_key}" \
+      "${auth_header}"
+  else
+    log_info "Gogs SSH key already uploaded"
+  fi
+}
+
 function ensure_gogs_user_configured
 {
   local username="$1"
 
   local gogs_token_name="access_token_${username}"
   local pass_gogs_token_id="${PASS_SECRET_ID_GOGS_ACCESS_TOKEN_t6xznusu}"
-  local ssh_key_name="ssh_key_${username}"
 
   local password
   password="$(pass_show \
     "${PASS_SECRET_ID_GOGS_USER_PASSWORD_hezqdg53}")"
-
-  local primary_key_fingerprint="174C9368811039C87F0C806A896572D1E78ED6A7"
 
   if quiet gogs_get_single_user \
     "${DOMAIN_GIT_FRONTEND_df29c969}" \
@@ -155,20 +175,17 @@ function ensure_gogs_user_configured
   token_value="$(pass_show "${pass_gogs_token_id}")"
   local auth_header="Authorization: token ${token_value}"
 
-  if ! quiet gogs_ssh_key_exists \
-    "${DOMAIN_GIT_FRONTEND_df29c969}" \
+  upload_ssh_key_if_absent \
     "${username}" \
-    "${ssh_key_name}" \
-    "${auth_header}"; then
-    log_info "Uploading SSH key to gogs..."
-    gogs_create_ssh_key \
-      "${DOMAIN_GIT_FRONTEND_df29c969}" \
-      "${ssh_key_name}" \
-      "$(gpg --export-ssh-key "${primary_key_fingerprint}")" \
-      "${auth_header}"
-  else
-    log_info "Gogs SSH key already uploaded"
-  fi
+    "gogs_personal_ssh_key_${username}" \
+    "${auth_header}" \
+    "$(pass_show "${PASS_SECRET_ID_PERSONAL_SSH_PUBLIC_KEY_ts5geji6}")"
+  upload_ssh_key_if_absent \
+    "${username}" \
+    "gogs_gitops_ssh_key_admin" \
+    "${auth_header}" \
+    "$(pass_show \
+      "${PASS_SECRET_ID_GITOPS_SSH_PUBLIC_KEY_ADMIN_rclub6oc}")"
 }
 
 function create_main_repos

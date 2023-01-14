@@ -53,3 +53,13 @@ function pass_generate_if_absent
       "${id}"
   fi
 }
+
+function pass_store_if_absent
+{
+  local id="$1"
+
+  if ! pass_exists "${id}"; then
+    pass_store \
+      "${id}"
+  fi
+}
