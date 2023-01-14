@@ -7,6 +7,35 @@ cd "${THIS_SCRIPT_DIR}"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
+function pass_generate_sealed_secrets_cert_if_absent
+{
+  local secret_key_id="$1"
+  local certificate_id="$2"
+
+  if ! pass_exists "${secret_key_id}" ||
+    ! pass_exists "${certificate_id}"; then
+    local temp_dir
+    temp_dir="$(mktemp -d)"
+    local key_path="${temp_dir}/key"
+    local cert_path="${temp_dir}/cert"
+
+    openssl req \
+      -x509 \
+      -nodes \
+      -newkey "rsa:4096" \
+      -keyout "${key_path}" \
+      -out "${cert_path}" \
+      -subj "/CN=sealed-secret/O=sealed-secret" &>/dev/null
+
+    cat "${key_path}" |
+      pass_store "${secret_key_id}"
+    cat "${cert_path}" |
+      pass_store "${certificate_id}"
+
+    rm -rf "${temp_dir}"
+  fi
+}
+
 function pass_generate_key_pair_if_absent
 {
   local secret_key_id="$1"
@@ -45,6 +74,10 @@ function main
   pass_generate_key_pair_if_absent \
     "${PASS_SECRET_ID_GITOPS_SSH_SECRET_KEY_ADMIN_duccc5fs}" \
     "${PASS_SECRET_ID_GITOPS_SSH_PUBLIC_KEY_ADMIN_rclub6oc}"
+
+  pass_generate_sealed_secrets_cert_if_absent \
+    "${PASS_SECRET_ID_SEALED_SECRETS_KEY_kxlsnqam}" \
+    "${PASS_SECRET_ID_SEALED_SECRETS_CERTIFICATE_4edcp3cm}"
 
   gpg \
     --export-ssh-key "${primary_key_fingerprint}" |

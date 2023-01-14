@@ -65,7 +65,7 @@ spec:
       name: gitops-admin
       namespace: gitops-system
   secretRef:
-    name: gogs-webhook-secret
+    name: gogs-webhook-secret-bkrumqmp
   type: generic-hmac
 ---
 apiVersion: notification.toolkit.fluxcd.io/v1beta2
@@ -80,7 +80,7 @@ spec:
       name: gitops-infrastructure
       namespace: gitops-system
   secretRef:
-    name: gogs-webhook-secret
+    name: gogs-webhook-secret-bkrumqmp
   type: generic-hmac
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2

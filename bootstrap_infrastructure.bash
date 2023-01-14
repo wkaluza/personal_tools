@@ -7,8 +7,6 @@ cd "${THIS_SCRIPT_DIR}"
 
 source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 
-CERTS_DIR="${HOME}/.wk_certificates___"
-
 function secret_exists
 {
   local namespace="$1"
@@ -23,19 +21,40 @@ function secret_exists
   fi
 }
 
+function set_up_sealed_secrets_cert
+{
+  local namespace="$1"
+
+  local secret_name="sealed-secrets-certificate-jqweyrms"
+
+  kubectl create secret \
+    tls \
+    "${secret_name}" \
+    --cert=<(pass_show \
+      "${PASS_SECRET_ID_SEALED_SECRETS_CERTIFICATE_4edcp3cm}") \
+    --key=<(pass_show "${PASS_SECRET_ID_SEALED_SECRETS_KEY_kxlsnqam}") \
+    --namespace="${namespace}" \
+    --dry-run="client" \
+    --output="yaml" |
+    quiet kubectl apply --filename -
+
+  quiet kubectl label secret \
+    --namespace="${namespace}" \
+    "${secret_name}" \
+    "sealedsecrets.bitnami.com/sealed-secrets-key=active"
+}
+
 function set_up_secrets
 {
   local sync_namespace="$1"
-  local ingress_namespace="$2"
+  local sealed_secrets_namespace="$2"
 
   set_up_repo_access_secrets \
     "${sync_namespace}"
-  set_up_webhook_secrets \
-    "${sync_namespace}"
   set_up_git_gpg_signature_verification_secrets \
     "${sync_namespace}"
-  set_up_tls_secrets \
-    "${ingress_namespace}"
+  set_up_sealed_secrets_cert \
+    "${sealed_secrets_namespace}"
 }
 
 function wait_flux_pre_check
@@ -141,24 +160,6 @@ function test_dns
     "${namespace}"
 }
 
-function set_up_tls_secrets
-{
-  local namespace="$1"
-
-  ensure_namespace_exists \
-    "${namespace}"
-
-  kubectl create secret \
-    tls \
-    "webhooks-localhost-tls-4b9o4rmb" \
-    --namespace="${namespace}" \
-    --cert="${CERTS_DIR}/${DOMAIN_WEBHOOK_SINK_a8800f5b}.pem" \
-    --key="${CERTS_DIR}/${DOMAIN_WEBHOOK_SINK_a8800f5b}.secret" \
-    --dry-run="client" \
-    --output="yaml" |
-    quiet kubectl apply --filename -
-}
-
 function wait_for_crds
 {
   quiet kubectl wait \
@@ -183,24 +184,6 @@ function apply_manifest_file
       --filename "${manifest_path}" \
       --wait
   fi
-}
-
-function set_up_webhook_secrets
-{
-  local namespace="$1"
-
-  local k8s_secret_name="gogs-webhook-secret"
-  local gogs_webhook_secret
-  gogs_webhook_secret="$(pass_show \
-    "${PASS_SECRET_ID_GOGS_WEBHOOK_SECRET_8q7aqxbl}")"
-
-  kubectl create secret generic \
-    "${k8s_secret_name}" \
-    --from-literal=token="${gogs_webhook_secret}" \
-    --dry-run="client" \
-    --namespace="${namespace}" \
-    --output="yaml" |
-    quiet kubectl apply --filename -
 }
 
 function set_up_repo_access_secrets
@@ -263,12 +246,13 @@ function set_up_git_gpg_signature_verification_secrets
   local fingerprint="174C9368811039C87F0C806A896572D1E78ED6A7"
   local secret_name="flux-git-gpg-sig-verification-gwnvmpi7"
 
-  kubectl create secret generic \
+  kubectl create secret \
+    generic \
     "${secret_name}" \
-    --dry-run="client" \
     --namespace="${namespace}" \
-    --output="yaml" \
-    --from-file="wkaluza.${fingerprint}="<(gpg --armor --export "${fingerprint}") |
+    --from-file="wkaluza="<(gpg --armor --export "${fingerprint}") \
+    --dry-run="client" \
+    --output="yaml" |
     quiet kubectl apply --filename -
 }
 
@@ -277,6 +261,7 @@ function main
   local flux_namespace="flux-system"
   local ingress_namespace="ingress-system"
   local sync_namespace="gitops-system"
+  local sealed_secrets_namespace="sealed-secrets"
 
   ensure_namespace_exists \
     "${sync_namespace}"
@@ -284,13 +269,15 @@ function main
     "${ingress_namespace}"
   ensure_namespace_exists \
     "${flux_namespace}"
+  ensure_namespace_exists \
+    "${sealed_secrets_namespace}"
 
   set_up_dns
   test_dns
 
   set_up_secrets \
     "${sync_namespace}" \
-    "${ingress_namespace}"
+    "${sealed_secrets_namespace}"
 
   install_flux \
     "${flux_namespace}"
