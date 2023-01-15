@@ -55,7 +55,7 @@ function set_up_git_gpg_signature_verification_secrets
   kubectl create secret generic \
     "${secret_name}" \
     --namespace="${namespace}" \
-    --from-file="wkaluza.${fingerprint}="<(gpg --armor --export "${fingerprint}") \
+    --from-file="wkaluza="<(gpg --armor --export "${fingerprint}") \
     --dry-run="client" \
     --output="yaml" |
     seal
