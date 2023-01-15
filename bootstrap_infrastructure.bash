@@ -32,7 +32,8 @@ function set_up_sealed_secrets_cert
     "${secret_name}" \
     --cert=<(pass_show \
       "${PASS_SECRET_ID_SEALED_SECRETS_CERTIFICATE_4edcp3cm}") \
-    --key=<(pass_show "${PASS_SECRET_ID_SEALED_SECRETS_KEY_kxlsnqam}") \
+    --key=<(pass_show \
+      "${PASS_SECRET_ID_SEALED_SECRETS_KEY_kxlsnqam}") \
     --namespace="${namespace}" \
     --dry-run="client" \
     --output="yaml" |

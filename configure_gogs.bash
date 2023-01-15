@@ -117,14 +117,14 @@ function upload_ssh_key_if_absent
     "${username}" \
     "${ssh_key_name}" \
     "${auth_header}"; then
-    log_info "Uploading SSH key to gogs..."
+    log_info "Uploading SSH key ${ssh_key_name} to gogs..."
     gogs_create_ssh_key \
       "${DOMAIN_GIT_FRONTEND_df29c969}" \
       "${ssh_key_name}" \
       "${public_key}" \
       "${auth_header}"
   else
-    log_info "Gogs SSH key already uploaded"
+    log_info "Gogs SSH key ${ssh_key_name} already uploaded"
   fi
 }
 

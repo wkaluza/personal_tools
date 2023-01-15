@@ -23,8 +23,7 @@ function set_up_webhook_secrets
     --from-literal=token="${gogs_webhook_secret}" \
     --namespace="${namespace}" \
     --dry-run="client" \
-    --output="yaml" |
-    seal
+    --output="yaml"
 }
 
 function set_up_tls_secrets
@@ -38,8 +37,7 @@ function set_up_tls_secrets
     --cert="${CERTS_DIR}/${DOMAIN_WEBHOOK_SINK_a8800f5b}.pem" \
     --key="${CERTS_DIR}/${DOMAIN_WEBHOOK_SINK_a8800f5b}.secret" \
     --dry-run="client" \
-    --output="yaml" |
-    seal
+    --output="yaml"
 }
 
 function set_up_git_gpg_signature_verification_secrets
@@ -54,8 +52,7 @@ function set_up_git_gpg_signature_verification_secrets
     --namespace="${namespace}" \
     --from-file="wkaluza="<(gpg --armor --export "${fingerprint}") \
     --dry-run="client" \
-    --output="yaml" |
-    seal
+    --output="yaml"
 }
 
 function seal
@@ -77,14 +74,13 @@ function main
   log_info "Sealing..."
   {
     set_up_webhook_secrets \
-      "${sync_namespace}"
+      "${sync_namespace}" | seal
     echo '---'
     set_up_git_gpg_signature_verification_secrets \
-      "${sync_namespace}"
+      "${sync_namespace}" | seal
     echo '---'
     set_up_tls_secrets \
-      "${ingress_namespace}"
-    echo '---'
+      "${ingress_namespace}" | seal
   } >"${THIS_SCRIPT_DIR}/sealed_secrets.yaml"
 
   log_info "Formatting..."
