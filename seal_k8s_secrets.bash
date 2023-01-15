@@ -31,9 +31,6 @@ function set_up_tls_secrets
 {
   local namespace="$1"
 
-  ensure_namespace_exists \
-    "${namespace}"
-
   kubectl create secret \
     tls \
     "webhooks-localhost-tls-4b9o4rmb" \
