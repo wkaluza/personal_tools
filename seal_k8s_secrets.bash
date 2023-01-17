@@ -23,7 +23,8 @@ function set_up_webhook_secrets
     --from-literal=token="${gogs_webhook_secret}" \
     --namespace="${namespace}" \
     --dry-run="client" \
-    --output="yaml"
+    --output="json" |
+    jq --sort-keys '.' -
 }
 
 function set_up_tls_secrets
@@ -37,33 +38,32 @@ function set_up_tls_secrets
     --cert="${CERTS_DIR}/${DOMAIN_WEBHOOK_SINK_a8800f5b}.pem" \
     --key="${CERTS_DIR}/${DOMAIN_WEBHOOK_SINK_a8800f5b}.secret" \
     --dry-run="client" \
-    --output="yaml"
+    --output="json" |
+    jq --sort-keys '.' -
 }
 
-function set_up_git_gpg_signature_verification_secrets
+function seal_with_separator
 {
-  local namespace="$1"
+  local cert_b64="$1"
+  local secret_manifest="$2"
 
-  local fingerprint="174C9368811039C87F0C806A896572D1E78ED6A7"
-  local secret_name="flux-git-gpg-sig-verification-gwnvmpi7"
-
-  kubectl create secret generic \
-    "${secret_name}" \
-    --namespace="${namespace}" \
-    --from-file="wkaluza="<(gpg --armor --export "${fingerprint}") \
-    --dry-run="client" \
-    --output="yaml"
+  seal \
+    "${cert_b64}" \
+    "${secret_manifest}"
+  echo '---'
 }
 
 function seal
 {
-  cat - |
+  local cert_b64="$1"
+  local secret_manifest="$2"
+
+  echo "${secret_manifest}" |
     kubeseal \
-      --cert <(pass_show \
-        "${PASS_SECRET_ID_SEALED_SECRETS_CERTIFICATE_4edcp3cm}") \
+      --cert <(echo "${cert_b64}" | base64 -d) \
       --format yaml \
       --scope strict |
-    grep -v 'creationTimestamp: null'
+    grep -v creationTimestamp
 }
 
 function main
@@ -71,20 +71,33 @@ function main
   local sync_namespace="gitops-system"
   local ingress_namespace="ingress-system"
 
+  local output="${THIS_SCRIPT_DIR}/sealed_secrets.yaml"
+  rm -rf "${output}"
+
+  local cert_b64
+  cert_b64="$(pass_show \
+    "${PASS_SECRET_ID_SEALED_SECRETS_CERTIFICATE_4edcp3cm}" |
+    base64)"
+
   log_info "Sealing..."
   {
     set_up_webhook_secrets \
-      "${sync_namespace}" | seal
-    echo '---'
-    set_up_git_gpg_signature_verification_secrets \
-      "${sync_namespace}" | seal
-    echo '---'
+      "${sync_namespace}"
+
     set_up_tls_secrets \
-      "${ingress_namespace}" | seal
-  } >"${THIS_SCRIPT_DIR}/sealed_secrets.yaml"
+      "${ingress_namespace}"
+
+    bash "${THIS_SCRIPT_DIR}/generate_cluster_startup_secrets.bash" \
+      "${sync_namespace}"
+  } |
+    jq --compact-output '.' - |
+    for_each seal_with_separator \
+      "${cert_b64}" >"${output}"
 
   log_info "Formatting..."
   quiet no_fail bash "${THIS_SCRIPT_DIR}/scripts/lint_in_docker.bash"
+
+  log_info "Output saved to ${output}"
 
   log_info "Success $(basename "$0")"
 }

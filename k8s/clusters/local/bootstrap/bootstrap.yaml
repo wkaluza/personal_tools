@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gitops-bootstrap
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitops-bootstrap-admin
+  namespace: gitops-bootstrap
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gitops-bootstrap-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: gitops-bootstrap-admin
+    namespace: gitops-bootstrap
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: gitops-bootstrap
+  namespace: gitops-bootstrap
+spec:
+  interval: 1h0m0s
+  path: ./k8s/clusters/local/deploy
+  prune: true
+  retryInterval: 1m0s
+  serviceAccountName: gitops-bootstrap-admin
+  sourceRef:
+    kind: GitRepository
+    name: gitops-bootstrap
+    namespace: gitops-bootstrap
+  timeout: 5m0s
+  wait: false
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: gitops-bootstrap
+  namespace: gitops-bootstrap
+spec:
+  interval: 1h0m0s
+  ref:
+    branch: main
+  secretRef:
+    name: git-ssh-key-bootstrap
+  timeout: 1m0s
+  url: ssh://git@git.localhost/wkaluza/infrastructure.git
+  verify:
+    mode: head
+    secretRef:
+      name: git-gpg-key-bootstrap
