@@ -382,8 +382,7 @@ re-run this script and commit the changes to the repository"
     return 1
   fi
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
-# Entry point
 main "${1:-"${INVALID_COMMIT}"}"

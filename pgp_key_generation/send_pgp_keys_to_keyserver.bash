@@ -14,5 +14,4 @@ function main
   gpg --keyserver keyserver.ubuntu.com --send-keys "${primary_key_fingerprint}"
 }
 
-# Entry point
 main "$1"

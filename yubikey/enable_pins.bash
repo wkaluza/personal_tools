@@ -93,5 +93,4 @@ function main
     "${public_key_file}"
 }
 
-# Entry point
 main "$1" "$2" "$3" "$4" "$5"

@@ -68,7 +68,7 @@ function main
         --resource "${manifest}"
     done
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
 main

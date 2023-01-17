@@ -14,7 +14,7 @@ function main
   refresh_ssh_known_host \
     "github.com"
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
 main

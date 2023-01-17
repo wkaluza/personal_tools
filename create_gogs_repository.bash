@@ -45,5 +45,4 @@ function main
   echo "Success $(basename "$0")"
 }
 
-# Entry point
 main "$1" "$2" "$3"

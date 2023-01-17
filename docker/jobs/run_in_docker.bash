@@ -186,8 +186,7 @@ function main_json
     "${command}" \
     "${args[@]}"
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
-# Entry point
 main_json "$@"

@@ -232,5 +232,4 @@ function main
   log_info "Keys and revocation certificates exported to ${secrets_output_dir}"
 }
 
-# Entry point
 main "$1"

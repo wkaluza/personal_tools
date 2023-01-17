@@ -108,8 +108,7 @@ function main
   install_brave
   install_inkscape
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
-# Entry point
 main

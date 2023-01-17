@@ -29,7 +29,7 @@ function main
   bash "${THIS_SCRIPT_DIR}/verify_services.bash"
   bash "${THIS_SCRIPT_DIR}/set_up_webhooks.bash"
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
 main

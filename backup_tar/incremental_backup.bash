@@ -61,8 +61,7 @@ function main
 
   rm "${snapshot_file}.decrypted"
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
-# Entry point
 main "$1" "$2"

@@ -46,5 +46,4 @@ function main
   chmod 400 "${encrypted_file}"
 }
 
-# Entry point
 main "$1" "$2"

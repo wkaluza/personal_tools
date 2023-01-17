@@ -107,8 +107,7 @@ function main
   install_docker_pass_credential_helper
   # install_docker_compose_if_absent
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
-# Entry point
 main

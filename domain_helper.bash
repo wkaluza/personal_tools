@@ -62,7 +62,7 @@ function main
 
   quiet popd
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
 main

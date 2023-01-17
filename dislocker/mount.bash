@@ -19,5 +19,4 @@ function main
   sudo mount -o loop "${dislocker_dir}/dislocker-file" "${mount_point}"
 }
 
-# Entry point
 main "$1" "$2" "$3"

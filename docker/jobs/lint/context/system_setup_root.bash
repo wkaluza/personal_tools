@@ -15,5 +15,4 @@ function main
   install_nodejs
 }
 
-# Entry point
 main

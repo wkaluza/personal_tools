@@ -34,5 +34,4 @@ function main
   echo "========================================"
 }
 
-# Entry point
 main

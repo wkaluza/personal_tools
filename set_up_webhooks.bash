@@ -248,5 +248,4 @@ function main
   log_info "Success $(basename "$0")"
 }
 
-# Entry point
 main

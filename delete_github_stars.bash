@@ -63,7 +63,7 @@ function main
   get_starred_repos "${token}" |
     for_each unstar "${token}"
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
 main

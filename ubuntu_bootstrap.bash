@@ -53,7 +53,7 @@ function main
   bash "${repo_dir}/installer_scripts/ubuntu_bare_minimum.bash"
   popd >/dev/null
 
-  echo "Success: $(basename "$0")"
+  echo "Success $(basename "$0")"
 }
 
 main

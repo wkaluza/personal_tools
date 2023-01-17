@@ -46,7 +46,7 @@ function main
     bash \
     "/home/$(id -un)/workspace/ubuntu_bare_minimum.bash"
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
 main

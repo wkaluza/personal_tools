@@ -644,7 +644,7 @@ function main
   log_info "  - luks_passphrase_external"
   log_info "========================================"
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
 main

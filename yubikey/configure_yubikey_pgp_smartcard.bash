@@ -144,5 +144,4 @@ function main
   rm -rf "${temp_gpg_homedir}"
 }
 
-# Entry point
 main "$1" "$2" "$3" "$4" "$5" "$6"

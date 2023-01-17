@@ -16,5 +16,4 @@ function main
   install_kubectl
 }
 
-# Entry point
 main

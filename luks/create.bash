@@ -28,5 +28,4 @@ function main
   sudo cryptsetup close "${mapping_name}"
 }
 
-# Entry point
 main "$1"

@@ -39,7 +39,7 @@ function main
     page="$((page + 1))"
   done
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
 main

@@ -52,5 +52,4 @@ function main
   create_workspace "${workspace}" "${uid}" "${gid}"
 }
 
-# Entry point
 main "$1" "$2" "$3" "$4"

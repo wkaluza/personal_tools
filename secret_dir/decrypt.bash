@@ -29,5 +29,4 @@ function main
   quiet popd
 }
 
-# Entry point
 main "$1" "$2"

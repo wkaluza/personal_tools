@@ -100,5 +100,4 @@ function main
   lock_config "${config_lock_code}"
 }
 
-# Entry point
 main "$1"

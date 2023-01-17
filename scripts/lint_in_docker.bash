@@ -20,8 +20,7 @@ function main
     "lint" \
     "${commit}"
 
-  log_info "Success: $(basename "$0")"
+  log_info "Success $(basename "$0")"
 }
 
-# Entry point
 main "$@"
