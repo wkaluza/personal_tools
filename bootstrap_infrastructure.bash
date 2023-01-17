@@ -361,6 +361,43 @@ function apply_manifest_file
     --server-side
 }
 
+function install_kyverno
+{
+  local namespace="$1"
+
+  local manifest_path="${THIS_SCRIPT_DIR}/k8s/clusters/local/deploy/third_party/kyverno.yaml"
+
+  log_info "Applying kyverno manifests..."
+  quiet apply_manifest_file \
+    "${manifest_path}"
+
+  log_info "Awaiting kyverno pod readiness..."
+  quiet kubectl wait \
+    --namespace="${namespace}" \
+    pod \
+    --all \
+    --for="condition=Ready" \
+    --timeout="5m"
+  log_info "Kyverno pods ready"
+}
+
+function install_kyverno_policies
+{
+  local manifest_path="${THIS_SCRIPT_DIR}/k8s/clusters/local/deploy/system/policy.yaml"
+
+  log_info "Installing kyverno policies..."
+  quiet apply_manifest_file \
+    "${manifest_path}"
+
+  log_info "Awaiting kyverno policy readiness..."
+  quiet kubectl wait \
+    ClusterPolicy \
+    --all \
+    --for="condition=Ready" \
+    --timeout="5m"
+  log_info "Kyverno policies ready"
+}
+
 function install_flux
 {
   local flux_namespace="$1"
@@ -405,6 +442,7 @@ function main
   local ingress_namespace="ingress-system"
   local sync_namespace="gitops-system"
   local sealed_secrets_namespace="sealed-secrets"
+  local kyverno_namespace="kyverno"
   local bootstrap_namespace="gitops-bootstrap"
 
   local sealed_secrets_bootstrap_cert="sealed-secrets-cert-bootstrap"
@@ -425,6 +463,10 @@ function main
   test_dns
 
   install_all_crds
+
+  install_kyverno \
+    "${kyverno_namespace}"
+  install_kyverno_policies
 
   install_sealed_secrets \
     "${sealed_secrets_namespace}"
