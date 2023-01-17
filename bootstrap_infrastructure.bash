@@ -347,6 +347,7 @@ function wait_for_crds
 {
   quiet kubectl wait \
     crd \
+    --all \
     --for "condition=Established" \
     --timeout="5m"
 }
@@ -355,18 +356,9 @@ function apply_manifest_file
 {
   local manifest_path="$1"
 
-  if ! quiet kubectl apply \
+  quiet kubectl apply \
     --filename "${manifest_path}" \
-    --wait; then
-    # CRDs may not have been established in time to instantiate them.
-    # This is a known race condition in k8s.
-    # Quick and dirty workaround: wait and retry.
-    wait_for_crds
-
-    quiet kubectl apply \
-      --filename "${manifest_path}" \
-      --wait
-  fi
+    --server-side
 }
 
 function install_flux
@@ -393,6 +385,20 @@ function install_flux
   wait_flux_check
 }
 
+function install_all_crds
+{
+  apply_manifest_file \
+    "${THIS_SCRIPT_DIR}/k8s/clusters/local/deploy/third_party/flux_crds.yaml"
+  apply_manifest_file \
+    "${THIS_SCRIPT_DIR}/k8s/clusters/local/deploy/third_party/kyverno_crds.yaml"
+  apply_manifest_file \
+    "${THIS_SCRIPT_DIR}/k8s/clusters/local/deploy/third_party/sealed_secrets_crds.yaml"
+  apply_manifest_file \
+    "${THIS_SCRIPT_DIR}/k8s/clusters/local/deploy/third_party/tekton_crds.yaml"
+
+  wait_for_crds
+}
+
 function main
 {
   local flux_namespace="flux-system"
@@ -417,6 +423,8 @@ function main
 
   set_up_dns
   test_dns
+
+  install_all_crds
 
   install_sealed_secrets \
     "${sealed_secrets_namespace}"
