@@ -436,6 +436,54 @@ function install_all_crds
   wait_for_crds
 }
 
+function _configure_user
+{
+  local username="$1"
+  local key_id="$2"
+  local csr_id="$3"
+
+  cat <<EOF | quiet kubectl apply --server-side --filename -
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: "${username}"
+spec:
+  request: $(cat <(pass_show "${csr_id}") | base64 -w0)
+  signerName: kubernetes.io/kube-apiserver-client
+  expirationSeconds: $((1 * 365 * 24 * 60 * 60))
+  usages:
+    - client auth
+EOF
+
+  quiet kubectl certificate approve \
+    "${username}"
+
+  quiet kubectl config set-credentials \
+    "${username}" \
+    --client-key=<(pass_show "${key_id}") \
+    --client-certificate=<(kubectl get CertificateSigningRequest \
+      "${username}" \
+      --output jsonpath='{ .status.certificate }' |
+      base64 -d) \
+    --embed-certs="true"
+
+  quiet kubectl config set-context \
+    "${username}" \
+    --cluster="minikube" \
+    --user="${username}" \
+    --namespace="default"
+}
+
+function set_up_users
+{
+  local username="wkaluza"
+
+  _configure_user \
+    "${username}" \
+    "${PASS_SECRET_ID_K8S_USER_KEY_nzgamwny}" \
+    "${PASS_SECRET_ID_K8S_USER_CSR_xf7rrqr3}"
+}
+
 function main
 {
   local flux_namespace="flux-system"
@@ -461,6 +509,8 @@ function main
 
   set_up_dns
   test_dns
+
+  set_up_users
 
   install_all_crds
 

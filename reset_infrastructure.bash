@@ -24,6 +24,9 @@ function main
   log_info "Deleting local k8s storage..."
   quiet sudo rm -rf "${HOME}/.wk_k8s_storage___/minikube/"
 
+  log_info "Deleting k8s config..."
+  quiet rm -rf "${HOME}/.kube/config"
+
   log_info "Success $(basename "$0")"
 }
 
