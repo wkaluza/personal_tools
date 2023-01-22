@@ -299,3 +299,14 @@ function prepend
     echo "${prefix}${line}"
   done
 }
+
+function dir_is_empty
+{
+  local directory="$1"
+
+  if [[ "$(ls -A "${directory}")" == "" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}

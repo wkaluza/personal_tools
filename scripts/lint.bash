@@ -366,7 +366,7 @@ function main
   wait
   log_info "Static analysis done"
 
-  if [[ "$(ls -A "${LOG_OUTPUT_DIR}")" != "" ]]; then
+  if ! dir_is_empty "${LOG_OUTPUT_DIR}"; then
     cat "${LOG_OUTPUT_DIR}"/*
 
     log_warning "Some problems or errors were found; \
@@ -375,7 +375,7 @@ see output above for details"
     return 1
   fi
 
-  if [[ "$(ls -A "${DIFFERENCES_DIR}")" != "" ]]; then
+  if ! dir_is_empty "${DIFFERENCES_DIR}"; then
     log_warning "Some files were incorrectly formatted; \
 re-run this script and commit the changes to the repository"
 
