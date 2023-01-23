@@ -41,6 +41,7 @@ function process_image
   local dockerfile_target="$3"
   local dockerfile="$4"
   local context="$5"
+  local username="$6"
 
   log_info "Processing image ${input_image} to ${output_image}..."
 
@@ -49,7 +50,7 @@ function process_image
     --tag "${output_image}" \
     --target "${dockerfile_target}" \
     --build-arg IMAGE="${input_image}" \
-    --build-arg DOCKER_USERNAME="${DOCKER_USERNAME}" \
+    --build-arg DOCKER_USERNAME="${username}" \
     "${context}"
 }
 
@@ -57,6 +58,7 @@ function add_image_epilogue
 {
   local input_image="$1"
   local output_image="$2"
+  local username="$3"
 
   local meta_dir="${THIS_SCRIPT_DIR}/docker/images/meta"
 
@@ -65,7 +67,8 @@ function add_image_epilogue
     "${output_image}" \
     "epilogue-bash-user-wo3sglfw" \
     "${meta_dir}/epilogue.dockerfile" \
-    "${meta_dir}/context/"
+    "${meta_dir}/context/" \
+    "${username}"
 }
 
 function _build_image
@@ -75,6 +78,9 @@ function _build_image
   local dockerfile_target="$3"
   local dockerfile="$4"
   local context="$5"
+  local username="$6"
+  local user_id="$7"
+  local group_id="$8"
 
   quiet docker build \
     --file "${dockerfile}" \
@@ -82,9 +88,9 @@ function _build_image
     --target "${dockerfile_target}" \
     --build-arg HOST_TIMEZONE="${HOST_TIMEZONE}" \
     --build-arg IMAGE="${source_image_ref}" \
-    --build-arg DOCKER_USERNAME="${DOCKER_USERNAME}" \
-    --build-arg DOCKER_UID="${DOCKER_UID}" \
-    --build-arg DOCKER_GID="${DOCKER_GID}" \
+    --build-arg DOCKER_USERNAME="${username}" \
+    --build-arg DOCKER_UID="${user_id}" \
+    --build-arg DOCKER_GID="${group_id}" \
     "${context}"
 }
 
@@ -97,6 +103,9 @@ function build_base_image
   local dockerfile_target="$5"
   local dockerfile="$6"
   local context="$7"
+  local username="$8"
+  local user_id="$9"
+  local group_id="${10}"
 
   local final_image_ref="${BASE_IMAGE_PREFIX}/${source_name}/${external_tag}:${destination_tag}"
   local source_image_ref="${EXTERNAL_IMAGE_PREFIX}/${source_name}/${external_tag}:${source_tag}"
@@ -108,7 +117,10 @@ function build_base_image
     "${final_image_ref}" \
     "${dockerfile_target}" \
     "${dockerfile}" \
-    "${context}"
+    "${context}" \
+    "${username}" \
+    "${user_id}" \
+    "${group_id}"
 }
 
 function build_app_image
@@ -120,6 +132,9 @@ function build_app_image
   local dockerfile_target="$5"
   local dockerfile="$6"
   local context="$7"
+  local username="$8"
+  local user_id="$9"
+  local group_id="${10}"
 
   local final_image_ref="${APP_IMAGE_PREFIX}/${destination_name}:${destination_tag}"
   local source_image_ref="${source_image}:${source_tag}"
@@ -131,7 +146,10 @@ function build_app_image
     "${final_image_ref}" \
     "${dockerfile_target}" \
     "${dockerfile}" \
-    "${context}"
+    "${context}" \
+    "${username}" \
+    "${user_id}" \
+    "${group_id}"
 }
 
 function build_app_image_with_epilogue
@@ -143,6 +161,9 @@ function build_app_image_with_epilogue
   local dockerfile_target="$5"
   local dockerfile="$6"
   local context="$7"
+  local username="$8"
+  local user_id="$9"
+  local group_id="${10}"
 
   local final_image_ref="${APP_IMAGE_PREFIX}/${destination_name}:${destination_tag}"
   local source_image_ref="${source_image}:${source_tag}"
@@ -156,11 +177,15 @@ function build_app_image_with_epilogue
     "${temp_image_ref}" \
     "${dockerfile_target}" \
     "${dockerfile}" \
-    "${context}"
+    "${context}" \
+    "${username}" \
+    "${user_id}" \
+    "${group_id}"
 
   add_image_epilogue \
     "${temp_image_ref}" \
-    "${final_image_ref}"
+    "${final_image_ref}" \
+    "${username}"
 
   quiet docker rmi \
     --force \
@@ -206,7 +231,10 @@ function main
     "1" \
     "base" \
     "${base_dir}/ubuntu/ubuntu.dockerfile" \
-    "${base_dir}/ubuntu/context"
+    "${base_dir}/ubuntu/context" \
+    "${DOCKER_USERNAME}" \
+    "${DOCKER_UID}" \
+    "${DOCKER_GID}"
 
   build_app_image_with_epilogue \
     "${BASE_IMAGE_PREFIX}/ubuntu/22.04" \
@@ -215,7 +243,10 @@ function main
     "1" \
     "base" \
     "${app_dir}/dns_tools/dns_tools.dockerfile" \
-    "${app_dir}/dns_tools/context"
+    "${app_dir}/dns_tools/context" \
+    "${DOCKER_USERNAME}" \
+    "${DOCKER_UID}" \
+    "${DOCKER_GID}"
 
   build_app_image_with_epilogue \
     "${BASE_IMAGE_PREFIX}/ubuntu/22.04" \
@@ -224,7 +255,10 @@ function main
     "1" \
     "base" \
     "${app_dir}/git/git.dockerfile" \
-    "${app_dir}/git/context"
+    "${app_dir}/git/context" \
+    "${DOCKER_USERNAME}" \
+    "${DOCKER_UID}" \
+    "${DOCKER_GID}"
 
   build_app_image \
     "${EXTERNAL_IMAGE_PREFIX}/coredns/coredns/1.10.0" \
@@ -233,7 +267,10 @@ function main
     "1" \
     "base" \
     "${app_dir}/dns/dns.dockerfile" \
-    "${app_dir}/dns/context"
+    "${app_dir}/dns/context" \
+    "${DOCKER_USERNAME}" \
+    "${DOCKER_UID}" \
+    "${DOCKER_GID}"
 
   build_app_image \
     "${EXTERNAL_IMAGE_PREFIX}/registry/2.8.1" \
@@ -242,7 +279,10 @@ function main
     "1" \
     "base" \
     "${app_dir}/registry/registry.dockerfile" \
-    "${app_dir}/registry/context"
+    "${app_dir}/registry/context" \
+    "${DOCKER_USERNAME}" \
+    "${DOCKER_UID}" \
+    "${DOCKER_GID}"
 
   bash "${app_dir}/git_frontend/prepare_build_context.bash"
   build_app_image \
@@ -252,7 +292,10 @@ function main
     "1" \
     "base" \
     "${app_dir}/git_frontend/git_frontend.dockerfile" \
-    "${app_dir}/git_frontend/context"
+    "${app_dir}/git_frontend/context" \
+    "${DOCKER_USERNAME}" \
+    "${DOCKER_UID}" \
+    "${DOCKER_GID}"
 
   build_app_image \
     "${EXTERNAL_IMAGE_PREFIX}/nginx/1.21.6-alpine" \
@@ -261,7 +304,10 @@ function main
     "1" \
     "base" \
     "${app_dir}/reverse_proxy/reverse_proxy.dockerfile" \
-    "${app_dir}/reverse_proxy/context"
+    "${app_dir}/reverse_proxy/context" \
+    "${DOCKER_USERNAME}" \
+    "${DOCKER_UID}" \
+    "${DOCKER_GID}"
 
   log_info "Success $(basename "$0")"
 }
