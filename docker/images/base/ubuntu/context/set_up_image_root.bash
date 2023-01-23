@@ -58,7 +58,7 @@ function install_trusted_ca_certs_ubuntu
   update-ca-certificates
 }
 
-function main_root
+function main
 {
   local uid="$1"
   local gid="$2"
@@ -73,22 +73,6 @@ function main_root
     "${gid}" \
     "${username}"
   install_trusted_ca_certs_ubuntu
-}
-
-function main
-{
-  local uid="$1"
-  local gid="$2"
-  local username="$3"
-  local timezone="$4"
-
-  if [[ "$(id -u)" == "0" ]]; then
-    main_root \
-      "${uid}" \
-      "${gid}" \
-      "${username}" \
-      "${timezone}"
-  fi
 }
 
 main "$1" "$2" "$3" "$4"
