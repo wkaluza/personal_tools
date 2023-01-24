@@ -13,10 +13,15 @@ function main
   local project_root_dir
   project_root_dir="$(realpath "${THIS_SCRIPT_DIR}/..")"
 
-  bash "${project_root_dir}/docker/jobs/run_in_docker.bash" \
-    "${project_root_dir}" \
-    "${project_root_dir}/docker/jobs/docker_jobs.json" \
-    "lint" \
+  local workspace_path="/workspace"
+
+  docker run \
+    --interactive \
+    --rm \
+    --tty \
+    --volume "${project_root_dir}:${workspace_path}" \
+    --workdir "${workspace_path}" \
+    "private.docker.localhost/local/lint:1" \
     "./" \
     "${commit}"
 

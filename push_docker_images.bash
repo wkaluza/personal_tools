@@ -45,6 +45,7 @@ function push_images
   push_image_group "external"
   push_image_group "base"
   push_image_group "app"
+  push_image_group "local"
 }
 
 function main

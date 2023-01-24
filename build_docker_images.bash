@@ -9,10 +9,15 @@ source "${THIS_SCRIPT_DIR}/shell_script_imports/preamble.bash"
 APP_IMAGE_PREFIX="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/app"
 BASE_IMAGE_PREFIX="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/base"
 EXTERNAL_IMAGE_PREFIX="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/external"
+LOCAL_IMAGE_PREFIX="${DOMAIN_DOCKER_REGISTRY_PRIVATE_a8a1ce1e}/local"
 
 DOCKER_USERNAME="sostratus"
 DOCKER_UID="54321"
 DOCKER_GID="43210"
+
+LOCAL_DOCKER_USERNAME="$(id -un)"
+LOCAL_DOCKER_UID="$(id -u)"
+LOCAL_DOCKER_GID="$(id -g)"
 
 HOST_TIMEZONE="$(current_timezone)"
 
@@ -122,6 +127,35 @@ function build_base_image
     "${group_id}"
 }
 
+function build_local_base_image
+{
+  local source_name="$1"
+  local external_tag="$2"
+  local source_tag="$3"
+  local destination_tag="$4"
+  local dockerfile_target="$5"
+  local dockerfile="$6"
+  local context="$7"
+  local username="$8"
+  local user_id="$9"
+  local group_id="${10}"
+
+  local final_image_ref="${LOCAL_IMAGE_PREFIX}/${source_name}/${external_tag}:${destination_tag}"
+  local source_image_ref="${EXTERNAL_IMAGE_PREFIX}/${source_name}/${external_tag}:${source_tag}"
+
+  log_info "Building image ${final_image_ref}..."
+
+  _build_image \
+    "${source_image_ref}" \
+    "${final_image_ref}" \
+    "${dockerfile_target}" \
+    "${dockerfile}" \
+    "${context}" \
+    "${username}" \
+    "${user_id}" \
+    "${group_id}"
+}
+
 function build_app_image
 {
   local source_image="$1"
@@ -192,6 +226,47 @@ function build_app_image_with_epilogue
     "${temp_image_ref}"
 }
 
+function build_local_app_image_with_epilogue
+{
+  local source_image="$1"
+  local source_tag="$2"
+  local destination_name="$3"
+  local destination_tag="$4"
+  local dockerfile_target="$5"
+  local dockerfile="$6"
+  local context="$7"
+  local username="$8"
+  local user_id="$9"
+  local group_id="${10}"
+
+  local final_image_ref="${LOCAL_IMAGE_PREFIX}/${destination_name}:${destination_tag}"
+  local source_image_ref="${source_image}:${source_tag}"
+  local temp_image_ref
+  temp_image_ref="temp_$(openssl rand -hex 8)"
+
+  log_info "Building image ${final_image_ref}..."
+
+  _build_image \
+    "${source_image_ref}" \
+    "${temp_image_ref}" \
+    "${dockerfile_target}" \
+    "${dockerfile}" \
+    "${context}" \
+    "${username}" \
+    "${user_id}" \
+    "${group_id}"
+
+  add_image_epilogue \
+    "${temp_image_ref}" \
+    "${final_image_ref}" \
+    "${username}"
+
+  quiet docker rmi \
+    --force \
+    --no-prune \
+    "${temp_image_ref}"
+}
+
 function main
 {
   local base_dir="${THIS_SCRIPT_DIR}/docker/images/base"
@@ -234,6 +309,19 @@ function main
     "${DOCKER_USERNAME}" \
     "${DOCKER_UID}" \
     "${DOCKER_GID}"
+
+  bash "${base_dir}/ubuntu/prepare_build_context.bash"
+  build_local_base_image \
+    "ubuntu" \
+    "22.04" \
+    "1" \
+    "1" \
+    "base" \
+    "${base_dir}/ubuntu/ubuntu.dockerfile" \
+    "${base_dir}/ubuntu/context" \
+    "${LOCAL_DOCKER_USERNAME}" \
+    "${LOCAL_DOCKER_UID}" \
+    "${LOCAL_DOCKER_GID}"
 
   build_app_image_with_epilogue \
     "${BASE_IMAGE_PREFIX}/ubuntu/22.04" \
@@ -307,6 +395,18 @@ function main
     "${DOCKER_USERNAME}" \
     "${DOCKER_UID}" \
     "${DOCKER_GID}"
+
+  build_local_app_image_with_epilogue \
+    "${LOCAL_IMAGE_PREFIX}/ubuntu/22.04" \
+    "1" \
+    "lint" \
+    "1" \
+    "base" \
+    "${app_dir}/lint/lint.dockerfile" \
+    "${app_dir}/lint/context" \
+    "${LOCAL_DOCKER_USERNAME}" \
+    "${LOCAL_DOCKER_UID}" \
+    "${LOCAL_DOCKER_GID}"
 
   log_info "Success $(basename "$0")"
 }
