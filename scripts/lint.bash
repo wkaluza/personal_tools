@@ -13,8 +13,6 @@ FILE_LIST="$(mktemp)"
 INVALID_COMMIT="___NOT_A_VALID_COMMIT___"
 COMMIT="${INVALID_COMMIT}"
 
-PROJECT_ROOT_DIR="$(realpath "${THIS_SCRIPT_DIR}/..")"
-
 function _list_versioned_files
 {
   cat \
@@ -327,9 +325,12 @@ function find_and_format_yaml_files
 
 function main
 {
-  cd "${PROJECT_ROOT_DIR}"
+  local project_root_dir
+  project_root_dir="$(realpath "$1")"
 
-  COMMIT="$1"
+  cd "${project_root_dir}"
+
+  COMMIT="${2:-"${INVALID_COMMIT}"}"
 
   if [[ "${COMMIT}" != "${INVALID_COMMIT}" ]]; then
     if is_git_repo && ! quiet git rev-parse "${COMMIT}"; then
@@ -338,7 +339,7 @@ function main
     fi
   fi
 
-  if [[ "$(list_files "${PROJECT_ROOT_DIR}" | wc -l)" == "0" ]]; then
+  if [[ "$(list_files "${project_root_dir}" | wc -l)" == "0" ]]; then
     log_info "Nothing to do."
     return 0
   fi
@@ -346,13 +347,13 @@ function main
   log_info "Formatting..."
 
   find_and_format_json_files \
-    "${PROJECT_ROOT_DIR}"
+    "${project_root_dir}"
 
   find_and_format_shell_scripts \
-    "${PROJECT_ROOT_DIR}"
+    "${project_root_dir}"
 
   find_and_format_yaml_files \
-    "${PROJECT_ROOT_DIR}"
+    "${project_root_dir}"
 
   wait
   log_info "Formatting done"
@@ -360,7 +361,7 @@ function main
   log_info "Performing static analysis..."
 
   find_and_analyse_shell_scripts \
-    "${PROJECT_ROOT_DIR}"
+    "${project_root_dir}"
 
   wait
   log_info "Static analysis done"
@@ -384,4 +385,4 @@ re-run this script and commit the changes to the repository"
   log_info "Success $(basename "$0")"
 }
 
-main "${1:-"${INVALID_COMMIT}"}"
+main "$1" "${2:-"${INVALID_COMMIT}"}"

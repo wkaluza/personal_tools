@@ -17,6 +17,7 @@ function main
     "${project_root_dir}" \
     "${project_root_dir}/docker/jobs/docker_jobs.json" \
     "lint" \
+    "./" \
     "${commit}"
 
   log_info "Success $(basename "$0")"
