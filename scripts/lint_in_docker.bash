@@ -8,10 +8,9 @@ source "${THIS_SCRIPT_DIR}/../shell_script_imports/preamble.bash"
 
 function main
 {
-  local commit="${1:-"HEAD"}"
-
   local project_root_dir
-  project_root_dir="$(realpath "${THIS_SCRIPT_DIR}/..")"
+  project_root_dir="$(realpath "$1")"
+  local commit="$2"
 
   local workspace_path="/workspace"
 
