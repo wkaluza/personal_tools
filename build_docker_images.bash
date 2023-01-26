@@ -408,6 +408,18 @@ function main
     "${LOCAL_DOCKER_UID}" \
     "${LOCAL_DOCKER_GID}"
 
+  build_local_app_image_with_epilogue \
+    "${LOCAL_IMAGE_PREFIX}/ubuntu/22.04" \
+    "1" \
+    "texlive" \
+    "1" \
+    "base" \
+    "${app_dir}/texlive/texlive.dockerfile" \
+    "${app_dir}/texlive/context" \
+    "${LOCAL_DOCKER_USERNAME}" \
+    "${LOCAL_DOCKER_UID}" \
+    "${LOCAL_DOCKER_GID}"
+
   log_info "Success $(basename "$0")"
 }
 
