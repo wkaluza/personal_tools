@@ -425,6 +425,104 @@ function find_and_format_yaml_files
       "${LOG_OUTPUT_DIR}"
 }
 
+function remove_trailing_whitespace_formatter
+{
+  local input_file="$1"
+  local output_file="$2"
+
+  cat "${input_file}" |
+    sed -E "s|[[:blank:]]+$||" >"${output_file}"
+}
+
+function remove_trailing_whitespace
+{
+  local project_root_dir="$1"
+
+  list_files \
+    "${project_root_dir}" |
+    for_each no_fail run_formatter \
+      remove_trailing_whitespace_formatter \
+      "${LOG_OUTPUT_DIR}"
+}
+
+function ensure_trailing_newline_formatter
+{
+  local input_file="$1"
+  local output_file="$2"
+
+  local last_char
+  last_char="$(cat "${input_file}" |
+    tail -c-1)"
+
+  local newline
+  newline="$(printf '\n')"
+
+  cat "${input_file}" >"${output_file}"
+
+  if [[ "${last_char}" != "${newline}" ]]; then
+    printf '\n' >>"${output_file}"
+  fi
+}
+
+function ensure_trailing_newline
+{
+  local project_root_dir="$1"
+
+  list_files \
+    "${project_root_dir}" |
+    for_each no_fail run_formatter \
+      ensure_trailing_newline_formatter \
+      "${LOG_OUTPUT_DIR}"
+}
+
+function remove_extra_trailing_newlines_formatter
+{
+  local input_file="$1"
+  local output_file="$2"
+
+  cat "${input_file}" >"${output_file}"
+
+  local last_line
+  while
+    last_line="$(cat "${input_file}" | tail -n-1)"
+    [[ "${last_line}" == "" ]]
+  do
+    cat "${input_file}" | head -n-1 >"${output_file}"
+    cat "${output_file}" >"${input_file}"
+  done
+}
+
+function remove_extra_trailing_newlines
+{
+  local project_root_dir="$1"
+
+  list_files \
+    "${project_root_dir}" |
+    for_each no_fail run_formatter \
+      remove_extra_trailing_newlines_formatter \
+      "${LOG_OUTPUT_DIR}"
+}
+
+function remove_crlf_formatter
+{
+  local input_file="$1"
+  local output_file="$2"
+
+  cat "${input_file}" |
+    sed -E "s|$(printf '\r')$||" >"${output_file}"
+}
+
+function remove_crlf
+{
+  local project_root_dir="$1"
+
+  list_files \
+    "${project_root_dir}" |
+    for_each no_fail run_formatter \
+      remove_crlf_formatter \
+      "${LOG_OUTPUT_DIR}"
+}
+
 function main
 {
   local project_root_dir
@@ -447,6 +545,18 @@ function main
   fi
 
   log_info "Formatting..."
+
+  remove_trailing_whitespace \
+    "${project_root_dir}"
+
+  ensure_trailing_newline \
+    "${project_root_dir}"
+
+  remove_extra_trailing_newlines \
+    "${project_root_dir}"
+
+  remove_crlf \
+    "${project_root_dir}"
 
   find_and_format_json_files \
     "${project_root_dir}"
