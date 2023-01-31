@@ -35,7 +35,10 @@ function create_user
   local gid="$2"
   local username="$3"
 
-  groupadd --gid "${gid}" "${username}"
+  apt-get install --yes \
+    adduser
+
+  addgroup --gid "${gid}" "${username}"
   adduser \
     --disabled-password \
     --shell /bin/bash \
@@ -45,7 +48,7 @@ function create_user
     "${username}"
 }
 
-function install_trusted_ca_certs_ubuntu
+function install_trusted_ca_certs
 {
   apt-get install --yes \
     ca-certificates
@@ -71,7 +74,7 @@ function main
     "${uid}" \
     "${gid}" \
     "${username}"
-  install_trusted_ca_certs_ubuntu
+  install_trusted_ca_certs
 }
 
 main "$1" "$2" "$3" "$4"
