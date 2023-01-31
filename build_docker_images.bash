@@ -306,6 +306,11 @@ function main
     "1.21.6-alpine" \
     "1"
 
+  pull_retag_external \
+    "texlive/texlive" \
+    "latest-full" \
+    "1"
+
   bash "${base_dir}/ubuntu/prepare_build_context.bash"
   build_base_image \
     "ubuntu" \
@@ -418,7 +423,7 @@ function main
     "${LOCAL_DOCKER_GID}"
 
   build_local_app_image_with_epilogue \
-    "${LOCAL_IMAGE_PREFIX}/ubuntu/22.04" \
+    "${EXTERNAL_IMAGE_PREFIX}/texlive/texlive/latest-full" \
     "1" \
     "texlive" \
     "1" \
