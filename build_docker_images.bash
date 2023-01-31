@@ -28,14 +28,23 @@ function pull_retag_external
   local destination_tag="$3"
 
   local old="${source_name}:${source_tag}"
-  local new
-  new="${EXTERNAL_IMAGE_PREFIX}/${source_name}/${source_tag}:${destination_tag}"
 
-  quiet docker pull \
-    "${old}"
-  quiet docker tag \
-    "${old}" \
-    "${new}"
+  local new_name="${EXTERNAL_IMAGE_PREFIX}/${source_name}/${source_tag}"
+  local new="${new_name}:${destination_tag}"
+
+  if image_exists \
+    "${new_name}" \
+    "${destination_tag}"; then
+    log_info "Image ${new} found locally"
+  else
+    log_info "Pulling image ${old}..."
+    quiet docker pull \
+      "${old}"
+    quiet docker tag \
+      "${old}" \
+      "${new}"
+    log_info "Tagged image ${new}"
+  fi
 }
 
 function process_image
