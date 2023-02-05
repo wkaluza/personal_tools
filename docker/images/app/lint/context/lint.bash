@@ -203,6 +203,7 @@ function run_formatter
     echo "=== ${formatter} ==="
   } &>>"${log_file}"
 
+  log_info "Formatting (${formatter}) ${input_file}..."
   if ${formatter} \
     "${scratch_file1}" \
     "${scratch_file2}" &>>"${log_file}"; then
@@ -242,6 +243,7 @@ function run_analyser
     echo "=== ${analyser} ==="
   } &>>"${log_file}"
 
+  log_info "Analysing (${analyser}) ${input_file}..."
   if ${analyser} \
     "${input_file}" &>>"${log_file}"; then
     rm -rf "${log_file}"
@@ -482,10 +484,12 @@ function remove_extra_trailing_newlines_formatter
 
   cat "${input_file}" >"${output_file}"
 
+  local line_count
   local last_line
   while
+    line_count="$(cat "${input_file}" | wc -l)"
     last_line="$(cat "${input_file}" | tail -n-1)"
-    [[ "${last_line}" == "" ]]
+    [[ "${line_count}" != "0" ]] && [[ "${last_line}" == "" ]]
   do
     cat "${input_file}" | head -n-1 >"${output_file}"
     cat "${output_file}" >"${input_file}"
