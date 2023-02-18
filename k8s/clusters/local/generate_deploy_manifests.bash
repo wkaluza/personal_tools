@@ -55,11 +55,9 @@ function main
 
   log_info "Formatting..."
   quiet no_fail bash "${PROJECT_ROOT_DIR}/scripts/lint_in_docker.bash" \
-    "${deploy_dir}" \
-    "HEAD"
+    "${THIS_SCRIPT_DIR}"
   quiet_unless_error bash "${PROJECT_ROOT_DIR}/scripts/lint_in_docker.bash" \
-    "${deploy_dir}" \
-    "HEAD"
+    "${THIS_SCRIPT_DIR}"
 
   log_info "Checking kyverno policies..."
   find "${deploy_dir}" -type f -iname '*.yaml' |
