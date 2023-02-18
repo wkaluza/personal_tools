@@ -16,7 +16,7 @@ ENV GOROOT="$_GO_ROOT"
 ENV PATH="$_GO_ROOT/bin:$_HOME/go/bin:$_HOME/.local/bin:$_HOME/.yarn/bin:$PATH"
 
 USER root
-COPY "./" $_TEMP_DIR_ROOT/
+COPY "./root/" $_TEMP_DIR_ROOT/
 RUN bash $_SETUP_SCRIPT_ROOT \
 "docker_entrypoint.bash" \
 "/docker_entrypoint_szmbg3jl.bash" \
@@ -26,7 +26,7 @@ $_GO_ROOT
 RUN rm -rf $_TEMP_DIR_ROOT/
 
 USER $DOCKER_USERNAME
-COPY --chown=$DOCKER_USERNAME "./" $_TEMP_DIR_USER/
+COPY --chown=$DOCKER_USERNAME "./user/" $_TEMP_DIR_USER/
 RUN bash $_SETUP_SCRIPT_USER \
 "lint.bash" \
 "$_HOME/lint_rpbexfju.bash"
