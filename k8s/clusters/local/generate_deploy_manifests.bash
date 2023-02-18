@@ -54,7 +54,12 @@ function main
     for_each generate_kustomization_yaml_for_directory
 
   log_info "Formatting..."
-  quiet no_fail bash "${PROJECT_ROOT_DIR}/scripts/lint_in_docker.bash"
+  quiet no_fail bash "${PROJECT_ROOT_DIR}/scripts/lint_in_docker.bash" \
+    "${deploy_dir}" \
+    "HEAD"
+  quiet_unless_error bash "${PROJECT_ROOT_DIR}/scripts/lint_in_docker.bash" \
+    "${deploy_dir}" \
+    "HEAD"
 
   log_info "Checking kyverno policies..."
   find "${deploy_dir}" -type f -iname '*.yaml' |
