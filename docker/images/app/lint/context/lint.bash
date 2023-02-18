@@ -343,7 +343,7 @@ function k8s_yaml_kustomize
   temp_output="$(mktemp)"
 
   local temp_file_name
-  temp_file_name="$(basename "${f}")"
+  temp_file_name="$(basename "${input_file}")"
   local temp_file="${temp_dir}/${temp_file_name}"
 
   cp "${input_file}" "${temp_file}"
@@ -362,6 +362,8 @@ EOF
 
     return 0
   fi
+
+  cat "${input_file}" >"${output_file}"
 }
 
 function single_yaml_file_deep_clean
