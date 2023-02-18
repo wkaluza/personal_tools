@@ -255,6 +255,47 @@ function run_analyser
   fi
 }
 
+function run_on_files
+{
+  local project_root_dir="$1"
+  local file_selector="$2"
+  local runner="$3"
+  local strategy="$4"
+
+  ${file_selector} \
+    "${project_root_dir}" |
+    for_each no_fail "${runner}" \
+      "${strategy}" \
+      "${LOG_OUTPUT_DIR}"
+}
+
+function list_json_files
+{
+  local project_root_dir="$1"
+
+  list_files \
+    "${project_root_dir}" |
+    no_fail grep -E '\.json$'
+}
+
+function list_shell_scripts
+{
+  local project_root_dir="$1"
+
+  list_files \
+    "${project_root_dir}" |
+    no_fail grep -E '\.sh$|\.bash$'
+}
+
+function list_yaml_files
+{
+  local project_root_dir="$1"
+
+  list_files \
+    "${project_root_dir}" |
+    no_fail grep -E '\.yaml$|\.yml$'
+}
+
 function shell_script_formatter
 {
   local input_file="$1"
@@ -262,20 +303,6 @@ function shell_script_formatter
 
   cat "${input_file}" |
     shfmt -i 2 -fn >"${output_file}"
-}
-
-function find_and_format_shell_scripts
-{
-  local project_root_dir="$1"
-
-  list_files \
-    "${project_root_dir}" |
-    {
-      grep -E '\.sh$|\.bash$' || true
-    } |
-    for_each no_fail run_formatter \
-      shell_script_formatter \
-      "${LOG_OUTPUT_DIR}"
 }
 
 function shell_script_analyser
@@ -295,20 +322,6 @@ function shell_script_analyser
     "${input_file}"
 }
 
-function find_and_analyse_shell_scripts
-{
-  local project_root_dir="$1"
-
-  list_files \
-    "${project_root_dir}" |
-    {
-      grep -E '\.sh$|\.bash$' || true
-    } |
-    for_each no_fail run_analyser \
-      shell_script_analyser \
-      "${LOG_OUTPUT_DIR}"
-}
-
 function json_file_formatter
 {
   local input_file="$1"
@@ -318,21 +331,7 @@ function json_file_formatter
     jq --sort-keys '.' - >"${output_file}"
 }
 
-function find_and_format_json_files
-{
-  local project_root_dir="$1"
-
-  list_files \
-    "${project_root_dir}" |
-    {
-      grep -E '\.json$' || true
-    } |
-    for_each no_fail run_formatter \
-      json_file_formatter \
-      "${LOG_OUTPUT_DIR}"
-}
-
-function k8s_yaml_kustomize
+function _try_k8s_yaml_kustomize
 {
   local input_file="$1"
   local output_file="$2"
@@ -366,7 +365,7 @@ EOF
   cat "${input_file}" >"${output_file}"
 }
 
-function single_yaml_file_deep_clean
+function _yaml_deep_clean
 {
   local input_file="$1"
   local output_file="$2"
@@ -381,7 +380,7 @@ function single_yaml_file_deep_clean
     grep -Ev '^\.\.\.$' >"${output_file}"
 }
 
-function single_yaml_file_clean
+function _yaml_basic_clean
 {
   local input_file="$1"
   local output_file="$2"
@@ -396,37 +395,28 @@ function single_yaml_file_clean
     grep -Ev '^\.\.\.$' >"${output_file}"
 }
 
-function yaml_file_formatter
+function yaml_formatter
 {
   local input_file="$1"
   local output_file="$2"
 
+  local intermediate_file1
+  intermediate_file1="$(mktemp)"
+  local intermediate_file2
+  intermediate_file2="$(mktemp)"
+
   # Good results, but mangles multiline strings
-  single_yaml_file_deep_clean \
+  _yaml_deep_clean \
     "${input_file}" \
+    "${intermediate_file1}"
+
+  _try_k8s_yaml_kustomize \
+    "${intermediate_file1}" \
+    "${intermediate_file2}"
+
+  _yaml_basic_clean \
+    "${intermediate_file2}" \
     "${output_file}"
-
-  k8s_yaml_kustomize \
-    "${input_file}" \
-    "${output_file}"
-
-  single_yaml_file_clean \
-    "${input_file}" \
-    "${output_file}"
-}
-
-function find_and_format_yaml_files
-{
-  local project_root_dir="$1"
-
-  list_files \
-    "${project_root_dir}" |
-    {
-      grep -E '\.yaml$|\.yml$' || true
-    } |
-    for_each no_fail run_formatter \
-      yaml_file_formatter \
-      "${LOG_OUTPUT_DIR}"
 }
 
 function remove_trailing_whitespace_formatter
@@ -436,17 +426,6 @@ function remove_trailing_whitespace_formatter
 
   cat "${input_file}" |
     sed -E "s|[[:blank:]]+$||" >"${output_file}"
-}
-
-function remove_trailing_whitespace
-{
-  local project_root_dir="$1"
-
-  list_files \
-    "${project_root_dir}" |
-    for_each no_fail run_formatter \
-      remove_trailing_whitespace_formatter \
-      "${LOG_OUTPUT_DIR}"
 }
 
 function ensure_trailing_newline_formatter
@@ -468,17 +447,6 @@ function ensure_trailing_newline_formatter
   fi
 }
 
-function ensure_trailing_newline
-{
-  local project_root_dir="$1"
-
-  list_files \
-    "${project_root_dir}" |
-    for_each no_fail run_formatter \
-      ensure_trailing_newline_formatter \
-      "${LOG_OUTPUT_DIR}"
-}
-
 function remove_extra_trailing_newlines_formatter
 {
   local input_file="$1"
@@ -498,17 +466,6 @@ function remove_extra_trailing_newlines_formatter
   done
 }
 
-function remove_extra_trailing_newlines
-{
-  local project_root_dir="$1"
-
-  list_files \
-    "${project_root_dir}" |
-    for_each no_fail run_formatter \
-      remove_extra_trailing_newlines_formatter \
-      "${LOG_OUTPUT_DIR}"
-}
-
 function remove_crlf_formatter
 {
   local input_file="$1"
@@ -516,17 +473,6 @@ function remove_crlf_formatter
 
   cat "${input_file}" |
     sed -E "s|$(printf '\r')$||" >"${output_file}"
-}
-
-function remove_crlf
-{
-  local project_root_dir="$1"
-
-  list_files \
-    "${project_root_dir}" |
-    for_each no_fail run_formatter \
-      remove_crlf_formatter \
-      "${LOG_OUTPUT_DIR}"
 }
 
 function main
@@ -552,34 +498,58 @@ function main
 
   log_info "Formatting..."
 
-  remove_trailing_whitespace \
-    "${project_root_dir}"
+  run_on_files \
+    "${project_root_dir}" \
+    "list_files" \
+    "run_formatter" \
+    "remove_trailing_whitespace_formatter"
 
-  ensure_trailing_newline \
-    "${project_root_dir}"
+  run_on_files \
+    "${project_root_dir}" \
+    "list_files" \
+    "run_formatter" \
+    "ensure_trailing_newline_formatter"
 
-  remove_extra_trailing_newlines \
-    "${project_root_dir}"
+  run_on_files \
+    "${project_root_dir}" \
+    "list_files" \
+    "run_formatter" \
+    "remove_extra_trailing_newlines_formatter"
 
-  remove_crlf \
-    "${project_root_dir}"
+  run_on_files \
+    "${project_root_dir}" \
+    "list_files" \
+    "run_formatter" \
+    "remove_crlf_formatter"
 
-  find_and_format_json_files \
-    "${project_root_dir}"
+  run_on_files \
+    "${project_root_dir}" \
+    "list_json_files" \
+    "run_formatter" \
+    "json_file_formatter"
 
-  find_and_format_shell_scripts \
-    "${project_root_dir}"
+  run_on_files \
+    "${project_root_dir}" \
+    "list_shell_scripts" \
+    "run_formatter" \
+    "shell_script_formatter"
 
-  find_and_format_yaml_files \
-    "${project_root_dir}"
+  run_on_files \
+    "${project_root_dir}" \
+    "list_yaml_files" \
+    "run_formatter" \
+    "yaml_formatter"
 
   wait
   log_info "Formatting done"
 
   log_info "Performing static analysis..."
 
-  find_and_analyse_shell_scripts \
-    "${project_root_dir}"
+  run_on_files \
+    "${project_root_dir}" \
+    "list_shell_scripts" \
+    "run_analyser" \
+    "shell_script_analyser"
 
   wait
   log_info "Static analysis done"
