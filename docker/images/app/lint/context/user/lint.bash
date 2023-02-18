@@ -10,6 +10,19 @@ FILE_LIST="$(mktemp)"
 INVALID_COMMIT="___NOT_A_VALID_COMMIT___"
 COMMIT="${INVALID_COMMIT}"
 
+function commit_is_valid
+{
+  local commit="$1"
+
+  if git rev-parse \
+    --verify \
+    "${commit}^{commit}" &>/dev/null; then
+    return 0
+  fi
+
+  return 1
+}
+
 function dir_is_empty
 {
   local directory="$1"
@@ -134,22 +147,22 @@ function _list_changed_files
 function _select_list_strategy_and_run
 {
   local project_root_dir="$1"
+  local commit="$2"
 
   if is_git_repo; then
-    if [[ "${COMMIT}" == "${INVALID_COMMIT}" ]]; then
-      _list_versioned_files |
+    if commit_is_valid "${commit}"; then
+      _list_changed_files "${commit}" |
         prepend "${project_root_dir}/"
     else
-      _list_changed_files "${COMMIT}" |
+      _list_versioned_files |
         prepend "${project_root_dir}/"
     fi
   else
     find "${project_root_dir}" \
       -type f \
       -and -not \( \
-      -path "'${project_root_dir}/*___*/*'" -or \
-      -path "'${project_root_dir}/.git/*'" -or \
-      -path "'${project_root_dir}/.idea/*'" \)
+      -path "${project_root_dir}/*___*" -or \
+      -path "${project_root_dir}/*/.git/*" \)
   fi
 }
 
@@ -169,7 +182,9 @@ function list_files
   local project_root_dir="$1"
 
   if [[ "$(cat "${FILE_LIST}" | wc -l)" == "0" ]]; then
-    _select_list_strategy_and_run "${project_root_dir}" |
+    _select_list_strategy_and_run \
+      "${project_root_dir}" \
+      "${COMMIT}" |
       for_each filter file_exists |
       sort |
       uniq >"${FILE_LIST}"
@@ -181,8 +196,7 @@ function list_files
 function run_formatter
 {
   local formatter="$1"
-  local log_output_dir="$2"
-  local input_file="$3"
+  local input_file="$2"
 
   local scratch_file1
   scratch_file1="$(mktemp)"
@@ -195,7 +209,7 @@ function run_formatter
 
   local log_file_name
   log_file_name="$(echo -n "${input_file}" | sha256sum | cut -d' ' -f1).${formatter}"
-  local log_file="${log_output_dir}/${log_file_name}"
+  local log_file="${LOG_OUTPUT_DIR}/${log_file_name}"
 
   {
     echo ""
@@ -230,12 +244,11 @@ function run_formatter
 function run_analyser
 {
   local analyser="$1"
-  local log_output_dir="$2"
-  local input_file="$3"
+  local input_file="$2"
 
   local log_file_name
   log_file_name="$(echo -n "${input_file}" | sha256sum | cut -d' ' -f1).${analyser}"
-  local log_file="${log_output_dir}/${log_file_name}"
+  local log_file="${LOG_OUTPUT_DIR}/${log_file_name}"
 
   {
     echo ""
@@ -265,8 +278,7 @@ function run_on_files
   ${file_selector} \
     "${project_root_dir}" |
     for_each no_fail "${runner}" \
-      "${strategy}" \
-      "${LOG_OUTPUT_DIR}"
+      "${strategy}"
 }
 
 function list_json_files
@@ -479,17 +491,9 @@ function main
 {
   local project_root_dir
   project_root_dir="$(realpath "$1")"
+  COMMIT="$2"
 
   cd "${project_root_dir}"
-
-  COMMIT="${2:-"${INVALID_COMMIT}"}"
-
-  if [[ "${COMMIT}" != "${INVALID_COMMIT}" ]]; then
-    if is_git_repo && ! quiet git rev-parse "${COMMIT}"; then
-      log_error "${COMMIT} is not a valid commit"
-      return 1
-    fi
-  fi
 
   if [[ "$(list_files "${project_root_dir}" | wc -l)" == "0" ]]; then
     log_info "Nothing to do."
