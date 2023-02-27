@@ -138,7 +138,9 @@ function _list_versioned_files
       prepend "${project_root_dir}/") \
     <(git status --porcelain |
       sed -E "s|^...||" |
-      prepend "$(git rev-parse --show-toplevel)/")
+      prepend "$(git rev-parse --show-toplevel)/") |
+    sort |
+    uniq
 }
 
 function _list_changed_files
@@ -151,7 +153,22 @@ function _list_changed_files
       prepend "${project_root_dir}/") \
     <(git status --porcelain |
       sed -E "s|^...||" |
-      prepend "$(git rev-parse --show-toplevel)/")
+      prepend "$(git rev-parse --show-toplevel)/") |
+    sort |
+    uniq
+}
+
+function _list_all_files_non_git
+{
+  local project_root_dir="$1"
+
+  find "${project_root_dir}" \
+    -type f \
+    -and -not \( \
+    -path "${project_root_dir}/*___*" -or \
+    -path "${project_root_dir}/*/.git/*" \) |
+    sort |
+    uniq
 }
 
 function _select_list_strategy_and_run
@@ -169,11 +186,8 @@ function _select_list_strategy_and_run
         "${project_root_dir}"
     fi
   else
-    find "${project_root_dir}" \
-      -type f \
-      -and -not \( \
-      -path "${project_root_dir}/*___*" -or \
-      -path "${project_root_dir}/*/.git/*" \)
+    _list_all_files_non_git \
+      "${project_root_dir}"
   fi
 }
 
