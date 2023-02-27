@@ -131,18 +131,27 @@ function no_fail
 
 function _list_versioned_files
 {
+  local project_root_dir="$1"
+
   cat \
-    <(git ls-files) \
-    <(git status --porcelain | sed -E "s|^...||")
+    <(git ls-files |
+      prepend "${project_root_dir}/") \
+    <(git status --porcelain |
+      sed -E "s|^...||" |
+      prepend "$(git rev-parse --show-toplevel)/")
 }
 
 function _list_changed_files
 {
-  local commit="$1"
+  local project_root_dir="$1"
+  local commit="$2"
 
   cat \
-    <(git diff --name-only "HEAD" "${commit}") \
-    <(git status --porcelain | sed -E "s|^...||")
+    <(git diff --name-only "HEAD" "${commit}" |
+      prepend "${project_root_dir}/") \
+    <(git status --porcelain |
+      sed -E "s|^...||" |
+      prepend "$(git rev-parse --show-toplevel)/")
 }
 
 function _select_list_strategy_and_run
@@ -152,11 +161,12 @@ function _select_list_strategy_and_run
 
   if is_git_repo; then
     if commit_is_valid "${commit}"; then
-      _list_changed_files "${commit}" |
-        prepend "${project_root_dir}/"
+      _list_changed_files \
+        "${project_root_dir}" \
+        "${commit}"
     else
-      _list_versioned_files |
-        prepend "${project_root_dir}/"
+      _list_versioned_files \
+        "${project_root_dir}"
     fi
   else
     find "${project_root_dir}" \
