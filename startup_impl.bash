@@ -27,6 +27,7 @@ function main
   bash "${THIS_SCRIPT_DIR}/bootstrap_infrastructure.bash"
   bash "${THIS_SCRIPT_DIR}/verify_services.bash"
   bash "${THIS_SCRIPT_DIR}/set_up_webhooks.bash"
+  bash "${THIS_SCRIPT_DIR}/brightness_fix_laptop.bash"
 
   log_info "Success $(basename "$0")"
 }
