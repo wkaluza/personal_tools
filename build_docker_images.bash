@@ -59,6 +59,7 @@ function process_image
   log_info "Processing image ${input_image} to ${output_image}..."
 
   docker build \
+    --progress plain \
     --file "${dockerfile}" \
     --tag "${output_image}" \
     --target "${dockerfile_target}" \
@@ -96,6 +97,7 @@ function _build_image
   local group_id="$8"
 
   quiet docker build \
+    --progress plain \
     --file "${dockerfile}" \
     --tag "${final_image_ref}" \
     --target "${dockerfile_target}" \
