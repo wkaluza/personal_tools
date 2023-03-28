@@ -135,9 +135,11 @@ function _list_versioned_files
 
   cat \
     <(git ls-files |
-      prepend "${project_root_dir}/") \
+      prepend "$(git rev-parse --show-toplevel)/" |
+      grep -E "^${project_root_dir}/") \
     <(git status --porcelain |
-      sed -E "s|^...||" |
+      sed -E "s|^.. ||" |
+      sed -E "s|^.+ -> ||" |
       prepend "$(git rev-parse --show-toplevel)/") |
     sort |
     uniq
@@ -152,7 +154,8 @@ function _list_changed_files
     <(git diff --name-only "HEAD" "${commit}" |
       prepend "${project_root_dir}/") \
     <(git status --porcelain |
-      sed -E "s|^...||" |
+      sed -E "s|^.. ||" |
+      sed -E "s|^.+ -> ||" |
       prepend "$(git rev-parse --show-toplevel)/") |
     sort |
     uniq
