@@ -111,7 +111,7 @@ function main
     "${uid}" \
     "${gid}"
 
-  update_texlive
+  # update_texlive
 
   install_inkscape
   install_xml_utils
