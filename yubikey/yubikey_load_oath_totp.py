@@ -8,14 +8,22 @@ from argparse import ArgumentParser
 def upload_totp(issuer, timestamp, secret, pin=None):
     print(f"Uploading {issuer}_{timestamp}:wk")
     args = [
-        "ykman", "oath", "accounts", "add",
-        "--oath-type", "TOTP",
-        "--period", "30",
-        "--digits", "6",
-        "--algorithm", "SHA1",
+        "ykman",
+        "oath",
+        "accounts",
+        "add",
+        "--oath-type",
+        "TOTP",
+        "--period",
+        "30",
+        "--digits",
+        "6",
+        "--algorithm",
+        "SHA1",
         "--force",
         "--touch",
-        "--issuer", f"{issuer}_{timestamp}"
+        "--issuer",
+        f"{issuer}_{timestamp}",
     ]
     password_arg = [] if pin is None else ["--password", f"{pin}"]
     name_secret_args = ["wk", secret]
@@ -29,8 +37,8 @@ def list_totp(pin=None):
     password_arg = [] if pin is None else ["--password", f"{pin}"]
 
     lines = subprocess.run(
-        args + password_arg,
-        stdout=subprocess.PIPE).stdout.splitlines()
+        args + password_arg, stdout=subprocess.PIPE
+    ).stdout.splitlines()
     time.sleep(2)
 
     return [line.decode() for line in lines]
@@ -72,11 +80,12 @@ def parse_arguments():
     code.add_argument("--issuer", required=True)
     code.add_argument("--secret", required=True)
 
-    utc_now = datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
+    utc_now = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
     code.add_argument(
         "--timestamp",
         default=utc_now,
-        help="Defaults to current UTC as YYYYmmddHHMMSS")
+        help="Defaults to current UTC as YYYYmmddHHMMSS",
+    )
 
     parsed = parser.parse_args()
 

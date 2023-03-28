@@ -10,6 +10,12 @@ function install_yq
     yq==3.0.1
 }
 
+function install_black
+{
+  python3 -m pip install \
+    black==23.1.0
+}
+
 function install_prettier
 {
   yarn --non-interactive --silent global \
@@ -58,6 +64,7 @@ function main
   install_shfmt
   install_prettier
   install_yq
+  install_black
   install_kubectl
 }
 

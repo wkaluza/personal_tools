@@ -336,6 +336,30 @@ function list_yaml_files
     no_fail grep -E '\.yaml$|\.yml$'
 }
 
+function python_formatter
+{
+  local input_file="$1"
+  local output_file="$2"
+
+  python3 -m black \
+    --line-length 80 \
+    --quiet \
+    --target-version "py311" \
+    --workers 1 \
+    "${input_file}"
+
+  cat "${input_file}" >"${output_file}"
+}
+
+function list_python_files
+{
+  local project_root_dir="$1"
+
+  list_files \
+    "${project_root_dir}" |
+    no_fail grep -E '\.py$'
+}
+
 function shell_script_formatter
 {
   local input_file="$1"
@@ -571,6 +595,12 @@ function main
     "list_yaml_files" \
     "run_formatter" \
     "yaml_formatter"
+
+  run_on_files \
+    "${project_root_dir}" \
+    "list_python_files" \
+    "run_formatter" \
+    "python_formatter"
 
   wait
   log_info "Formatting done"
