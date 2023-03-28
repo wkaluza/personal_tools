@@ -66,6 +66,13 @@ function main
   install_yq
   install_black
   install_kubectl
+
+  cp \
+    "${THIS_SCRIPT_DIR}/clang-format-15.yaml" \
+    "${HOME}/clang_format_15_c4esgfkt.yaml"
+  cp \
+    "${THIS_SCRIPT_DIR}/cmake-format.py" \
+    "${HOME}/cmake_format_7oo7okzt.py"
 }
 
 main "$@"

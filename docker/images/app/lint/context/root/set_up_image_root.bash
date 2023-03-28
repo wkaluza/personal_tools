@@ -94,6 +94,18 @@ function install_git
     git
 }
 
+function install_cmake_format
+{
+  apt-get install --yes \
+    cmake-format
+}
+
+function install_clang_format_15
+{
+  apt-get install --yes \
+    clang-format-15
+}
+
 function install_nodejs
 {
   apt-get install --yes \
@@ -144,6 +156,8 @@ function main
   install_shellcheck
   install_python3
   install_nodejs
+  install_clang_format_15
+  install_cmake_format
 }
 
 main "$@"

@@ -327,6 +327,45 @@ function list_shell_scripts
     no_fail grep -E '\.sh$|\.bash$'
 }
 
+function c_cpp_formatter
+{
+  local input_file="$1"
+  local output_file="$2"
+
+  clang-format-15 \
+    --style="file:${HOME}/clang_format_15_c4esgfkt.yaml" \
+    "${input_file}" >"${output_file}"
+}
+
+function list_c_cpp_files
+{
+  local project_root_dir="$1"
+
+  list_files \
+    "${project_root_dir}" |
+    no_fail grep -E '\.c$|\.h$|\.cpp$|\.hpp$|\.cxx$|\.hxx$'
+}
+
+function cmake_formatter
+{
+  local input_file="$1"
+  local output_file="$2"
+
+  cmake-format \
+    --config-files "${HOME}/cmake_format_7oo7okzt.py" \
+    --outfile-path "${output_file}" \
+    "${input_file}"
+}
+
+function list_cmake_files
+{
+  local project_root_dir="$1"
+
+  list_files \
+    "${project_root_dir}" |
+    no_fail grep -E '\.cmake$|CMakeLists\.txt$'
+}
+
 function list_yaml_files
 {
   local project_root_dir="$1"
@@ -577,6 +616,18 @@ function main
     "list_files" \
     "run_formatter" \
     "remove_crlf_formatter"
+
+  run_on_files \
+    "${project_root_dir}" \
+    "list_cmake_files" \
+    "run_formatter" \
+    "cmake_formatter"
+
+  run_on_files \
+    "${project_root_dir}" \
+    "list_c_cpp_files" \
+    "run_formatter" \
+    "c_cpp_formatter"
 
   run_on_files \
     "${project_root_dir}" \
