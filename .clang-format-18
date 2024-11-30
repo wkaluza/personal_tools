@@ -166,7 +166,7 @@ IndentWidth: 2
 IndentWrappedFunctionNames: true
 InsertBraces: true
 InsertNewlineAtEOF: true
-InsertTrailingCommas: None
+InsertTrailingCommas: Wrapped
 IntegerLiteralSeparator:
   Binary: 8
   BinaryMinDigits: 0
@@ -209,6 +209,7 @@ PPIndentWidth: -1
 QualifierAlignment: Custom
 QualifierOrder:
   - constexpr
+  - friend
   - inline
   - static
   - type
