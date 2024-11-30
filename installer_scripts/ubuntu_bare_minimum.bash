@@ -215,7 +215,7 @@ function clone_personal_tools
 
   local tools_dir="$1"
 
-  local url="ssh://git@github.com/wkaluza/personal_tools.git"
+  local url="https://github.com/wkaluza/personal_tools.git"
 
   refresh_ssh_known_host \
     "github.com"

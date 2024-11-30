@@ -18,7 +18,8 @@ function install_docker
     apt-transport-https \
     ca-certificates \
     curl \
-    gnupg
+    gnupg \
+    software-properties-common
 
   curl -fsSL "https://download.docker.com/linux/ubuntu/gpg" |
     sudo gpg --dearmor -o "${key}"
@@ -33,12 +34,9 @@ function install_docker
 
   quiet sudo apt-get update
   quiet sudo apt-get install --yes \
-    docker-ce \
-    docker-ce-cli \
-    containerd.io
+    docker-ce
 
   sudo systemctl enable docker.service
-  sudo systemctl enable containerd.service
 }
 
 function enable_sudoless_docker

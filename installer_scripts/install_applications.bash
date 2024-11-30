@@ -29,6 +29,7 @@ function install_basics
   sudo apt-get install --yes \
     curl \
     gettext-base \
+    jq \
     rdfind \
     vim \
     wget
